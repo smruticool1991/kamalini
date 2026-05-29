@@ -1,10 +1,13 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import logo from "../../assets/images/logo.png";
 import Link from "next/link";
 
 Header03.propTypes = {};
 
+/**
+ * @param {{ clname?: string, handleMobile?: () => void }} props
+ */
 function Header03({ clname = "", handleMobile }) {
   const [activeIndex, setActiveIndex] = useState(null);
   const handleDropdown = (index) => {

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
@@ -8,8 +8,11 @@ import { partnerData } from "../../data/partners";
 
 Partner.propTypes = {};
 
-function Partner() {
-  const data = partnerData;
+/**
+ * @param {{ data?: any[] }} props
+ */
+function Partner({ data: propData } = {}) {
+  const data = (propData && propData.length > 0) ? propData : partnerData;
   return (
     <section>
       <div className="wd-partner">

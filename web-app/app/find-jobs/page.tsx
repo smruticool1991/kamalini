@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
@@ -250,7 +250,7 @@ function updateURL(overrides: Record<string, string>) {
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
-export default function FindJobsPage() {
+function FindJobsInner() {
   const searchParams = useSearchParams();
   const urlCategory = searchParams.get('category') || '';
   const urlKeyword  = searchParams.get('keyword')  || '';
@@ -821,3 +821,12 @@ export default function FindJobsPage() {
     </>
   );
 }
+
+export default function FindJobsPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><p style={{ color: '#999', fontSize: 18 }}>Loading...</p></div>}>
+      <FindJobsInner />
+    </Suspense>
+  );
+}
+

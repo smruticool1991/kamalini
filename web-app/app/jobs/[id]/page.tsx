@@ -274,7 +274,7 @@ function ApplicationModal({
                 </div>
                 <div>
                   <label style={labelStyle}>Email *</label>
-                  <input style={inputStyle} value={form.email} readOnly placeholder="Email" style={{ ...inputStyle, background: '#f0f9f5', color: '#14a077', cursor: 'not-allowed' }} />
+                  <input value={form.email} readOnly placeholder="Email" style={{ ...inputStyle, background: '#f0f9f5', color: '#14a077', cursor: 'not-allowed' }} />
                 </div>
               </div>
               <div>

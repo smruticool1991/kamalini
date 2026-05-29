@@ -5,6 +5,9 @@ import Link from "next/link";
 import { onAuthStateChanged, signOut, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 
+/**
+ * @param {{ clname?: string, handleMobile?: () => void }} props
+ */
 function Header4({ clname = "", handleMobile }) {
   const [user, setUser] = useState(null);
   const [dropOpen, setDropOpen] = useState(false);

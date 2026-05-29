@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { onAuthStateChanged, signOut, signInWithPopup } from "firebase/auth";
@@ -6,6 +6,9 @@ import { auth, googleProvider } from "@/lib/firebase";
 
 Header.propTypes = {};
 
+/**
+ * @param {{ clname?: string, handleMobile?: () => void }} props
+ */
 function Header({ clname = "", handleMobile }) {
   const [scroll, setScroll] = useState(0);
   const [user, setUser] = useState(null);
