@@ -1,0 +1,132 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Admin access: authenticated users in 'admins' collection ──
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // ── Admin has full access to ALL collections ──
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── Admins collection: admin can read/write, self-register on login ──
+    match /admins/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── Jobs: public read, employer manages own jobs, admin full ──
+    match /jobs/{jobId} {
+      allow read: if true;
+      // Employer can create a job for their own company
+      allow create: if request.auth != null &&
+        request.resource.data.companyId == request.auth.uid;
+      // Employer can update/delete only their own jobs
+      allow update: if request.auth != null &&
+        resource.data.companyId == request.auth.uid;
+      allow delete: if request.auth != null &&
+        resource.data.companyId == request.auth.uid;
+      allow write: if isAdmin();
+    }
+
+    // ── Public read for categories, skills (mobile app needs this) ──
+    match /jobCategories/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /skills/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /training/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /trainings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Users can read/write their own data + subcollections (bookmarks, etc.) ──
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin();
+    }
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin();
+    }
+
+    // ── Applications: user creates/reads own, employer reads+updates for their jobs, admin full ──
+    match /applications/{appId} {
+      allow read: if request.auth != null &&
+        (resource.data.userId == request.auth.uid ||
+         resource.data.companyId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null;
+      // Employer can update status of applications for their own jobs
+      allow update: if request.auth != null &&
+        resource.data.companyId == request.auth.uid;
+      allow delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Application Contacts: written by mobile on apply, read by employer after payment ──
+    match /applicationContacts/{appId} {
+      allow create: if request.auth != null;
+      // resource == null handles the case where the document doesn't exist yet
+      allow read: if request.auth != null &&
+        (resource == null || resource.data.companyId == request.auth.uid || isAdmin());
+      allow update: if request.auth != null &&
+        resource.data.companyId == request.auth.uid;
+      allow delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Companies: public read, employer self-write, admin full ──
+    match /companies/{companyId} {
+      allow read: if true;
+      // Employer can create/update their own company doc (uid == companyId)
+      allow create: if request.auth != null && request.auth.uid == companyId;
+      allow update: if request.auth != null && request.auth.uid == companyId;
+      allow delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Training Applications: user creates/reads own, admin full ──
+    match /trainingApplications/{appId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Education Applications: user creates/reads own, admin full ──
+    match /educationApplications/{appId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Payments: user reads own, employer creates own, admin full ──
+    match /payments/{paymentId} {
+      allow read: if request.auth != null &&
+        (resource.data.userId == request.auth.uid ||
+         resource.data.companyId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null &&
+        request.resource.data.companyId == request.auth.uid;
+      allow update, delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}

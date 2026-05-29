@@ -1,0 +1,144 @@
+:root{
+	--headheight: 60px;
+	--headwidth: var(--frame-width);
+}
+.header{
+	background-color: var(--body-bg2);
+    min-height: var(--headheight);
+    max-width: var(--headwidth);
+	padding: 0 15px;
+	border-bottom: 1px solid var(--border-color);
+	&.style-2{
+		border-bottom: 0;
+	}
+	&.header-transparent{
+		background-color: rgba($color: $secondary, $alpha: 0.25);
+		backdrop-filter: blur(6px);
+		box-shadow: unset;
+		border: unset;
+		.title{
+			color: #fff!important;
+		}
+	}
+	.header-content{
+		display: flex;
+        height: 100%;
+		min-height: var(--headheight);
+        align-items: center;
+	}
+	.location{
+		i{
+			color: var(--bs-secondary);
+			font-size: 24px;
+		}
+		.name{
+			font-size: 15px;
+			font-weight: 700;
+			color: var(--bs-primary);
+		}
+		.address{
+			margin-bottom: 0;
+			font-size: 12px;
+			font-weight: 500;
+		}
+	}
+	.left-content,
+	.mid-content,
+	.right-content{
+		.title{
+			text-align: center;
+			margin-bottom: 0;
+			white-space: nowrap;
+		}
+	}
+	.left-content{
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		.logo-title{
+			font-size: 24px;
+			font-weight: 400;
+			margin-bottom: 0;
+			b{
+				font-weight: 700;
+			}
+		}
+		.dz-head-items{
+			display: flex;
+			flex-direction: column;
+			.dz-meta{
+				display: flex;
+				align-items: center;
+				flex-wrap: wrap;
+				.dz-item{
+					text-transform: capitalize;
+					position: relative;
+					font-size: 13px;
+					padding-right: 20px;
+					&::after{
+						content: "";
+						position: absolute;
+						top: 50%;
+						right: 7px;
+						transform: translateY(-50%) rotate(45deg);
+						width: 5px;
+						height: 5px;
+						background-color: var(--bg-dark);
+					}
+					b{
+						font-weight: 800;
+						color: var(--bs-primary);
+					}
+					&:last-child{
+						padding-right: 0;
+						&::after{
+							content: none;
+						}
+					}
+				}
+			}
+		}
+	}
+	.mid-content{
+		text-align: center;
+		flex: 1;
+	}
+	.right-content{
+		text-align: end;
+		> * {
+			margin-left: auto;
+		}
+	}
+	&.header-fixed{
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		margin-left: auto;
+		margin-right: auto;
+		z-index: 1020;
+	}
+	
+	//Header
+	.header-logo{
+		img,
+		.logo{
+			max-width: 145px;
+			margin: auto;
+		}
+		&.logo-lg{
+			img,
+			.logo{
+				max-width: 145px;
+				margin: auto;
+			}
+		}
+	}
+
+	.header-search{
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+	}
+}

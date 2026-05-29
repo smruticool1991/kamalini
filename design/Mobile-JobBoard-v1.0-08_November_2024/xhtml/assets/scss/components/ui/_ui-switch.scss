@@ -1,0 +1,50 @@
+.form-check-input{
+    &.form-check-primary{
+        &:checked{
+            background-color: var(--bs-primary);
+            border: var(--bs-primary)
+        }
+    }
+    &.form-check-secondary{
+        &:checked{
+            background-color: var(--bs-secondary);
+            border: var(--bs-secondary)
+        }
+    }
+    &.form-check-success{
+        &:checked{
+            background-color: var(--bs-success);
+            border: var(--bs-success)
+        }
+    }
+    &.form-check-info{
+        &:checked{
+            background-color: var(--bs-info);
+            border: var(--bs-info)
+        }
+    }
+    &.form-check-warning{
+        &:checked{
+            background-color: var(--bs-warning);
+            border: var(--bs-warning)
+        }
+    }
+    &.form-check-danger{
+        &:checked{
+            background-color: var(--bs-danger);
+            border: var(--bs-danger)
+        }
+    }
+    &.form-check-light{
+        &:checked{
+            background-color: var(--bs-light);
+            border: var(--bs-light)
+        }
+    }
+    &.form-check-dark{
+        &:checked{
+            background-color: var(--bs-dark);
+            border: var(--bs-dark)
+        }
+    }
+}

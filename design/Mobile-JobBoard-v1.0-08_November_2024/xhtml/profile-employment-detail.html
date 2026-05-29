@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<!-- Title -->
+	<title>JobBoard - Job Search Mobile App Template ( Bootstrap + PWA )</title>
+
+	<!-- Meta -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="author" content="Indiancoder">
+	<meta name="robots" content="index, follow">
+
+	<meta name="keywords" content="JobBoard, job search app, mobile app template, Bootstrap template, PWA job app, recruitment app, job listings, employment platform, job seekers, responsive design">   
+
+	<meta name="description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+
+	<meta property="og:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+
+	<meta name="format-detection" content="telephone=no">
+
+	<!-- Twitter Specific -->
+	<meta name="twitter:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+
+	<meta name="twitter:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta name="twitter:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+	<meta name="twitter:card" content="summary_large_image">
+
+	<!-- Mobile Specific -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, minimal-ui, viewport-fit=cover">
+
+	<!-- Favicons Icon -->
+	<link rel="shortcut icon" type="image/x-icon" href="assets/images/app-logo/favicon.png">
+    
+	<!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+	
+    <!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+
+</head>   
+<body>
+<div class="page-wrapper">
+    
+	<!-- Preloader -->
+	<div id="preloader">
+		<div class="loader">
+			<div class="logo">
+				<img src="assets/images/app-logo/preloader/circle.svg" class="circle-vector" alt="">	
+				<img src="assets/images/app-logo/preloader/user.svg" class="user-vector wow fadeInUpBig" alt="">	
+			</div>
+		</div>
+	</div>
+    <!-- Preloader end-->
+	
+	<!-- Header -->
+    <header class="header header-fixed">
+		<div class="header-content">
+			<div class="left-content">
+				<div class="back-btn dz-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.833 10H4.16634" stroke="var(--bs-body-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M10 4.16666L4.16667 9.99999L10 15.8333" stroke="var(--bs-body-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </div>
+				<h6 class="title">Employment</h6>
+			</div>
+			<div class="mid-content"></div>
+			<div class="right-content"></div>
+		</div>
+	</header>
+	<!-- Header -->
+	
+	<!-- Main Content Start -->
+	<main class="page-content space-top space-bottom">
+		<div class="container">
+			<div class="form-group mb-3">
+				<label for="employeLabel" class="form-label required">Is this your current company</label>
+				<div class="d-flex align-items-center gap-2">
+					<div class="form-check custom-check style-3">
+						<input type="radio" class="btn-check" name="employmentCheckoutlined" id="employmentCheck" autocomplete="off" checked="">
+						<label class="btn btn-sm" for="employmentCheck">Yes</label>
+					</div>
+					<div class="form-check custom-check style-3">
+						<input type="radio" class="btn-check" name="employmentCheckoutlined" id="employmentCheck1" autocomplete="off">
+						<label class="btn btn-sm" for="employmentCheck1">No</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group mb-3">
+				<label for="employeLabel" class="form-label required">Employment Type</label>
+				<div class="d-flex align-items-center gap-2">
+					<div class="form-check custom-check style-3">
+						<input type="radio" class="btn-check" name="employmentCheckoutlined1" id="employmentCheck2" autocomplete="off" checked="">
+						<label class="btn btn-sm" for="employmentCheck2">Full-Time</label>
+					</div>
+					<div class="form-check custom-check style-3">
+						<input type="radio" class="btn-check" name="employmentCheckoutlined1" id="employmentCheck3" autocomplete="off">
+						<label class="btn btn-sm" for="employmentCheck3">Internship</label>
+					</div>
+				</div>
+			</div>
+			<div class="d-flex align-items-end gap-3 mb-3">
+				<div class="form-group w-100">
+					<label for="experienceYear" class="form-label required">Experience</label>
+					<div class="position-relative">
+						<input type="number" id="experienceYear" class="form-control pe-5" value="8">
+						<span class="position-absolute end-0 top-0 h-100 d-flex align-items-center pe-3">Year</span>
+					</div>
+				</div>
+				<div class="form-group w-100">
+					<div class="position-relative">
+						<input type="number" id="experienceMonth" class="form-control pe-5" value="6">
+						<span class="position-absolute end-0 top-0 h-100 d-flex align-items-center pe-3">Month</span>
+					</div>
+				</div>
+			</div>
+			<div class="form-group mb-3">
+				<label for="companyName" class="form-label required">Current Company Name</label>
+				<div class="position-relative">
+					<div class="dz-icon icon-sm position-absolute top-50 start-0 translate-middle-y bg-body rounded-1 ms-2"><i class="fa-regular fa-building text-body"></i></div>
+					<input type="text" class="form-control ps-5" id="companyName">
+				</div>
+			</div>
+			<div class="form-group mb-3">
+				<label for="joiningDate" class="form-label required">Joining Date</label>
+				<input type="number" class="form-control" id="joiningDate">
+			</div>
+			<div class="form-group mb-3">
+				<label for="Number" class="form-label required">Annual Salary</label>
+				<div class="number-select style-2">
+					<input type="number" class="form-control" id="Number" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
+					<select class="form-select" aria-label="Default select example">
+						<option selected="">$</option>
+						<option value="1">₹</option>
+						<option value="2">€</option>
+						<option value="3">£</option>
+					</select>
+					<span class="position-absolute end-0 top-0 h-100 d-flex align-items-center pe-3">Per Year</span>
+				</div>
+			</div>
+			<div class="form-group mb-3">
+				<label for="employeLabel" class="form-label required">Notice Period</label>
+				<div class="d-flex align-items-center gap-2 flex-wrap">
+					<div class="form-check custom-check style-3">
+						<input type="radio" class="btn-check" name="checked3" id="checkNoticeperiod" autocomplete="off" checked="">
+						<label class="btn btn-sm" for="checkNoticeperiod">15 Days</label>
+					</div>
+					<div class="form-check custom-check style-3">
+						<input type="radio" class="btn-check" name="checked3" id="checkNoticeperiod1" autocomplete="off">
+						<label class="btn btn-sm" for="checkNoticeperiod1">1 Month</label>
+					</div>
+					<div class="form-check custom-check style-3">
+						<input type="radio" class="btn-check" name="checked3" id="checkNoticeperiod2" autocomplete="off">
+						<label class="btn btn-sm" for="checkNoticeperiod2">2 Month</label>
+					</div>
+					<div class="form-check custom-check style-3">
+						<input type="radio" class="btn-check" name="checked3" id="checkNoticeperiod3" autocomplete="off">
+						<label class="btn btn-sm" for="checkNoticeperiod3">3 Month</label>
+					</div>
+					<div class="form-check custom-check style-3">
+						<input type="radio" class="btn-check" name="checked3" id="checkNoticeperiod4" autocomplete="off">
+						<label class="btn btn-sm" for="checkNoticeperiod4">Serving Notice Period</label>
+					</div>
+				</div>
+			</div>
+			<div class="divider"></div>
+			<a href="javascript:void(0);" class="btn btn-outline-light btn-flex gap-2 w-100 text-primary fw-bold"><i class="fi fi-br-plus fs-2"></i>Add More</a>
+		</div>
+		<!-- Footer Fixed Button -->
+		<div class="footer-fixed-btn">
+            <a href="profile-fill.html" class="btn btn-primary w-100 btn-shadow">Save</a>
+        </div>
+	</main>
+	<!-- Main Content End -->
+</div>  
+<!-- Scripts -->
+<script src="assets/js/jquery.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/settings.js"></script>
+<script src="assets/js/custom.js"></script>
+</body>
+</html>

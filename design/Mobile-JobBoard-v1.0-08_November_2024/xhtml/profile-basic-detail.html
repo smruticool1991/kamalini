@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<!-- Title -->
+	<title>JobBoard - Job Search Mobile App Template ( Bootstrap + PWA )</title>
+
+	<!-- Meta -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="author" content="Indiancoder">
+	<meta name="robots" content="index, follow">
+
+	<meta name="keywords" content="JobBoard, job search app, mobile app template, Bootstrap template, PWA job app, recruitment app, job listings, employment platform, job seekers, responsive design">   
+
+	<meta name="description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+
+	<meta property="og:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+
+	<meta name="format-detection" content="telephone=no">
+
+	<!-- Twitter Specific -->
+	<meta name="twitter:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+
+	<meta name="twitter:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta name="twitter:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+	<meta name="twitter:card" content="summary_large_image">
+
+	<!-- Mobile Specific -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, minimal-ui, viewport-fit=cover">
+
+	<!-- Favicons Icon -->
+	<link rel="shortcut icon" type="image/x-icon" href="assets/images/app-logo/favicon.png">
+    
+	<!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+	
+    <!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+
+</head>   
+<body>
+<div class="page-wrapper">
+    
+	<!-- Preloader -->
+	<div id="preloader">
+		<div class="loader">
+			<div class="logo">
+				<img src="assets/images/app-logo/preloader/circle.svg" class="circle-vector" alt="">	
+				<img src="assets/images/app-logo/preloader/user.svg" class="user-vector wow fadeInUpBig" alt="">	
+			</div>
+		</div>
+	</div>
+    <!-- Preloader end-->
+	
+	<!-- Header -->
+    <header class="header header-fixed">
+		<div class="header-content">
+			<div class="left-content">
+				<div class="back-btn dz-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.833 10H4.16634" stroke="var(--bs-body-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M10 4.16666L4.16667 9.99999L10 15.8333" stroke="var(--bs-body-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </div>
+				<h6 class="title">Basic Details</h6>
+			</div>
+			<div class="mid-content"></div>
+			<div class="right-content"></div>
+		</div>
+	</header>
+	<!-- Header -->
+	
+	<!-- Main Content Start -->
+	<main class="page-content space-top space-bottom">
+		<div class="container">
+			<div class="form-group mb-3">
+				<label for="FormEmail" class="form-label required">Email Address</label>
+				<input type="email" class="form-control" id="FormEmail">
+			</div>
+			<div class="form-group mb-3">
+				<label for="Number" class="form-label required">Phone Number</label>
+				<div class="number-select">
+					<input type="number" class="form-control" id="Number" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
+					<select class="form-select" aria-label="Default select example">
+						<option selected="">+91</option>
+						<option value="1">+1</option>
+						<option value="2">+355</option>
+						<option value="4">+213</option>
+						<option value="5">+376</option>
+						<option value="6">+54</option>
+						<option value="7">+246</option>
+						<option value="8">+86</option>
+						<option value="9">+33</option>
+						<option value="10">+49</option>
+						<option value="11">+39</option>
+						<option value="12">+852</option>
+						<option value="14">+93</option>
+						<option value="15">+509</option>
+						<option value="16">+504</option>
+					</select>
+				</div>
+			</div>
+			<div class="from-group mb-3">
+				<label for="locationInput" class="form-label required">Location</label>
+				<input type="text" class="form-control" id="locationInput" placeholder="Enter Location">	
+			</div>
+			<div class="d-flex align-items-end gap-3 mb-3">
+				<div class="form-group w-100">
+					<label for="experienceYear" class="form-label required">Experience</label>
+					<div class="position-relative">
+						<input type="number" id="experienceYear" class="form-control pe-5" value="8">
+						<span class="position-absolute end-0 top-0 h-100 d-flex align-items-center pe-3">Year</span>
+					</div>
+				</div>
+				<div class="form-group w-100">
+					<div class="position-relative">
+						<input type="number" id="experienceMonth" class="form-control pe-5" value="6">
+						<span class="position-absolute end-0 top-0 h-100 d-flex align-items-center pe-3">Month</span>
+					</div>
+				</div>
+			</div>
+			<div class="form-group mb-3">
+				<label for="Number" class="form-label required">Annual Salary</label>
+				<div class="number-select style-2">
+					<input type="number" class="form-control" id="Number" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
+					<select class="form-select" aria-label="Default select example">
+						<option selected="">$</option>
+						<option value="1">₹</option>
+						<option value="2">€</option>
+						<option value="3">£</option>
+					</select>
+					<span class="position-absolute end-0 top-0 h-100 d-flex align-items-center pe-3">Per Year</span>
+				</div>
+			</div>
+		</div>
+		<!-- Footer Fixed Button -->
+		<div class="footer-fixed-btn">
+            <a href="profile-fill.html" class="btn btn-primary w-100 btn-shadow">Save</a>
+        </div>
+	</main>
+	<!-- Main Content End -->
+</div>  
+<!-- Scripts -->
+<script src="assets/js/jquery.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/settings.js"></script>
+<script src="assets/js/custom.js"></script>
+</body>
+</html>

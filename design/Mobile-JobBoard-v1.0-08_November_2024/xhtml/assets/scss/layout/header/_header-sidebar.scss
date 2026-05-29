@@ -1,0 +1,131 @@
+// Sidebar ===
+.sidebar{
+	max-width: 280px;
+	border-right: 0;
+	border-radius: 0 20px 20px 0;
+	box-shadow: none;
+	// Offcanvas Sidebar
+	.offcanvas-header{
+		padding: 20px;	
+	}
+	.offcanvas-body{
+		padding: 20px;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+	// Offcanvas Sidebar
+
+	// Sidebar Inner
+	.author-box{
+		display: flex;
+		align-items: center;
+		width: 100%;
+		.dz-media{
+			width: 60px;
+			height: 60px;
+			overflow: unset;
+			margin-right: 10px;
+			border-radius: 50%;
+			border: 3px solid var(--bs-primary);
+			padding: 4px;
+			img{
+				border-radius: inherit;
+			}
+			.status-badge {
+				position: absolute;
+				bottom: -3px;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				padding: 2px 4px;
+				background-color: var(--bs-body-bg);
+				border: 1px solid var(--bs-border-color);
+				border-radius: 4px;
+				font-weight: 700;
+				font-size: 9px;
+				text-align: center;
+				color: var(--title);
+				z-index: 1;
+				line-height: 1;
+			}
+		}
+		.name{
+			margin-bottom: 0;
+			font-weight: 700;
+			font-size: 15px;
+		}
+		.about{
+			font-size: 12px;
+			font-weight: 500;
+		}
+	}
+	.app-info{
+		.name{
+			margin-bottom: 0;
+			font-size: 13px;
+			font-weight: 400;
+			color: var(--title);
+			span{
+				font-weight: 600;
+			}
+		}
+		.ver-info{
+			font-size: 13px;
+			color: var(--title);
+		}
+	}
+	.sidebar-list{
+		ul > li {
+			padding: 14px 0;
+			a{
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				position: relative;
+			}	
+			.title{
+				font-size: 14px;
+				font-weight: 500;
+			}
+			.dz-icon{
+				color: var(--bs-primary);
+				i{
+					font-size: 18px;
+				}
+			}
+		} 
+	}
+	.dz-theme{
+		margin-top: auto;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 15px;
+		.dz-theme-mode{
+			display: flex;
+			align-items: center;
+			border: 0;
+			box-shadow: unset;	
+			background-color: $dark;
+			&.light{
+				.icon-light{
+					display: block;
+				}
+				.icon-dark{
+					display: none;
+				}		
+			}
+			&.dark{
+				.icon-light{
+					display: none;
+				}
+				.icon-dark{
+					display: block;
+				}		
+			}
+		}
+	}
+}

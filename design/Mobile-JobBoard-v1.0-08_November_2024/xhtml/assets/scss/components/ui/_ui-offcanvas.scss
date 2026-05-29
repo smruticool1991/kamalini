@@ -1,0 +1,80 @@
+.offcanvas{
+    .offcanvas-header{
+        border-bottom: 1px solid var(--border-color);
+    }
+    .offcanvas-footer{
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 15px;
+        border-top: 1px solid var(--border-color);
+    }
+}
+// Filter Offcanvas
+.filter-offcanvas{
+	padding-bottom: 50px;
+	border-radius: 10px 10px 0 0;
+}
+
+// Notification Offcanvas
+.notification-offcanvas{
+	display: flex;
+    align-items: center;
+    justify-content: center;
+	.offcanvas-body{
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+		gap: 30px;
+		padding: 25px 30px;
+		.dz-icon{
+			margin: 0 auto;
+			width: 120px;
+			min-width: 120px;
+			height: 120px;
+			border-radius: 50%;
+			background-color: var(--bs-light);
+			i{
+				font-size: 40px;
+				color: $danger;
+			}
+		}
+		.title{
+			padding: 0 70px;
+		}
+		p{
+			font-size: 14px;
+			font-weight: 500;
+			margin: 0;
+		}
+	}
+	.offcanvas-footer{
+		padding: 15px;
+    }
+}
+
+// PWA Offcanvas
+.pwa-offcanvas{
+	.offcanvas-body{
+		text-align: center;
+		padding: 30px;
+		.logo-area{
+			margin: auto auto 15px;
+			background-color: var(--bs-body-bg);
+			box-shadow: var(--bs-box-shadow);
+			border: 1px solid var(--bs-border-color);
+			border-radius: 20px;
+			width: 75px;
+			min-width: 75px;
+			height: 75px;
+			img{
+				display: block;
+			}
+		}
+		p{
+			color: var(--bs-body-color);
+			font-size: 15px;
+			margin: 0 0 25px;
+		}
+	}
+}

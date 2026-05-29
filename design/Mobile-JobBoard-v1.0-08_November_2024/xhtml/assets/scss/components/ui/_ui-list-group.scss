@@ -1,0 +1,198 @@
+.list-group{   
+    .list-group-item{
+        &.active{
+            --bs-heading-color: $white;
+        }
+        .item-link{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+    } 
+    .dz-inner{
+        .title{
+            font-size: 15px;
+            font-weight: 600;
+        }
+    }
+}
+
+.custom-list{
+    .item-link{
+        position: relative;
+        gap: 15px!important;
+        font-size: 16px!important;
+        .dz-icon{
+            i{
+                font-size: 20px;
+                color: var(--text-color);
+            }
+        }
+        .title{
+            color: var(--text-color);
+            font-size: 15px;
+            font-weight: 400;
+        }
+        &::after{
+            content: "\e844";
+            position: absolute;
+            top: 50%;
+            right: 0;
+            font-family: 'feather' !important;
+            font-size: 20px;
+            color: var(--text-color);
+            line-height: 1;
+            transform: translateY(-50%);
+        }
+    }
+}
+
+.dz-list{
+    ul{    
+        li{
+            border-radius: 0!important;
+            border: 0;
+            &:last-child{
+                border-bottom: 0;
+            }
+        }
+    }
+    .list-group-item{
+        padding: 15px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .list-content{
+        .title,p{
+            margin-bottom: 0;
+        }
+    }
+    .nav-link{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        &::after{
+            content: "\e844";
+            font-family: 'feather' !important;
+            right: 0;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: 500;
+            font-size: 20px;
+            color: var(--text-light);
+        }
+    }
+    &.style-2{
+        ul{    
+            li{
+                margin: 0 -15px;
+                .title{
+                    color: var(--text-color);
+                    font-size: 15px;
+                }
+            }
+        }
+    }
+    &.radio-style{
+        ul > li {
+            border-bottom: 1px solid var(--bs-border-color);
+        }
+        input{
+            position: absolute;
+            opacity: 0;
+            left: 0;
+        }
+        label{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .list-group-item{
+            padding: 15px 0;
+        }
+        .list-content{
+            display: flex;
+            flex-direction: column;
+            .title{
+                font-size: 15px;
+                color: var(--text-color);
+            }
+        }
+        .check {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            left: auto;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            background-color: var(--body-bg2);
+            &:after{
+                content:"";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 14px;
+                height: 14px;
+                z-index: 2;
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+        input {
+            &:checked {
+                ~ {
+                    .form-check-label {
+                        .check{
+                            &::after{
+                                background-color: var(--bs-primary);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Search List ==
+.recent-search-list{
+	margin-bottom: 10px;
+	ul{
+		li{
+			width: 100%;
+			padding: 6px 0;
+			&.search-content{
+				display: flex;
+				align-items: center;
+				color: var(--title);
+				font-size: 15px;
+				font-weight: 400;
+				.left-content{
+					display: flex;
+					align-items: center;
+					flex: 1;
+					gap: 15px;
+					span{
+						font-size: 14px;
+                        font-weight: 500;
+					}
+					i{
+						font-size: 20px;
+						color: var(--bs-primary);					
+					}
+				} 
+				.remove{
+					color: rgba($color: $body-color, $alpha: 0.5);
+					i{
+                        font-size: 20px;
+                    }
+				} 
+			}
+		}
+	}
+}
+

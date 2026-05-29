@@ -1,0 +1,135 @@
+.dz-stepper{
+    .bootstrap-touchspin{
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+        width: 100%;
+        &.input-group{
+            flex-wrap: nowrap;
+        }
+        .input-group-btn{
+            .btn{
+                width: 35px;
+                height: 35px;
+                padding: 3px;
+                padding-bottom: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: var(--title);
+            }   
+            &:not(:first-child){
+                padding: 0;    
+            }
+        }
+        .form-control{
+            height: 100%;
+            font-size: 1.125rem;
+            font-weight: 500;
+            padding: 5px;
+            color: var(--title);
+            background: transparent;
+            border: 0;
+            box-shadow: unset;
+            z-index: 3;
+            text-align: center;
+        }
+    }	
+    &.style-2{
+        .bootstrap-touchspin{
+            height: 40px;
+            border: 1px solid var(--border-color2);
+            border-radius: 6px;
+            overflow: hidden;
+            .input-group-btn{
+                height: 100%;
+                .btn{
+                    height: 100%;
+                    width: 36px;
+                    font-size: 0;
+                    border-radius: 0;
+                    background-color: var(--bs-light);
+                    border-color: transparent;
+                    position: relative;
+                    &::after{
+                        content: "\f4f3";
+                        position: absolute;
+                        font-size: 14px;
+                        font-family: uicons-bold-rounded !important;
+                        color: var(--text-color);
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%,-50%);
+                    }
+                    &.bootstrap-touchspin-down{
+                        &::after{
+                            content: "\f62d";
+                        }
+                    }
+                    &.bootstrap-touchspin-up{
+                        &::after{
+                            content: "\f4f3";
+                        }
+                    }
+                }   
+            }
+            .form-control{
+                border-left: 1px solid var(--border-color2);
+                border-right: 1px solid var(--border-color2);
+                &:hover, &:focus, &:active{
+                    border-color: var(--border-color2);
+                }
+            }
+        } 
+    }
+    &.style-3{
+        width: 80px;
+        background: var(--bs-secondary);
+        border-radius: 6px;
+		.bootstrap-touchspin{
+            .input-group-btn{
+                .btn{
+					width: 30px;
+					height: 30px;
+					font-size: 0;
+					border-radius: var(--bs-border-radius-sm);
+                    background-color: transparent;
+                    border-color: transparent;
+                    &.bootstrap-touchspin-up{
+                        &::after{
+                            content: "\2b";
+                            font-family: "FontAwesome" !important;
+                            font-size: 14px;
+                            position: absolute;
+                            left: 50%;
+                            top: 50%;
+                            color: #fff;
+                            transform: translate(-50%, -50%);
+                        }
+                    }
+                    &.bootstrap-touchspin-down{
+                        &::after{
+                            content: "\f068";
+                            font-family: "FontAwesome" !important;
+                            font-size: 14px;
+                            position: absolute;
+                            left: 50%;
+                            color: #fff;
+                            top: 50%;
+                            transform: translate(-50%, -50%);
+                        }
+                    }
+                }				
+            }
+			.form-control{
+                padding: 3px;
+                font-size: 14px;
+                font-weight: 500;
+                background: var(--bs-body-bg);
+                color: var(--text-color);
+                border-radius: 4px !important;
+			}
+        }
+	}
+}

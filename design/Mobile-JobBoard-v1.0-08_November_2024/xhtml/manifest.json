@@ -1,0 +1,16 @@
+{
+  "background_color": "#267FE8",
+  "description": "JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone",
+  "display": "standalone",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/images/app-logo/pwa150x150.png",
+      "sizes": "150x150",
+      "type": "image/png"
+    }
+  ],
+  "name": "JobBoard - Job Search Mobile App Template",
+  "short_name": "JobBoard",
+  "start_url": "index.html"
+}

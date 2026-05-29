@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<!-- Title -->
+	<title>JobBoard - Job Search Mobile App Template ( Bootstrap + PWA )</title>
+
+	<!-- Meta -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="author" content="Indiancoder">
+	<meta name="robots" content="index, follow">
+
+	<meta name="keywords" content="JobBoard, job search app, mobile app template, Bootstrap template, PWA job app, recruitment app, job listings, employment platform, job seekers, responsive design">   
+
+	<meta name="description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+	<meta property="og:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+	<meta name="format-detection" content="telephone=no">
+
+	<!-- Twitter Specific -->
+	<meta name="twitter:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+	<meta name="twitter:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+	<meta name="twitter:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+	<meta name="twitter:card" content="summary_large_image">
+
+	<!-- Mobile Specific -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, minimal-ui, viewport-fit=cover">
+	
+	<!-- Favicons Icon -->
+	<link rel="shortcut icon" type="image/x-icon" href="assets/images/app-logo/favicon.png">
+	
+	<!-- PWA Version -->
+	<link rel="manifest" href="manifest.json">
+    
+    <!-- Global CSS -->
+	<link href="assets/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="assets/vendor/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.css">
+	<link rel="stylesheet" href="assets/vendor/nouislider/nouislider.min.css">
+	<link rel="stylesheet" href="assets/vendor/swiper/swiper-bundle.min.css">
+    
+	<!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+	
+    <!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+
+</head>   
+<body>
+<div class="page-wrapper">
+    
+	<!-- Preloader -->
+	<div id="preloader">
+		<div class="loader">
+			<div class="logo">
+				<img src="assets/images/app-logo/preloader/circle.svg" class="circle-vector" alt="">	
+				<img src="assets/images/app-logo/preloader/user.svg" class="user-vector wow fadeInUpBig" alt="">	
+			</div>
+		</div>
+	</div>
+    <!-- Preloader end-->
+	
+	<!-- Header -->
+	<header class="header style-2 header-fixed">
+		<div class="header-content">
+			<div class="left-content location">
+				<a href="javascript:void(0);" class="toggle-icon" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+					<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<rect width="22" height="2" fill="var(--bs-body-color)"/>
+						<rect y="7" width="16" height="2" fill="var(--bs-body-color)"/>
+						<rect y="14" width="22" height="2" fill="var(--bs-body-color)"/>
+					</svg>
+				</a>
+			</div>
+			<div class="mid-content px-3">
+				<a href="search.html">
+					<div class="input-group input-group-sm style-2">
+						<span class="input-group-text bg-transparent">
+							<i class="fi fi-br-search fs-4"></i>
+						</span>
+						<input type="search" class="form-control style-2 border-1 rounded-pill" placeholder="Search Area" aria-label="Search">
+					</div>
+				</a>
+			</div>
+			<div class="right-content d-flex align-items-center">
+				<a href="notification.html">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="var(--bs-body-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M13.7295 21C13.5537 21.3031 13.3014 21.5547 12.9978 21.7295C12.6941 21.9044 12.3499 21.9965 11.9995 21.9965C11.6492 21.9965 11.3049 21.9044 11.0013 21.7295C10.6977 21.5547 10.4453 21.3031 10.2695 21" stroke="var(--bs-body-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</a>
+			</div>
+		</div>
+	</header>
+	<!-- Header -->
+	
+	<!-- Sidebar -->
+    <div class="offcanvas offcanvas-start sidebar" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
+		<div class="offcanvas-header">
+			<div class="author-box">
+				<div class="dz-media">
+					<img src="assets/images/avatar/1.png" alt="author-image">
+					<span class="status-badge">100%</span>
+				</div>
+				<div class="dz-info flex-1">
+					<h6 class="name">Morgan Carter</h6>
+					<span class="about">Web Designer</span>
+				</div>
+				<a class="edit ms-auto" href="edit-profile.html">
+					<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M11.333 2.00001C11.5081 1.82491 11.716 1.68602 11.9447 1.59126C12.1735 1.4965 12.4187 1.44772 12.6663 1.44772C12.914 1.44772 13.1592 1.4965 13.3879 1.59126C13.6167 1.68602 13.8246 1.82491 13.9997 2.00001C14.1748 2.1751 14.3137 2.38297 14.4084 2.61175C14.5032 2.84052 14.552 3.08572 14.552 3.33334C14.552 3.58096 14.5032 3.82616 14.4084 4.05494C14.3137 4.28371 14.1748 4.49158 13.9997 4.66667L4.99967 13.6667L1.33301 14.6667L2.33301 11L11.333 2.00001Z" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+					</svg>								
+				</a>
+			</div>
+		</div>
+		<div class="offcanvas-body">
+			<div class="sidebar-list">
+				<ul>
+					<li>
+						<a href="search.html" class="item-link">
+							<div class="dz-icon">
+								<i class="flaticon flaticon-search-1"></i>
+							</div>
+							<span class="title">Search Jobs</span>
+						</a>
+					</li>
+					<li>
+						<a href="bookmark.html" class="item-link">
+							<div class="dz-icon">
+								<i class="feather icon-bookmark"></i>
+							</div>
+							<span class="title">Saved Jobs</span>
+						</a>
+					</li>
+					<li>
+						<a href="my-application.html" class="item-link">
+							<div class="dz-icon">
+								<i class="feather icon-file-text"></i>
+							</div>
+							<span class="title">My Application</span>
+						</a>
+					</li>
+					<li>
+						<a href="contact-us.html" class="item-link">
+							<div class="dz-icon">
+								<i class="feather icon-eye"></i>
+							</div>
+							<span class="title">Job Seeking Status</span>
+						</a>
+					</li>
+					<li>
+						<a href="chat-list.html" class="item-link">
+							<div class="dz-icon">
+								<i class="feather icon-message-square"></i>
+							</div>
+							<span class="title">Chat For help</span>
+						</a>
+					</li>
+					<li>
+						<a href="language.html" class="item-link">
+							<div class="dz-icon">
+								<i class="feather icon-globe"></i>
+							</div>
+							<span class="title">Language</span>
+						</a>
+					</li>
+					<li>
+						<a href="setting.html" class="item-link">
+							<div class="dz-icon">
+								<i class="feather icon-settings"></i>
+							</div>
+							<span class="title">Settings</span>
+						</a>
+					</li>
+					<li>
+						<a href="notification.html" class="item-link">
+							<div class="dz-icon">
+								<i class="feather icon-bell"></i>
+							</div>
+							<span class="title">Notifications</span>
+						</a>
+					</li>
+					<li>
+						<a href="faq.html" class="item-link">
+							<div class="dz-icon">
+								<i class="feather icon-help-circle"></i>
+							</div>
+							<span class="title">Help Center</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="offcanvas-footer">
+			<div class="app-info">
+				<h6 class="name"><span>JobBoard</span> Job Search</h6>
+				<span class="ver-info">Version 1.0.0</span>
+			</div>
+		</div>
+	</div>
+    <!-- Sidebar End -->
+	
+	<!-- Main Content Start -->
+	<main class="page-content space-top space-bottom">
+		<div class="container">
+			<!-- Card Banners  -->
+			<div class="dz-banner">
+				<div class="title-bar">
+					<h6 class="title flex-1">Recommend Job</h6>
+					<a href="javascript:void(0);">See All</a>
+				</div>
+				<div class="swiper banner-swiper swiper-lr">
+					<div class="swiper-wrapper">
+						<div class="swiper-slide">
+							<div class="dz-card card">
+								<div class="card-body">
+									<div class="card-info">
+										<div class="card-content">
+											<h5 class="title"><a href="job-detail.html">User Experience Design Lead</a></h5>
+											<a href="about-company.html"><span class="c-name">Bakeron</span></a>
+										</div>
+										<div class="c-logo">
+											<img src="assets/images/company-logo/1.svg" alt="">	
+										</div>
+									</div>
+									<div class="dz-info">
+										<span class="c-salery"><i class="feather icon-dollar-sign"></i>14 - 18 Lacs P.A</span>
+										<div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.7</span></div>
+									</div>
+									<div class="btn-group gap-2">
+										<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+										<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Remote</a>
+										<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Director</a>
+									</div>
+								</div>
+								<div class="card-footer">
+									<div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Noida, India</span></div>
+									<div class="right-content">
+										<span class="time">5 Day ago
+											<span class="item-bookmark icon-left">
+												<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+													<rect width="20" height="20" fill="var(--bs-body-bg)"/>
+													<path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+												</svg>
+											</span> 	
+										</span> 	
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="swiper-slide">
+							<div class="dz-card card">
+								<div class="card-body">
+									<div class="card-info">
+										<div class="card-content">
+											<h5 class="title"><a href="job-detail.html">Front-End Developer</a></h5>
+											<a href="about-company.html"><span class="c-name">Bakeron</span></a>
+										</div>
+										<div class="c-logo">
+											<img src="assets/images/company-logo/2.svg" alt="">	
+										</div>
+									</div>
+									<div class="dz-info">
+										<span class="c-salery"><i class="feather icon-dollar-sign"></i>8 - 12 Lacs P.A</span>
+										<div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.7</span></div>
+									</div>
+									<div class="btn-group gap-2">
+										<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Hybrid</a>
+										<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Internship</a>
+										<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+									</div>
+								</div>
+								<div class="card-footer">
+									<div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Paris, France</span></div>
+									<div class="right-content">
+										<span class="time">2 Day ago
+											<span class="item-bookmark icon-left">
+												<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+													<rect width="20" height="20" fill="var(--bs-body-bg)"/>
+													<path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+												</svg>
+											</span> 	
+										</span> 	
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="swiper-slide">
+							<div class="dz-card card">
+								<div class="card-body">
+									<div class="card-info">
+										<div class="card-content">
+											<h5 class="title"><a href="job-detail.html">Back-End Developer</a></h5>
+											<a href="about-company.html"><span class="c-name">Bakeron</span></a>
+										</div>
+										<div class="c-logo">
+											<img src="assets/images/company-logo/3.svg" alt="">	
+										</div>
+									</div>
+									<div class="dz-info">
+										<span class="c-salery"><i class="feather icon-dollar-sign"></i>8 - 12 Lacs P.A</span>
+										<div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.7</span></div>
+									</div>
+									<div class="btn-group gap-2">
+										<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Remote</a>
+										<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+										<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Executive</a>
+									</div>
+								</div>
+								<div class="card-footer">
+									<div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Tokyo, Japan</span></div>
+									<div class="right-content">
+										<span class="time">2 Weeks ago
+											<span class="item-bookmark icon-left">
+												<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+													<rect width="20" height="20" fill="var(--bs-body-bg)"/>
+													<path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+												</svg>
+											</span> 	
+										</span> 	
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Card Banners  -->
+			
+			<!-- Tips Card  -->
+			<div class="jb-tips-card">
+				<h6 class="title">Boost Your Interview Success with JobBoard Team Tips</h6>
+				<a href="javascript:void(0);" class="btn btn-sm btn-primary lh-1 rounded-2 btn-shadow">Start Preparing</a>
+				<div class="dz-media">
+					<img src="assets/images/banner/1.png" alt="">
+				</div>
+			</div>
+			<!-- Tips Card  -->
+			
+			<!-- Jobs List -->
+			<div class="title-bar">
+				<h6 class="title">Jobs for you</h6>
+			</div>
+			<div class="row g-3">
+				<div class="col-12 col-md-6 col-lg-4">
+					<div class="dz-card card style-2">
+						<div class="card-body">
+							<div class="card-info">
+								<div class="c-logo">
+									<img src="assets/images/company-logo/4.svg" alt="">	
+								</div>
+								<div class="card-content">
+									<h5 class="title"><a href="job-detail.html">User Experience Design Lead</a></h5>
+									<div class="d-flex align-items-center gap-2">
+										<a href="about-company.html"><span class="c-name">Bakeron</span></a>
+										<div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.5 Review</span></div>
+									</div>
+								</div>
+								<span class="item-bookmark icon-left">
+									<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<rect width="20" height="20" fill="var(--bs-body-bg)"/>
+										<path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+								</span>
+							</div>
+							<div class="btn-group gap-2">
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Remote</a>
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Executive</a>
+							</div>
+						</div>
+						<div class="card-footer">
+							<div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Noida, India</span></div>
+							<div class="right-content"><span class="time">5 Day ago</span></div>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-4">
+					<div class="dz-card card style-2">
+						<div class="card-body">
+							<div class="card-info">
+								<div class="c-logo">
+									<img src="assets/images/company-logo/5.svg" alt="">	
+								</div>
+								<div class="card-content">
+									<h5 class="title"><a href="job-detail.html">Quality Assurance (QA) Engineer</a></h5>
+									<div class="d-flex align-items-center gap-2">
+										<a href="about-company.html"><span class="c-name">Bakeron</span></a>
+										<div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.5 Review</span></div>
+									</div>
+								</div>
+								<span class="item-bookmark icon-left">
+									<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<rect width="20" height="20" fill="var(--bs-body-bg)"/>
+										<path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+								</span>
+							</div>
+							<div class="btn-group gap-2">
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Remote</a>
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Executive</a>
+							</div>
+						</div>
+						<div class="card-footer">
+							<div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Noida, India</span></div>
+							<div class="right-content"><span class="time">5 Day ago</span></div>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-4">
+					<div class="dz-card card style-2">
+						<div class="card-body">
+							<div class="card-info">
+								<div class="c-logo">
+									<img src="assets/images/company-logo/6.svg" alt="">	
+								</div>
+								<div class="card-content">
+									<h5 class="title"><a href="job-detail.html">Full-Stack Developer</a></h5>
+									<div class="d-flex align-items-center gap-2">
+										<a href="about-company.html"><span class="c-name"><span class="c-name">JobZilla</span></span></a>
+										<div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">5.0 Review</span></div>
+									</div>
+								</div>
+								<span class="item-bookmark icon-left">
+									<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<rect width="20" height="20" fill="var(--bs-body-bg)"/>
+										<path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+								</span>
+							</div>
+							<div class="btn-group gap-2">
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">WFH</a>
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Internship</a>
+							</div>
+						</div>
+						<div class="card-footer">
+							<div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Paris, France</span></div>
+							<div class="right-content"><span class="time">4 Weeks ago</span></div>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-4">
+					<div class="dz-card card style-2">
+						<div class="card-body">
+							<div class="card-info">
+								<div class="c-logo">
+									<img src="assets/images/company-logo/7.svg" alt="">	
+								</div>
+								<div class="card-content">
+									<h5 class="title"><a href="job-detail.html">Back-End Developer</a></h5>
+									<div class="d-flex align-items-center gap-2">
+										<a href="about-company.html"><span class="c-name"><span class="c-name">JobBoard</span></span></a>
+										<div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.5 Review</span></div>
+									</div>
+								</div>
+								<span class="item-bookmark icon-left">
+									<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<rect width="20" height="20" fill="var(--bs-body-bg)"/>
+										<path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+								</span>
+							</div>
+							<div class="btn-group gap-2">
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Hybrid</a>
+								<a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Internship</a>
+							</div>
+						</div>
+						<div class="card-footer">
+							<div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Tokyo, Japan</span></div>
+							<div class="right-content"><span class="time">4 Day ago</span></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Jobs List -->
+		</div>
+	</main>
+	<!-- Main Content End -->
+	
+	<!-- Menubar -->
+	<div class="menubar-area footer-fixed">
+		<div class="toolbar-inner menubar-nav">
+			<a href="index.html" class="nav-link active">
+				<i class="feather icon-home"></i>
+				<span class="name">Home</span>
+			</a>
+			<a href="bookmark.html" class="nav-link">
+				<i class="feather icon-bookmark"></i>
+				<span class="name">Bookmark</span>
+			</a>
+			<a href="chat-list.html" class="nav-link">
+				<i class="feather icon-message-square"></i>
+				<span class="name">Messages</span>
+			</a>
+			<a href="profile.html" class="nav-link">
+				<i class="feather icon-user"></i>
+				<span class="name">Profile</span>
+			</a>
+		</div>
+	</div>
+	<!-- Menubar -->
+	
+	<!-- PWA Offcanvas -->
+	<div class="offcanvas offcanvas-bottom pwa-offcanvas">
+		<div class="container p-0">
+			<div class="offcanvas-body">
+				<div class="logo-area dz-icon">
+					<img class="logo-dark" src="assets/images/app-logo/preloader/logo.svg" alt="">
+				</div>
+				<h4 class="title">JobBoard - Job Search Mobile App Template</h4>
+				<p class="pwa-text">Install "JobBoard" to your home screen for easy access, just like any other app</p>
+				<div class="d-grid gap-2">
+					<button type="button" class="btn btn-primary pwa-btn">Add to Home Screen</button>
+					<button type="button" class="btn pwa-close btn-secondary">Maybe later</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- PWA Offcanvas End -->
+</div>  
+<!--**********************************
+    Scripts
+***********************************-->
+<script src="assets/js/jquery.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="assets/js/ic.carousel.js"></script>
+<script src="assets/js/settings.js"></script>
+<script src="assets/js/custom.js"></script>
+<script src="index.js"></script>
+</body>
+</html>

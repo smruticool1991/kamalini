@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "543414932327",
+    "project_id": "ka-jobs",
+    "storage_bucket": "ka-jobs.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:543414932327:android:d378a5311298774404d5c2",
+        "android_client_info": {
+          "package_name": "com.kamaliniapp.india"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "543414932327-bf6nbuula8a24sm8bgsqcecrqmerhk69.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kamaliniapp.india",
+            "certificate_hash": "adb49873a96c87f887c5e26bcd32449ec9030380"
+          }
+        },
+        {
+          "client_id": "543414932327-1ht3qsdgjpsvtdtb8ep5ag1koo3cbigb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdoiRWWm2FGChCFF8lhSCI3I6jbGKg3HM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "543414932327-1ht3qsdgjpsvtdtb8ep5ag1koo3cbigb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "543414932327-2m0b8siln5dekdtq9ua9skbt9pcu1u90.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kamaliniApplication"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

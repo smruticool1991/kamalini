@@ -1,0 +1,235 @@
+// Search Box ====
+.search-box{
+	border-bottom: 1px solid var(--bs-light);
+	margin: 0 -15px 0;
+	padding: 0 15px 15px;
+	.form-control{
+		border-radius: 6px!important;
+	}
+}
+// Search Box ====
+
+// Dz Banner ===
+.banner-swiper{
+	padding-bottom: 15px;
+	.swiper-slide{
+		width: 305px;
+	}
+}
+.dz-banner{
+   background-color: rgba(var(--bs-light-rgb), 0.50);
+	margin: -15px -15px 15px;
+    position: relative;
+	overflow: hidden;
+    padding: 15px 15px 0;
+	z-index: 1;
+	.inner-content{
+		padding: 20px 0px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		.vector-img{
+			position: absolute;
+			z-index: -1;
+			&.img_1{
+				width: 45px;
+				top: 30%;
+				right: 25%;
+			}
+			&.img_2{
+				width: 60px;
+				bottom: 0;
+				left: -15px;
+			}
+			&.img_3{
+				width: 70px;
+				bottom: -10px;
+				left: 45%;
+				right: 50%;
+				transform: translate(-50%, -50%);
+			}
+		}
+		.left-content{
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			height: 100%;
+			gap: 25px;
+			padding-left: 10px;
+		}
+		.dz-media{
+			position: absolute;
+			right: 0;
+			width: 170px;
+			bottom: 0;
+		}
+		.banner-title{
+			margin-bottom: 0;
+			color: #fff;
+			font-size: calc(1.25rem + 1.1vw);
+			// font-size: 24px;
+			font-weight: 700;
+		}
+		.sub-title{
+			color: #fff;
+		}
+	}
+}
+
+//Location ==
+.add-location{
+	display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--bs-light);
+	margin-bottom: 15px;
+}
+
+.location-list-item{
+	&.active{
+		background-color: unset;
+		.title{
+			color: var(--title);
+		}
+		&::after{
+			display: block;
+		}	
+	}	
+	p{
+		color: rgba(var(--bs-body-color-rgb), 0.60);
+	}
+	&::after{
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		border-radius: 6px;
+		background-color: rgba(var(--bs-primary-rgb), 0.05);
+		z-index: -1;
+		display: none;
+	}
+}
+
+.dz-find-location{
+	display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 25px;
+    text-align: center;
+    padding: 30px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(var(--frame-width) - 30px);
+    max-width: 100%;
+	.dz-icon{
+		width: 120px;
+		height: 120px;
+		border-radius: 50%;
+	}
+}
+
+// Search Area  ==
+.search-area{
+	position: relative;
+    margin: -15px -15px 25px;
+    padding: 15px 15px 20px;
+	&::after{
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		background-color: var(--body-bg2);
+		width: 100%;
+		height: 100%;
+		z-index: -1;
+	}
+	form{
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+}
+
+// Category Button ==
+.category-btn{
+	padding: 7px 10px;
+	background-color: var(--bs-body-bg);
+	border: 2px solid var(--bs-light);
+	color: var(--title);
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 13px;
+	font-weight: 500;
+	border-radius: 6px;
+	i{
+		font: 18px;
+		color: var(--bs-primary);
+	}
+	&:hover,
+	&:focus,
+	&:active{
+		background-color: rgba(var(--bs-primary-rgb), 0.20);
+		border-color: var(--bs-primary);
+	}
+	&.style-2{
+		background-color: var(--bs-body-bg);
+		border-width: 1px;
+		border-radius: var(--bs-border-radius-pill);
+		padding: 8px 15px;
+		color: var(--bs-body-color);
+		&:hover,
+		&:focus,
+		&:active{
+			color: var(--bs-primary);
+		}
+	}
+}
+
+.category-tag{
+	display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 8px;
+    gap: 5px;
+    background-color: rgba(var(--bs-body-bg-rgb), 0.1);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 36px;
+    font-weight: 500;
+    font-size: 13px;
+    color: #5F729D;
+    line-height: 20px;
+}
+
+// Dz About Banner ==
+.dz-about-banner{
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: -15px -15px 0;
+    padding: 25px 20px;
+	.icon-media{
+		width: 80px;
+		height: 80px;
+		background-color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;	
+		border: 1px solid var(--bs-light);
+		box-shadow: 0px 5px 5px rgba(5, 21, 55, 0.02);
+		border-radius: 15px;
+		img{
+			width: 100%;
+		}
+	}
+	.title,
+	p{
+		color: #fff;
+		margin-bottom: 0;
+	}
+}

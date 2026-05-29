@@ -1,0 +1,47 @@
+// range-slider
+.range-slider{
+	&.style-1{
+		.noUi-horizontal{
+			.noUi-connects{
+				background-color: #CCCCCC;
+			}
+			height: 2px;
+			.noUi-handle {
+				width: 14px;
+				height: 14px;
+				border-radius: 2px;
+				border: 0;
+				background-color: $primary;
+                box-shadow: unset;
+				top: 50%;
+				right: 0;
+				cursor: pointer;
+				transform: translateY(-45%);
+				&:before,
+				&:after{
+					content: none;
+				}
+				.noUi-tooltip {
+					border: 0;
+					padding: 3px 8px;
+					color: var(--bs-body-color);
+					border-radius: 20px;
+					font-size: 15px;
+					top: -33px;
+					bottom: auto;
+					font-weight: 700;
+					background-color: var(--bs-light);
+				}
+			}
+		}
+		.noUi-target {
+			background: var(--text-color);
+			border-radius: var(--bs-border-radius);
+			border: 0;
+			box-shadow: none;
+			.noUi-connect{
+				background: $primary;
+			}
+		}
+	}
+}

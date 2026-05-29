@@ -1,0 +1,107 @@
+html[data-bs-theme="dark"]{
+	--primary-light			: #333333;
+	--bs-heading-color		: #fff;
+    --bs-border-color   	: rgba(255, 255, 255, 0.10);
+    --border-color2			: rgba(193, 205, 217, 0.10);
+    --border-color3			: rgba(236, 242, 248, 0.10);
+	--text-color			: #fff;
+	--bs-card-bg			: #000;
+	--body-bg2				: #181525;
+	--bs-body-bg			: #222222;
+	--text-light			: rgba(255, 255, 255, 0.50);
+	--bs-light				: #333;
+	--bg-dark				: #fff;	
+	--bs-box-shadow			: 0px 5px 5px rgba(0, 0, 0, 0.02);	
+	--bs-box-shadow-sm		: 0px 0px 50px rgba(255, 255, 255, 0.1);
+	--bs-box-shadow-lg		: 0px 0px 100px rgba(255, 255, 255, 0.1);
+
+	// Additional Scss ==
+	#theme-image {
+		content: url('../images/background/shape-dark.svg');
+	}
+	.btn-close.style-2{
+		background: transparent!important;
+		i{	
+			color: rgba(var(--bs-body-color-rgb), 1);
+		}
+	}
+	.job-card .dz-media{
+		opacity: 1;
+	}
+	// Welcome Screen ==
+	.welcome-inner .bg-circle-shape{
+		background-color: #121212;
+		.shape{
+			--circle-shadow: rgba(255, 255, 255, 0.3);
+		}
+	}
+	.dz-banner{
+		background-color: rgba($color: #333, $alpha: 0.5);
+	}
+	.bg-body{
+		background-color: #000!important;
+	}
+	.btn-white{
+		&.border{
+			--bs-border-color: #DFCBBD;
+		}
+	}	
+	.custom-list .item-link .title,
+	.form-label{
+		color: var(--title);
+	}
+
+	//Form 
+	.form-select,
+	.form-select:focus,
+	.form-control,
+	.form-control:focus {
+	  	color: $body-color-dark;
+	}
+	.notification-list .list-content .date,
+	.nav-link::after,
+	.custom-list .item-link::after,
+	.dz-card .dz-price del{
+		color: rgba($color: $white, $alpha: 0.5);
+	}
+	.dz-chekout-timeline .timeline-content .num{
+		--bs-white: #000;
+	}
+	.dz-link,
+	.dz-stepper.style-2 .bootstrap-touchspin .input-group-btn .btn{
+		background-color: #041021;
+	}
+	.dz-card .dz-cart-footer li .dz-remove{
+		background-color: var(--bs-body-bg);
+	}
+	.dz-accordion .accordion-item{
+		--body-bg2: #333;
+	}
+	.range-slider.style-1{
+		.noUi-target{
+			--text-color: #000000;
+		}
+	} 
+	.dz-timeline .timeline-item:not(.active):after{
+		border-color: #333;
+	}
+	.dz-timeline .timeline-item:not(.active):before{
+		background-color: #333;
+	}
+	.footer-fixed.style-2,
+	.menubar-area{
+		border-color: var(--border-color);
+	}
+	// Swiper ===
+	.swiper-pagination .swiper-pagination-bullet{
+		background-color: rgba($color: $white, $alpha: 0.1);
+		&.swiper-pagination-bullet-active{
+			background-color: $white;
+		}
+	}
+	.form-control{
+		&.border-light{
+			border-color: var(--border-color)!important;
+		}
+	}
+}

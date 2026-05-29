@@ -1,0 +1,5 @@
+/* Global overrides for Next.js app */
+* {
+  box-sizing: border-box;
+}
+

@@ -1,0 +1,47 @@
+h1{
+    .badge{
+        font-size: calc(1.34375rem + 1.125vw);
+    }
+}
+h2{
+    .badge{
+        font-size: calc(1.3rem + 0.6vw);
+    }   
+}
+h3{
+    .badge{
+        font-size: calc(1.27813rem + 0.3375vw);
+    }
+}
+h4{
+    .badge{
+        font-size: calc(1.25625rem + 0.075vw);
+    }
+}
+h5{
+    .badge{
+        font-size: 1.09375rem;
+    }
+}
+h6{
+    .badge{
+        font-size: 0.875rem;
+    }
+}
+
+.category-badge{
+    img{
+        width: 16px;
+        margin-top: -25px;
+        margin-right: -5px;
+        filter: drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.30));
+    }
+    .badge{
+        --bs-badge-padding-x: 5px;
+        --bs-badge-padding-y: 4px;
+        --bs-badge-font-size: 12px;
+        --bs-badge-font-weight: 600;
+        --bs-badge-border-radius: 3px;
+        box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.30);
+    }
+}

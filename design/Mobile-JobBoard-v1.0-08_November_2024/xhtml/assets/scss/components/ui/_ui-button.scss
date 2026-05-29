@@ -1,0 +1,437 @@
+//Custom-btn
+.custom-btn{
+    --bs-btn-padding-y: 14px;
+    --bs-btn-padding-x: 15px;
+    --bs-btn-font-size: 16px;
+    --bs-btn-line-height: 15px;
+}
+
+.btn-shadow{
+    box-shadow: 0px 4px 4px rgba(25, 103, 210, 0.1)
+}
+
+.btn-white{
+    background-color: $white;
+    color: $dark;
+    &:active,
+    &:hover,
+    &:focus{
+        background-color: $dark;
+        color: $white;
+        border-color: transparent;
+    }
+}
+.btn-flex{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .dz-icon{
+		position: absolute;
+		left: 2px;
+	}
+}
+.btn-lg{
+    line-height: 23px;
+}
+.icon-btn{
+    position: relative;
+    padding-left: 60px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .icon-start{
+        position: absolute;
+        left: 0;
+    }
+}
+.btn{
+    &.style-2{
+        font-size: 15px;
+    }
+    &.bg-primary-subtle{
+        &:hover{
+            background-color: var(--bs-primary) !important;
+            color: var(--bs-white) !important;
+            .text-bg-primary{
+                background-color: var(--bs-white) !important;
+                color: var(--bs-primary) !important;
+            }
+        }
+    }
+    &.bg-secondary-subtle{
+        &:hover{
+            background-color: var(--bs-secondary) !important;
+            color: var(--bs-white) !important;
+            .text-bg-secondary{
+                background-color: var(--bs-white) !important;
+                color: var(--bs-secondary) !important;
+            }
+        }
+    }
+    &.bg-success-subtle{
+        &:hover{
+            background-color: var(--bs-success) !important;
+            color: var(--bs-white) !important;
+            .text-bg-success{
+                background-color: var(--bs-white) !important;
+                color: var(--bs-success) !important;
+            }
+        }
+    }
+    &.bg-info-subtle{
+        &:hover{
+            background-color: var(--bs-info) !important;
+            color: var(--bs-white) !important;
+            .text-bg-info{
+                background-color: var(--bs-white) !important;
+                color: var(--bs-info) !important;
+            }
+        }
+    }
+    &.bg-warning-subtle{
+        &:hover{
+            background-color: var(--bs-warning) !important;
+            color: var(--bs-white) !important;
+            .text-bg-warning{
+                background-color: var(--bs-white) !important;
+                color: var(--bs-warning) !important;
+            }
+        }
+    }
+    &.bg-danger-subtle{
+        &:hover{
+            background-color: var(--bs-danger) !important;
+            color: var(--bs-white) !important;
+            .text-bg-danger{
+                background-color: var(--bs-white) !important;
+                color: var(--bs-danger) !important;
+            }
+        }
+    }
+    &.bg-light-subtle{
+        &:hover{
+            background-color: var(--bs-light) !important;
+            color: var(--bs-dark) !important;
+            .text-bg-light{
+                background-color: var(--bs-white) !important;
+                color: var(--bs-light) !important;
+            }
+        }
+    }
+    &.bg-dark-subtle{
+        &:hover{
+            background-color: var(--bs-dark) !important;
+            color: var(--bs-white) !important;
+            .text-bg-light{
+                background-color: var(--bs-white) !important;
+                color: var(--bs-dark) !important;
+            }
+        }
+    }
+    &.btn-xs{
+        padding: 4px 8px;
+        font-size: 10px;
+        line-height: normal;
+        border-radius: 4px;
+    }
+}
+
+// Social Button ==
+.btn-facebook {
+    background  : $facebook;
+    border-color: $facebook;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($facebook, 10%);
+        color       : $white;
+        border-color: darken($facebook, 10%);
+    }
+}
+
+.btn-twitter {
+    background  : $twitter;
+    border-color: $twitter;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($twitter, 10%);
+        color       : $white;
+        border-color: darken($twitter, 10%);
+    }
+}
+
+.btn-youtube {
+    background  : $youtube;
+    border-color: $youtube;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($youtube, 10%);
+        color       : $white;
+        border-color: darken($youtube, 10%);
+    }
+}
+
+.btn-instagram {
+    background  : $instagram;
+    border-color: $instagram;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($instagram, 10%);
+        color       : $white;
+        border-color: darken($instagram, 10%);
+    }
+}
+
+.btn-pinterest {
+    background  : $pinterest;
+    border-color: $pinterest;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($pinterest, 10%);
+        color       : $white;
+        border-color: darken($pinterest, 10%);
+    }
+}
+
+.btn-linkedin {
+    background  : $linkedin;
+    border-color: $linkedin;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($linkedin, 10%);
+        color       : $white;
+        border-color: darken($linkedin, 10%);
+    }
+}
+
+.btn-google-plus {
+    background  : $google-plus;
+    border-color: $google-plus;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($google-plus, 10%);
+        color       : $white;
+        border-color: darken($google-plus, 10%);
+    }
+}
+
+.btn-google {
+    background  : $google;
+    border-color: $google;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($google, 10%);
+        color       : $white;
+        border-color: darken($google, 10%);
+    }
+}
+
+.btn-snapchat {
+    background  : $snapchat;
+    border-color: $snapchat;
+    color       : $black;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($snapchat, 10%);
+        color       : $black;
+        border-color: darken($snapchat, 10%);
+    }
+}
+
+.btn-whatsapp {
+    background  : $whatsapp;
+    border-color: $whatsapp;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($whatsapp, 10%);
+        color       : $white;
+        border-color: darken($whatsapp, 10%);
+    }
+}
+
+.btn-tumblr {
+    background  : $tumblr;
+    border-color: $tumblr;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($tumblr, 10%);
+        color       : $white;
+        border-color: darken($tumblr, 10%);
+    }
+}
+
+.btn-reddit {
+    background  : $reddit;
+    border-color: $reddit;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($reddit, 10%);
+        color       : $white;
+        border-color: darken($reddit, 10%);
+    }
+}
+
+.btn-spotify {
+    background  : $spotify;
+    border-color: $spotify;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($spotify, 10%);
+        color       : $white;
+        border-color: darken($spotify, 10%);
+    }
+}
+
+.btn-yahoo {
+    background  : $yahoo;
+    border-color: $yahoo;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($yahoo, 10%);
+        color       : $white;
+        border-color: darken($yahoo, 10%);
+    }
+}
+
+.btn-dribbble {
+    background  : $dribbble;
+    border-color: $dribbble;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($dribbble, 10%);
+        color       : $white;
+        border-color: darken($dribbble, 10%);
+    }
+}
+
+.btn-skype {
+    background  : $skype;
+    border-color: $skype;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($skype, 10%);
+        color       : $white;
+        border-color: darken($skype, 10%);
+    }
+}
+
+.btn-quora {
+    background  : $quora;
+    border-color: $quora;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($quora, 10%);
+        color       : $white;
+        border-color: darken($quora, 10%);
+    }
+}
+
+.btn-vimeo {
+    background  : $vimeo;
+    border-color: $vimeo;
+    color       : $white;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background  : darken($vimeo, 10%);
+        color       : $white;
+        border-color: darken($vimeo, 10%);
+    }
+}
+
+
+.social-btn{
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+}
+.social-icon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    &.lg{
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        font-size: 22px;
+    }
+    &.sm{
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+    }
+    &.xs{
+        width: 25px;
+        height: 25px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+}
+.btn-icon{
+    display: inline-flex;
+    padding: 6px 10px;
+    font-size: 15px;
+    transform: scale(1.1);
+    &.icon-start{
+        border-left: 1px solid rgba(255, 255, 255, 0.40);
+        margin-left: 10px;
+    }
+    &.icon-end{
+        border-right: 1px solid rgba(255, 255, 255, 0.40);
+        margin-right: 10px;
+    }
+}

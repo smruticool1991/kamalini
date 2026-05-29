@@ -1,0 +1,174 @@
+.card-area{
+    background-color: var(--bs-body-bg);
+    margin: 85px 0 0;
+    padding: 15px 15px;
+    border-radius: 20px 20px 0 0;
+}
+// Payment Style Start ==
+.payment-card-swiper{
+    margin: 0 -15px;
+    padding: 0 15px;
+    .swiper-slide{
+        padding-bottom: 30px;
+    }
+}
+.payment-card{
+	width: 100%;
+    background-color: var(--bs-primary);
+	overflow: hidden;
+	padding: 10px 15px;
+    height: 150px;
+    border-radius: 8px;
+    &.style-2{
+        margin-bottom: 20px;
+        height: auto;
+        padding: 15px;
+        .card-info .card-title{
+            font-size: 16px;
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+        .card-info{
+            margin-bottom: 40px;
+        }
+        .card-number{
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+    }
+    &.bg-2{
+        background: $secondary;
+    }
+    .card-content{
+        display: flex;
+        flex-direction: column;
+    }
+    .card-info{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        .card-title{
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1.2px;
+            margin-bottom: 0;
+            color: #fff;
+            display: flex;
+            align-items: center;
+        }
+        .activity{
+           display: inline-block;
+           margin-right: 8px;
+        }
+    }
+    .card-number{
+        color: #FFF;
+        font-weight: 500;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+    .bottom-info{
+        display: flex;
+        align-items: end;
+        .holder-name{
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 0;
+            font-size: 14px;
+            flex: 1;
+            font-weight: 500;
+        }
+        .card-about{
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            span{
+                display: block;
+            }
+            small{
+                display: block;
+                opacity: 0.5;
+            }
+        }
+    }
+    .add-content{
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        i{
+            color: var(--bs-primary);
+            font-size: 30px;
+        }
+        .title{
+            font-size: 13px;
+            color: var(--bs-primary);
+            font-weight: 500;
+            margin-bottom: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+    }
+}
+
+
+// Review Area ===
+.rating-area{
+    padding: 30px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    .rating{   
+        text-align: center;
+    }
+    .title{
+        margin-bottom: 6px;
+        font-size: 20px;
+        font-weight: 700;
+    }
+    .dz-text{
+        margin-bottom: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--bs-body-color);
+        text-transform: capitalize;
+    }
+    .dz-star-rating{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        li{ 
+            i{
+                font-size: 33px;
+                color: #ddd;
+            }
+            svg{
+                width: 32px;
+                height: 32px;
+            } 
+            &.active{
+                i{
+                    -webkit-text-stroke-width: 0;
+                    filter: unset;    
+                    color: #FFB444;
+                }
+                svg{
+                    path{
+                        stroke: #FFB444;
+                        fill: #FFB444;  
+                    }
+                }
+            }
+        }
+    }
+} 

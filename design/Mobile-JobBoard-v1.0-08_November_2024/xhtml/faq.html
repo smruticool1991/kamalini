@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- Title -->
+	<title>JobBoard - Job Search Mobile App Template ( Bootstrap + PWA )</title>
+
+	<!-- Meta -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="author" content="Indiancoder">
+	<meta name="robots" content="index, follow">
+
+	<meta name="keywords" content="JobBoard, job search app, mobile app template, Bootstrap template, PWA job app, recruitment app, job listings, employment platform, job seekers, responsive design">   
+
+	<meta name="description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+
+	<meta property="og:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+
+	<meta name="format-detection" content="telephone=no">
+
+	<!-- Twitter Specific -->
+	<meta name="twitter:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+
+	<meta name="twitter:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta name="twitter:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+	<meta name="twitter:card" content="summary_large_image">
+
+	<!-- Mobile Specific -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, minimal-ui, viewport-fit=cover">
+
+	<!-- Favicons Icon -->
+	<link rel="shortcut icon" type="image/x-icon" href="assets/images/app-logo/favicon.png">
+    
+	<!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+	
+    <!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+
+</head>   
+<body>
+<div class="page-wrapper">
+    
+	<!-- Preloader -->
+	<div id="preloader">
+		<div class="loader">
+			<div class="logo">
+				<img src="assets/images/app-logo/preloader/circle.svg" class="circle-vector" alt="">	
+				<img src="assets/images/app-logo/preloader/user.svg" class="user-vector wow fadeInUpBig" alt="">	
+			</div>
+		</div>
+	</div>
+    <!-- Preloader end-->
+	
+	<!-- Header -->
+	<header class="header header-fixed border-bottom">
+		<div class="header-content">
+            <div class="left-content">
+				<div class="back-btn dz-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.833 10H4.16634" stroke="var(--bs-body-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M10 4.16666L4.16667 9.99999L10 15.8333" stroke="var(--bs-body-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </div>
+			</div>
+			<div class="mid-content"><h6 class="title">Help Center</h6></div>
+			<div class="right-content"></div>
+		</div>
+	</header>
+	<!-- Header -->
+	
+	<!-- Main Content Start -->
+	<main class="page-content space-top">
+		<div class="container pt-0">
+            <div class="dz-tab">
+                <div class="nav nav-tabs gap-2 justify-content-center" id="nav-tab" role="tablist">
+                    <button class="nav-link active" id="nav-feedback-tab" data-bs-toggle="tab" data-bs-target="#nav-feedback" type="button" role="tab" aria-controls="nav-feedback" aria-selected="true">Feedback</button>
+                    <button class="nav-link" id="nav-faq-tab" data-bs-toggle="tab" data-bs-target="#nav-faq" type="button" role="tab" aria-controls="nav-faq" aria-selected="false">FAQs</button>
+                </div>
+                <div class="tab-content" id="nav-tabContent">
+                    <!-- FEEDBACK -->
+                    <div class="tab-pane fade active show" id="nav-feedback" role="tabpanel" aria-labelledby="nav-feedback-tab" tabindex="0">
+                        <div class="my-3 text-center px-4">
+                            <h4 class="title fw-bold">Send Feedback</h4>
+                            <p class="mb-0 fw-medium">Tell us what you love about the app. or what we could be doing better.</p>
+                        </div>
+                        <textarea class="form-control style-2" rows="6" id="textFeedback" placeholder="Enter Feedback"></textarea>
+                    </div>
+                    <!-- FAQ -->
+                    <div class="tab-pane fade" id="nav-faq" role="tabpanel" aria-labelledby="nav-faq-tab" tabindex="0">
+                        <div class="my-3 text-center px-4">
+                            <h4 class="title fw-bold">Frequently Asked Questions</h4>
+                            <p class="mb-0 fw-medium">Here’s a list of frequently asked questions (FAQs) for applying for a job:</p>
+                        </div>
+                        <!-- Search Input  -->
+                        <div class="input-group style-3 mb-3">
+                            <input type="search" class="form-control style-2 rounded-1" placeholder="Search keywords" aria-label="Search">
+                            <span class="input-group-text bg-transparent rounded-1">
+                                <i class="flaticon flaticon-search-1 fs-6"></i>
+                            </span>
+                        </div>
+                        <!-- Search Input  -->
+                        
+                        <!-- FAQ ACCO-->
+                        <div class="accordion dz-accordion style-3" id="accordionExample">
+                            <div class="accordion-item">
+                                <h6 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">How do I apply for a job?
+                                    </button>
+                                </h6>
+                                <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <p class="m-b0">To apply for a job, tailor your resume and cover letter to match the job requirements and follow the application instructions carefully. Reach out politely afterward to express your interest and check the status.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h6 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">Do I need to create an account to apply?</button>
+                                </h6>
+                                <div id="collapseTwo" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <p class="m-b0">Yes, most job portals require you to create an account in order to submit applications. This helps track your application status and allows you to apply for multiple roles.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h6 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">What documents do I need to apply?</button>
+                                </h6>
+                                <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <p class="m-b0">To apply for a job, submit an updated resume, a tailored cover letter, and, if relevant, a portfolio of your work. Include any necessary certificates and a list of references to support your application.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h6 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">Can I apply for multiple jobs at the same time?
+                                    </button>
+                                </h6>
+                                <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <p class="m-b0">Yes, you can apply for multiple jobs at the same time, and it's often a good strategy to increase your chances of finding a position. Just make sure to tailor each application to the specific job and company, highlighting the most relevant skills and experiences for each role.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h6 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">Can I update my application after submitting it?
+                                    </button>
+                                </h6>
+                                <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <p class="m-b0">Yes, you can sometimes update your application after submitting it, depending on the company's system. If the portal doesn’t allow edits, consider emailing the hiring manager with your updated documents. Politely explain the reason for the update to show your professionalism.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h6 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">How will I know if my application was successful?
+                                    </button>
+                                </h6>
+                                <div id="collapseSix" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <p class="m-b0">If your application was successful, the company will typically reach out via email or phone to schedule an interview or discuss next steps. You may also receive an automated confirmation immediately after applying, but follow-up contact usually indicates you're being considered. If you don’t hear back within a few weeks, you can send a polite follow-up to check the status.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h6 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">What should I do if I don't hear back from the employer?
+                                    </button>
+                                </h6>
+                                <div id="collapseSeven" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <p class="m-b0">If you don’t hear back from an employer after a couple of weeks, send a polite follow-up email expressing your continued interest and inquiring about the status of your application. Keep it brief and professional, and thank them for considering your application. If there’s still no response, focus on other opportunities to keep your momentum going.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h6 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">Can I apply for a job if I don't meet all the qualifications?
+                                    </button>
+                                </h6>
+                                <div id="collapseEight" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <p class="m-b0">Yes, you can apply for a job even if you don’t meet all the qualifications. Many employers consider candidates who may lack certain skills but demonstrate potential, relevant experience, or a strong willingness to learn. Tailor your application to highlight your strengths and how they can contribute to the role, and be prepared to discuss how you plan to bridge any gaps in your qualifications during the interview.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>  
+                </div>
+            </div>
+		</div>
+	</main>
+	<!-- Main Content End -->
+
+</div>  
+<!-- Scripts -->
+<script src="assets/js/jquery.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/settings.js"></script>
+<script src="assets/js/custom.js"></script>
+</body>
+</html>

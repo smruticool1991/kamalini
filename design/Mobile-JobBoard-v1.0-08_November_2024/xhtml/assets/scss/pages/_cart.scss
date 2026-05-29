@@ -1,0 +1,163 @@
+// Cart ==
+.dz-total-area{
+    padding: 15px;
+    margin: -15px -15px 0;
+    background-color: var(--bs-body-bg);
+    &.fixed{
+        margin: 0;
+        position: fixed;
+        top: 60px;
+        left: 50%;
+        width: 100%;
+        max-width: 600px;
+        z-index: 8;
+        transform: translateX(-50%);
+    }
+    .total-prize{
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 5px;
+        > li{
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--bs-secondary);
+        }
+        .prize{
+            color: var(--bs-primary);
+        }
+    }
+    .dz-text{
+        display: flex;
+        align-items: center;    
+        font-size: 14px;
+        font-weight: 600;
+        color: $green;
+        gap: 6px;
+        text-transform: capitalize;
+        i{
+            width: 22px;
+            height: 22px;
+            background-color: $green;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
+// Checkout Area ==
+.view-cart{
+    ul {
+        padding: 0;
+        margin : 0;
+    }
+    ul{
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        li{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--bs-primary);
+            span{
+                font-size: 16px;
+                display: block;
+            }
+            .name{
+                color: rgba(var(--bs-body-color-rgb), 0.60);
+                font-weight: 500;
+                text-transform: capitalize;
+            }
+            .about{
+                font-weight: 700;
+                font-size: 14px;
+            }
+            .status{
+                color: #159E42;
+            }
+			.price{
+				color: var(--title);
+                margin-bottom: 0;
+                font-family: var(--font-family-base);
+                font-weight: 600;
+			}
+        }
+    }
+    .dz-total{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: var(--text-color);
+        .price{
+            color: var(--bs-primary);
+            font-size: 18px;
+            font-weight: 600;
+        }
+    }
+}
+
+
+// Empty Cart box ==
+.dz-cart-about {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    width: 70%;
+    .title{
+        font-style: italic;
+        font-size: 24px;
+        font-weight: 400;
+        margin-bottom: 0;
+    }
+    p{
+        margin: 0;
+        text-align: center;
+        color: var(--bs-body-color);
+        font-weight: 500;
+        font-size: 15px;
+        text-transform: capitalize;
+    }
+    > a{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        background-color: var(--body-bg2);
+        color: var(--title);
+        border-color: var(--body-bg2);
+        font-size: 22px;
+    }
+}
+
+
+
+// Delivery Address ===
+.dz-add-box{
+    display: flex;
+    align-items: center;
+    padding: 14px 15px;
+    font-weight: 600;
+    font-size: 14px;
+    background: var(--bs-primary);
+    border-radius: var(--bs-border-radius-sm);
+    text-transform: capitalize;
+    span{
+        flex: 1;
+        color: #fff;
+    }
+    i{
+        font-size: 20px;
+        color: #fff;
+    }
+}

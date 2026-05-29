@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Foreground layer for the adaptive launcher icon.
+    Canvas: 108dp × 108dp (full adaptive icon size).
+    Safe zone: inner ~66dp circle centred at (54,54) — icon content stays inside ~(21..87).
+    Design: white briefcase — appropriate for a Job Board app.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Briefcase body (rounded rectangle) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M74,50 H34 C31.8,50 30,51.8 30,54 V78 C30,80.2 31.8,82 34,82 H74 C76.2,82 78,80.2 78,78 V54 C78,51.8 76.2,50 74,50 Z" />
+
+    <!-- Briefcase handle (top) -->
+    <path
+        android:fillColor="@null"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M46,50 L46,44 C46,41.8 47.8,40 50,40 L58,40 C60.2,40 62,41.8 62,44 L62,50" />
+
+    <!-- Horizontal clasp band -->
+    <path
+        android:fillColor="#BBDEFB"
+        android:pathData="M30,63 L78,63 L78,68 L30,68 Z" />
+
+    <!-- Small circular latch -->
+    <path
+        android:fillColor="#90CAF9"
+        android:pathData="M54,62 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+
+</vector>

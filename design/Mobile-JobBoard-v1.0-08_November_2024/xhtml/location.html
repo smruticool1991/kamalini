@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<!-- Title -->
+	<title>JobBoard - Job Search Mobile App Template ( Bootstrap + PWA )</title>
+
+	<!-- Meta -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="author" content="Indiancoder">
+	<meta name="robots" content="index, follow">
+
+	<meta name="keywords" content="JobBoard, job search app, mobile app template, Bootstrap template, PWA job app, recruitment app, job listings, employment platform, job seekers, responsive design">   
+
+	<meta name="description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+	<meta property="og:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+	<meta name="format-detection" content="telephone=no">
+
+	<!-- Twitter Specific -->
+	<meta name="twitter:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+	<meta name="twitter:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+	<meta name="twitter:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+	<meta name="twitter:card" content="summary_large_image">
+
+	<!-- Mobile Specific -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, minimal-ui, viewport-fit=cover">
+	
+	<!-- Favicons Icon -->
+	<link rel="shortcut icon" type="image/x-icon" href="assets/images/app-logo/favicon.png">
+	
+	<!-- PWA Version -->
+	<link rel="manifest" href="manifest.json">
+    
+    <!-- Global CSS -->
+	<link href="assets/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="assets/vendor/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.css">
+	<link rel="stylesheet" href="assets/vendor/nouislider/nouislider.min.css">
+	<link rel="stylesheet" href="assets/vendor/swiper/swiper-bundle.min.css">
+    
+	<!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+	
+    <!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+
+</head>   
+<body>
+<div class="page-wrapper">
+    
+	<!-- Preloader -->
+	<div id="preloader">
+		<div class="loader">
+			<div class="logo">
+				<img src="assets/images/app-logo/preloader/circle.svg" class="circle-vector" alt="">	
+				<img src="assets/images/app-logo/preloader/user.svg" class="user-vector wow fadeInUpBig" alt="">	
+			</div>
+		</div>
+	</div>
+    <!-- Preloader end-->
+	
+    <!-- Header -->
+	<header class="header style-2 header-fixed">
+		<div class="header-content">
+			<div class="left-content location">
+                <div class="back-btn dz-icon icon-light style-2 rounded-circle">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.833 10H4.16634" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 4.16666L4.16667 9.99999L10 15.8333" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+				<h4 class="title">Your Location</h4>
+			</div>
+			<div class="mid-content"></div>
+			<div class="right-content"></div>
+		</div>
+	</header>
+	<!-- Header -->
+
+	<!-- Main Content Start -->
+	<main class="page-content space-top">
+		<div class="container pt-1">
+			<!-- Search Area -->
+			<form class="search-box">
+				<div class="input-group style-2">
+					<input type="search" class="form-control style-2" placeholder="Search Area" aria-label="Search">
+					<span class="input-group-text bg-transparent">
+						<i class="flaticon flaticon-search-1 fs-7"></i>
+					</span>
+				</div>
+			</form>
+			<!-- Search Area -->
+			
+			<!-- Current Location -->
+			<div class="add-location">
+				<a href="current-location.html" class="d-flex align-items-center gap-2">
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M17.5763 9.99998C17.5763 14.184 14.1845 17.5757 10.0006 17.5757C5.81659 17.5757 2.4248 14.184 2.4248 9.99998C2.4248 5.81601 5.81659 2.42422 10.0006 2.42422C14.1845 2.42422 17.5763 5.81601 17.5763 9.99998ZM3.93996 9.99998C3.93996 13.3472 6.65338 16.0606 10.0006 16.0606C13.3477 16.0606 16.0612 13.3472 16.0612 9.99998C16.0612 6.6528 13.3477 3.93938 10.0006 3.93938C6.65338 3.93938 3.93996 6.6528 3.93996 9.99998Z" fill="#1967D2"/>
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M10.6061 0H9.39394V2.44815C9.59401 2.4323 9.79628 2.42423 10.0004 2.42423C10.2043 2.42423 10.4063 2.43228 10.6061 2.44809V0ZM17.5523 9.39394C17.5681 9.59387 17.5762 9.79599 17.5762 9.99999C17.5762 10.204 17.5681 10.4061 17.5523 10.6061H20V9.39394H17.5523ZM10.6061 17.5519C10.4063 17.5677 10.2043 17.5757 10.0004 17.5757C9.79628 17.5757 9.59401 17.5677 9.39394 17.5518V20H10.6061V17.5519ZM2.44856 10.6061C2.43273 10.4061 2.42467 10.204 2.42467 9.99999C2.42467 9.79599 2.43273 9.59387 2.44855 9.39394H0V10.6061H2.44856Z" fill="#1967D2"/>
+						<circle cx="10" cy="9.99998" r="4" fill="#1967D2"/>
+					</svg>
+					<h6 class="title text-primary mb-0">Use Current Location</h6>
+				</a>
+				<a href="current-location.html" class="btn btn-outline-light py-2 px-3 text-body rounded-1 lh-1">Select</a>
+			</div>
+			<!-- Current Location -->
+			
+			<!-- All Location -->
+			<div class="title-bar mb-0">
+				<h6 class="title">Search Result</h6>
+			</div>
+			<div class="dz-list style-2">
+				<ul class="list-group">
+					<li class="list-group-item location-list-item">
+						<a href="javascript:void(0);">
+							<span class="d-flex align-items-center gap-2 mb-1">
+								<i class="fa-solid fa-location-dot"></i>
+								<span class="title">Baker Street Library</span>
+							</span>
+							<p class="mb-0 fw-medium">221B Baker Street London, NW1 6XE United Kingdom</p>
+						</a>
+					</li>
+					<li class="list-group-item location-list-item active">
+						<a href="javascript:void(0);">
+							<span class="d-flex align-items-center gap-2 mb-1">
+								<i class="fa-solid fa-location-dot"></i>
+								<span class="title">The Greenfield Mall</span>
+							</span>
+							<p class="mb-0 fw-medium">45 High Street Greenfield, Manchester, M1 2AB United Kingdom</p>
+						</a>
+					</li>
+					<li class="list-group-item location-list-item">
+						<a href="javascript:void(0);">
+							<span class="d-flex align-items-center gap-2 mb-1">
+								<i class="fa-solid fa-location-dot"></i>
+								<span class="title">Riverbank Business Park</span>
+							</span>
+							<p class="mb-0 fw-medium">Unit 12, Riverside Drive Bristol, BS1 5RT United Kingdom</p>
+						</a>
+					</li>
+					<li class="list-group-item location-list-item">
+						<a href="javascript:void(0);">
+							<span class="d-flex align-items-center gap-2 mb-1">
+								<i class="fa-solid fa-location-dot"></i>
+								<span class="title">Elmwood Community Centre</span>
+							</span>
+							<p class="mb-0 fw-medium">78 Elmwood Avenue Birmingham, B12 3DF United Kingdom</p>
+						</a>
+					</li>
+				</ul>
+			</div>
+        </div>
+	</main>
+	<!-- Main Content End -->
+</div>  
+<!--**********************************
+    Scripts
+***********************************-->
+<script src="assets/js/jquery.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/settings.js"></script>
+<script src="assets/js/custom.js"></script>
+</body>
+</html>

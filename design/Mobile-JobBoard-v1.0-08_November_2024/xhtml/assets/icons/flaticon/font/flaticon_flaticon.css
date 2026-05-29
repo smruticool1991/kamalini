@@ -1,0 +1,110 @@
+/*!
+*    ______ _       _   _
+*    |  ____| |     | | (_)
+*    | |__  | | __ _| |_ _  ___ ___  _ __
+*    |  __| | |/ _` | __| |/ __/ _ \| '_ \
+*    | |    | | (_| | |_| | (_| (_) | | | |
+*    |_|    |_|\__,_|\__|_|\___\___/|_| |_|
+*
+*         https://www.flaticon.com
+*/
+
+@font-face {
+    font-family: "flaticon_flaticon";
+    src: url("./flaticon_flaticon.woff2?18ec3540cfd6fcabfd8013f0239bfeb0") format("woff2"),
+url("./flaticon_flaticon.woff?18ec3540cfd6fcabfd8013f0239bfeb0") format("woff"),
+url("./flaticon_flaticon.eot?18ec3540cfd6fcabfd8013f0239bfeb0#iefix") format("embedded-opentype"),
+url("./flaticon_flaticon.ttf?18ec3540cfd6fcabfd8013f0239bfeb0") format("truetype"),
+url("./flaticon_flaticon.svg?18ec3540cfd6fcabfd8013f0239bfeb0#flaticon_flaticon") format("svg")
+}
+
+i[class^="flaticon-"]:before, i[class*=" flaticon-"]:before {
+    font-family: flaticon_flaticon !important;
+    font-style: normal;
+    font-weight: normal !important;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.flaticon-search:before {
+    content: "\f101";
+}
+.flaticon-magnifying-glass:before {
+    content: "\f102";
+}
+.flaticon-check:before {
+    content: "\f103";
+}
+.flaticon-check-1:before {
+    content: "\f104";
+}
+.flaticon-search-1:before {
+    content: "\f105";
+}
+.flaticon-bell:before {
+    content: "\f106";
+}
+.flaticon-filter:before {
+    content: "\f107";
+}
+.flaticon-arrow:before {
+    content: "\f108";
+}
+.flaticon-delivery-truck:before {
+    content: "\f109";
+}
+.flaticon-delivery:before {
+    content: "\f10a";
+}
+.flaticon-save-money:before {
+    content: "\f10b";
+}
+.flaticon-scanner:before {
+    content: "\f10c";
+}
+.flaticon-check-2:before {
+    content: "\f10d";
+}
+.flaticon-technical-support-1:before {
+    content: "\f10e";
+}
+.flaticon-credit-card:before {
+    content: "\f10f";
+}
+.flaticon-time-left:before {
+    content: "\f110";
+}
+.flaticon-up-right-arrow:before {
+    content: "\f111";
+}
+.flaticon-translation:before {
+    content: "\f112";
+}
+.flaticon-hp:before {
+    content: "\f113";
+}
+.flaticon-adidas:before {
+    content: "\f114";
+}
+.flaticon-dell:before {
+    content: "\f115";
+}
+.flaticon-left-chevron:before {
+    content: "\f116";
+}
+.flaticon-share:before {
+    content: "\f117";
+}
+.flaticon-star-10:before {
+    content: "\f118";
+}
+.flaticon-truck-fast:before {
+    content: "\f119";
+}
+.flaticon-checkbox:before {
+    content: "\f11a";
+}
+

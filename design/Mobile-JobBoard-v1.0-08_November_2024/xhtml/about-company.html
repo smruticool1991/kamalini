@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<!-- Title -->
+	<title>JobBoard - Job Search Mobile App Template ( Bootstrap + PWA )</title>
+
+	<!-- Meta -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="author" content="Indiancoder">
+	<meta name="robots" content="index, follow">
+
+	<meta name="keywords" content="JobBoard, job search app, mobile app template, Bootstrap template, PWA job app, recruitment app, job listings, employment platform, job seekers, responsive design">   
+
+	<meta name="description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+
+	<meta property="og:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+
+	<meta name="format-detection" content="telephone=no">
+
+	<!-- Twitter Specific -->
+	<meta name="twitter:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+
+	<meta name="twitter:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta name="twitter:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+	<meta name="twitter:card" content="summary_large_image">
+
+	<!-- Mobile Specific -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, minimal-ui, viewport-fit=cover">
+
+	<!-- Favicons Icon -->
+	<link rel="shortcut icon" type="image/x-icon" href="assets/images/app-logo/favicon.png">
+    
+    <!-- Global CSS -->
+	<link rel="stylesheet" href="assets/vendor/swiper/swiper-bundle.min.css">
+	<link rel="stylesheet" href="assets/vendor/lightgallery/dist/css/lightgallery.css">
+    <link rel="stylesheet" href="assets/vendor/lightgallery/dist/css/lg-thumbnail.css">
+    <link rel="stylesheet" href="assets/vendor/lightgallery/dist/css/lg-zoom.css">
+
+	<!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+	
+    <!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+
+</head>   
+<body>
+<div class="page-wrapper">
+    
+	<!-- Preloader -->
+	<div id="preloader">
+		<div class="loader">
+			<div class="logo">
+				<img src="assets/images/app-logo/preloader/circle.svg" class="circle-vector" alt="">	
+				<img src="assets/images/app-logo/preloader/user.svg" class="user-vector wow fadeInUpBig" alt="">	
+			</div>
+		</div>
+	</div>
+    <!-- Preloader end-->
+	
+	<!-- Header -->
+    <header class="header header-fixed">
+		<div class="header-content">
+			<div class="left-content">
+				<div class="back-btn dz-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.833 10H4.16634" stroke="var(--bs-body-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M10 4.16666L4.16667 9.99999L10 15.8333" stroke="var(--bs-body-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </div>
+				<h6 class="title">Bakeron</h6>
+			</div>
+			<div class="mid-content"></div>
+			<div class="right-content"><a href="javascript:void(0);" class="text-primary"><i class="feather icon-globe pe-1 fs-4"></i>Visit</a></div>
+		</div>
+	</header>
+	<!-- Header -->
+	
+	<!-- Main Content Start -->
+	<main class="page-content space-top">
+		<div class="container">
+			<div class="dz-about-banner" style="background-image: url('assets/images/background/company-bg.png');">
+                <div class="d-flex align-items-center flex-column">
+                    <div class="icon-media mb-3"><img src="assets/images/company-logo/4.svg" alt=""></div>
+                    <h5 class="title">Bakeron Info Solution</h5>
+                    <p class="mb-0 fw-medium">IT Technology Solutions</p>
+                </div>
+            </div>
+            <div class="dz-tab">
+                <div class="nav nav-tabs flex-nowrap" id="nav-tab" role="tablist">
+                    <button class="nav-link active text-nowrap" id="nav-about-tab" data-bs-toggle="tab" data-bs-target="#nav-about" type="button" role="tab" aria-controls="nav-about" aria-selected="true">About</button>
+                    <button class="nav-link text-nowrap" id="nav-gallery-tab" data-bs-toggle="tab" data-bs-target="#nav-gallery" type="button" role="tab" aria-controls="nav-gallery" aria-selected="false">Gallery</button>
+                    <button class="nav-link text-nowrap" id="nav-openJobs-tab" data-bs-toggle="tab" data-bs-target="#nav-openJobs" type="button" role="tab" aria-controls="nav-openJobs" aria-selected="false">Open Jobs</button>
+                    <button class="nav-link text-nowrap" id="nav-review-tab" data-bs-toggle="tab" data-bs-target="#nav-review" type="button" role="tab" aria-controls="nav-review" aria-selected="false">Review</button>
+                </div>   
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade active show" id="nav-about" role="tabpanel" aria-labelledby="nav-about-tab" tabindex="0">
+                        <div class="description">
+							<h6 class="title">About Company</h6>
+							<p class="para">
+                                When crafting a section about a company, it usually includes key information about its mission, values, history, and overall culture. Here's a template you can use or adapt based on the specific company <a href="javascript:void(0);" class="text-primary border-primary border-bottom">Read More</a>
+                            </p>
+						</div>
+                        <div class="divider"></div>
+                        <div class="specification-list">
+							<ul>
+								<li>
+									<span class="name">
+                                        <i class="feather icon-globe"></i>
+                                        Website
+                                    </span>
+									<a href="javascript:void(0);"><span class="property">www.google.com</span></a>
+								</li>
+								<li>
+                                    <span class="name">
+                                        <i class="feather icon-map-pin"></i>
+                                        Headquarters
+                                    </span>
+									<span class="property">Noida, India</span>
+								</li>
+								<li>
+                                    <span class="name">
+                                        <i class="feather icon-calendar"></i>
+                                        Founded
+                                    </span>
+									<span class="property">14 July 2005</span>
+								</li>
+								<li>
+                                    <span class="name">
+                                        <i class="feather icon-users"></i>
+                                        Size
+                                    </span>
+									<span class="property">2500</span>
+								</li>
+								<li>
+                                    <span class="name">
+                                        <i class="feather icon-dollar-sign"></i>
+                                        Revenue
+                                    </span>
+									<span class="property">10,000 Millions</span>
+								</li>
+							</ul>
+						</div>
+                        <div class="divider"></div>
+                        <!-- About Media -->
+                        <div class="title-bar">
+                             <h6 class="title flex-1">Life Of Bakeron</h6>
+                        </div>
+                        <div class="dz-lightgallery row g-1" id="lightgallery">
+                            <a class="col-6" href="assets/images/company-image/1.png">
+                                <img class="rounded-1" src="assets/images/company-image/1.png" alt="image">
+                            </a>
+                            <a class="col-6" href="assets/images/company-image/2.png">
+                                <img class="rounded-1" src="assets/images/company-image/2.png" alt="image">
+                            </a>
+                            <a class="col-4" href="assets/images/company-image/3.png">
+                                <img class="rounded-1" src="assets/images/company-image/3.png" alt="image">
+                            </a>
+                            <a class="col-4" href="assets/images/company-image/4.png">
+                                <img class="rounded-1" src="assets/images/company-image/4.png" alt="image">
+                            </a>
+                            <a class="col-4" href="assets/images/company-image/5.png">
+                                <img class="rounded-1" src="assets/images/company-image/5.png" alt="image">
+                            </a>
+                        </div>
+                        <div class="divider"></div>
+                        <!-- About Media -->
+                        <div class="title-bar">
+                            <h6 class="title flex-1">Recently Added Jobs</h6>
+                        </div>   
+                        <div class="swiper company-swiper swiper-lr">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <div class="dz-card card style-2">
+                                        <div class="card-body">
+                                            <div class="card-info">
+                                                <div class="c-logo">
+                                                    <img src="assets/images/company-logo/4.svg" alt="">	
+                                                </div>
+                                                <div class="card-content">
+                                                    <h5 class="title"><a href="job-detail.html">User Experience Design Lead</a></h5>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a href="about-company.html"><span class="c-name"><span class="c-name">Bakeron</span></span></a>
+                                                        <div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.5 Review</span></div>
+                                                    </div>
+                                                </div>
+                                                <span class="item-bookmark icon-left">
+                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <rect width="20" height="20" fill="var(--bs-body-bg)"></rect>
+                                                        <path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                            <div class="btn-group gap-2">
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Remote</a>
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Executive</a>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Noida, India</span></div>
+                                            <div class="right-content"><span class="time">5 Day ago</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="swiper-slide">
+                                    <div class="dz-card card style-2">
+                                        <div class="card-body">
+                                            <div class="card-info">
+                                                <div class="c-logo">
+                                                    <img src="assets/images/company-logo/5.svg" alt="">	
+                                                </div>
+                                                <div class="card-content">
+                                                    <h5 class="title"><a href="job-detail.html">Quality Assurance (QA)</a></h5>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a href="about-company.html"><span class="c-name"><span class="c-name">Bakeron</span></span></a>
+                                                        <div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.5 Review</span></div>
+                                                    </div>
+                                                </div>
+                                                <span class="item-bookmark icon-left">
+                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <rect width="20" height="20" fill="var(--bs-body-bg)"></rect>
+                                                        <path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                            <div class="btn-group gap-2">
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Remote</a>
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Executive</a>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Noida, India</span></div>
+                                            <div class="right-content"><span class="time">5 Day ago</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="swiper-slide">
+                                    <div class="dz-card card style-2">
+                                        <div class="card-body">
+                                            <div class="card-info">
+                                                <div class="c-logo">
+                                                    <img src="assets/images/company-logo/6.svg" alt="">	
+                                                </div>
+                                                <div class="card-content">
+                                                    <h5 class="title"><a href="job-detail.html">Full-Stack Developer</a></h5>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a href="about-company.html"><span class="c-name"><span class="c-name">JobZilla</span></span></a>
+                                                        <div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">5.0 Review</span></div>
+                                                    </div>
+                                                </div>
+                                                <span class="item-bookmark icon-left">
+                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <rect width="20" height="20" fill="var(--bs-body-bg)"></rect>
+                                                        <path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                            <div class="btn-group gap-2">
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">WFH</a>
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Internship</a>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Paris, France</span></div>
+                                            <div class="right-content"><span class="time">4 Weeks ago</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="swiper-slide">
+                                    <div class="dz-card card style-2">
+                                        <div class="card-body">
+                                            <div class="card-info">
+                                                <div class="c-logo">
+                                                    <img src="assets/images/company-logo/7.svg" alt="">	
+                                                </div>
+                                                <div class="card-content">
+                                                    <h5 class="title"><a href="job-detail.html">Back-End Developer</a></h5>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a href="about-company.html"><span class="c-name"><span class="c-name">JobBoard</span></span></a>
+                                                        <div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.5 Review</span></div>
+                                                    </div>
+                                                </div>
+                                                <span class="item-bookmark icon-left">
+                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <rect width="20" height="20" fill="var(--bs-body-bg)"></rect>
+                                                        <path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                            <div class="btn-group gap-2">
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Hybrid</a>
+                                                <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Internship</a>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Tokyo, Japan</span></div>
+                                            <div class="right-content"><span class="time">4 Day ago</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Review Comments -->
+                        <div class="divider"></div>
+                        <div class="title-bar">
+                            <h6 class="title flex-1">Review</h6>
+                            <div class="d-flex align-items-center gap-3">
+                                <a href="add-review.html" class="text-primary fw-semibold text-nowrap">Add Review</a>
+                                <select class="form-select dz-select" aria-label="Default select example">
+                                    <option selected="">Recent</option>
+                                    <option value="1">Hourly</option>
+                                    <option value="2">Ago</option>
+                                    <option value="4">Recent</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                                <div class="review-comments">
+                                    <div class="top-bar">
+                                        <div class="review me-2">
+                                            <svg width="15" height="15" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                            </svg>
+                                            <span>5.0</span>
+                                        </div>
+                                        <h5 class="title mb-0 flex-1">Kim Shine</h5>
+                                        <span class="review-time">2 hr ago</span>
+                                    </div>
+                                    <p class="mb-0">Offers a close-knit, collaborative environment with great work-life balance. However, career growth is limited due to the company’s size and resource constraints."</p>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                                <div class="review-comments">
+                                    <div class="top-bar">
+                                        <div class="review me-2">
+                                            <svg width="15" height="15" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                            </svg>
+                                            <span>3.0</span>
+                                        </div>
+                                        <h5 class="title mb-0 flex-1">Avery Thompson</h5>
+                                        <span class="review-time">3 days ago</span>
+                                    </div>
+                                    <p class="mb-0">Offers a close-knit, collaborative environment with great work-life balance. However, career growth is limited due to the company’s size and resource constraints."</p>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                                <div class="review-comments">
+                                    <div class="top-bar">
+                                        <div class="review me-2">
+                                            <svg width="15" height="15" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                            </svg>
+                                            <span>4.0</span>
+                                        </div>
+                                        <h5 class="title mb-0 flex-1">Jordan Mitchell</h5>
+                                        <span class="review-time">2 month ago</span>
+                                    </div>
+                                    <p class="mb-0">Offers a close-knit, collaborative environment with great work-life balance. However, career growth is limited due to the company’s size and resource constraints."</p>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                                <div class="review-comments">
+                                    <div class="top-bar">
+                                        <div class="review me-2">
+                                            <svg width="15" height="15" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                            </svg>
+                                            <span>3.5</span>
+                                        </div>
+                                        <h5 class="title mb-0 flex-1">Taylor Reynolds</h5>
+                                        <span class="review-time">2 hr ago</span>
+                                    </div>
+                                    <p class="mb-0">Offers a close-knit, collaborative environment with great work-life balance. However, career growth is limited due to the company’s size and resource constraints."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="nav-gallery" role="tabpanel" aria-labelledby="nav-gallery-tab" tabindex="0">
+                        <div class="dz-lightgallery row g-1" id="lightgallery">
+                            <a class="col-6" href="assets/images/company-image/1.png">
+                                <img class="rounded-1" src="assets/images/company-image/1.png" alt="image">
+                            </a>
+                            <a class="col-6" href="assets/images/company-image/2.png">
+                                <img class="rounded-1" src="assets/images/company-image/2.png" alt="image">
+                            </a>
+                            <a class="col-4" href="assets/images/company-image/3.png">
+                                <img class="rounded-1" src="assets/images/company-image/3.png" alt="image">
+                            </a>
+                            <a class="col-4" href="assets/images/company-image/4.png">
+                                <img class="rounded-1" src="assets/images/company-image/4.png" alt="image">
+                            </a>
+                            <a class="col-4" href="assets/images/company-image/5.png">
+                                <img class="rounded-1" src="assets/images/company-image/5.png" alt="image">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="nav-openJobs" role="tabpanel" aria-labelledby="nav-openJobs-tab" tabindex="0">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="dz-card card style-2">
+                                    <div class="card-body">
+                                        <div class="card-info">
+                                            <div class="c-logo">
+                                                <img src="assets/images/company-logo/4.svg" alt="">	
+                                            </div>
+                                            <div class="card-content">
+                                                <h5 class="title"><a href="job-detail.html">User Experience Design Lead</a></h5>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <a href="about-company.html"><span class="c-name"><span class="c-name">Bakeron</span></span></a>
+                                                    <div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.5 Review</span></div>
+                                                </div>
+                                            </div>
+                                            <span class="item-bookmark icon-left">
+                                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect width="20" height="20" fill="var(--bs-body-bg)"></rect>
+                                                    <path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </span>
+                                        </div>
+                                        <div class="btn-group gap-2">
+                                            <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Remote</a>
+                                            <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+                                            <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Executive</a>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Noida, India</span></div>
+                                        <div class="right-content"><span class="time">5 Day ago</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="dz-card card style-2">
+                                    <div class="card-body">
+                                        <div class="card-info">
+                                            <div class="c-logo">
+                                                <img src="assets/images/company-logo/5.svg" alt="">	
+                                            </div>
+                                            <div class="card-content">
+                                                <h5 class="title"><a href="job-detail.html">Quality Assurance (QA) Engineer</a></h5>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <a href="about-company.html"><span class="c-name"><span class="c-name">Bakeron</span></span></a>
+                                                    <div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.5 Review</span></div>
+                                                </div>
+                                            </div>
+                                            <span class="item-bookmark icon-left">
+                                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect width="20" height="20" fill="var(--bs-body-bg)"></rect>
+                                                    <path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </span>
+                                        </div>
+                                        <div class="btn-group gap-2">
+                                            <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Remote</a>
+                                            <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+                                            <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Executive</a>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Noida, India</span></div>
+                                        <div class="right-content"><span class="time">5 Day ago</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="dz-card card style-2">
+                                    <div class="card-body">
+                                        <div class="card-info">
+                                            <div class="c-logo">
+                                                <img src="assets/images/company-logo/7.svg" alt="">	
+                                            </div>
+                                            <div class="card-content">
+                                                <h5 class="title"><a href="job-detail.html">Back-End Developer</a></h5>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <a href="about-company.html"><span class="c-name"><span class="c-name">JobBoard</span></span></a>
+                                                    <div class="c-review"><i class="feather icon-star-on"></i><span class="total-review">4.5 Review</span></div>
+                                                </div>
+                                            </div>
+                                            <span class="item-bookmark icon-left">
+                                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect width="20" height="20" fill="var(--bs-body-bg)"></rect>
+                                                    <path d="M15.8337 17.5L10.0003 13.3333L4.16699 17.5V4.16667C4.16699 3.72464 4.34259 3.30072 4.65515 2.98816C4.96771 2.67559 5.39163 2.5 5.83366 2.5H14.167C14.609 2.5 15.0329 2.67559 15.3455 2.98816C15.6581 3.30072 15.8337 3.72464 15.8337 4.16667V17.5Z" fill="#1967D2" fill-opacity="0.2" stroke="#1967D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </span>
+                                        </div>
+                                        <div class="btn-group gap-2">
+                                            <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Full-Time</a>
+                                            <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Hybrid</a>
+                                            <a href="javascript:void(0);" class="btn btn-sm px-2 btn-light text-secondary lh-1">Internship</a>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="left-content"><span class="location"><i class="feather icon-map-pin"></i>Tokyo, Japan</span></div>
+                                        <div class="right-content"><span class="time">4 Day ago</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="nav-review" role="tabpanel" aria-labelledby="nav-review-tab" tabindex="0">
+                        <div class="review-area">
+                            <!-- Review Box -->
+                            <div class="review-box">
+                                <div class="left-content">
+                                    <h2 class="title mb-0">4.5<span class="fs-4">/5</span></h2>
+                                    <span class="total-review">2.7k Review</span>    
+                                    <ul class="rating-star"> 
+                                        <li>
+                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                            </svg>
+                                        </li>
+                                        <li>
+                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                            </svg>
+                                        </li>
+                                        <li>
+                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                            </svg>
+                                        </li>
+                                        <li>
+                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                            </svg>
+                                        </li>
+                                        <li>
+                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#D9D9D9"></path>
+                                            </svg>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="right-content">
+                                    <ul class="reviews-type">
+                                        <li>
+                                            <span class="rating">5 Star</span>
+                                            <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-warning" style="width: 100%"></div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <span class="rating">4 Star</span>
+                                            <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-warning" style="width: 85%"></div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <span class="rating">3 Star</span>
+                                            <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-warning" style="width: 65%"></div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <span class="rating">2 Star</span>
+                                            <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-warning" style="width: 45%"></div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <span class="rating">1 Star</span>
+                                            <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-warning" style="width: 25%"></div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Review Comments -->
+                            <div class="title-bar">
+                                <h6 class="title flex-1">Review</h6>
+                                <div class="d-flex align-items-center gap-3">
+                                    <a href="add-review.html" class="text-primary fw-semibold text-nowrap">Add Review</a>
+                                    <select class="form-select dz-select" aria-label="Default select example">
+                                        <option selected="">Recent</option>
+                                        <option value="1">Hourly</option>
+                                        <option value="2">Ago</option>
+                                        <option value="4">Recent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                                    <div class="review-comments">
+                                        <div class="top-bar">
+                                            <div class="review me-2">
+                                                <svg width="15" height="15" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                                </svg>
+                                                <span>5.0</span>
+                                            </div>
+                                            <h5 class="title mb-0 flex-1">Kim Shine</h5>
+                                            <span class="review-time">2 hr ago</span>
+                                        </div>
+                                        <p class="mb-0">Offers a close-knit, collaborative environment with great work-life balance. However, career growth is limited due to the company’s size and resource constraints."</p>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                                    <div class="review-comments">
+                                        <div class="top-bar">
+                                            <div class="review me-2">
+                                                <svg width="15" height="15" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                                </svg>
+                                                <span>3.0</span>
+                                            </div>
+                                            <h5 class="title mb-0 flex-1">Avery Thompson</h5>
+                                            <span class="review-time">3 days ago</span>
+                                        </div>
+                                        <p class="mb-0">Offers a close-knit, collaborative environment with great work-life balance. However, career growth is limited due to the company’s size and resource constraints."</p>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                                    <div class="review-comments">
+                                        <div class="top-bar">
+                                            <div class="review me-2">
+                                                <svg width="15" height="15" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                                </svg>
+                                                <span>4.0</span>
+                                            </div>
+                                            <h5 class="title mb-0 flex-1">Jordan Mitchell</h5>
+                                            <span class="review-time">2 month ago</span>
+                                        </div>
+                                        <p class="mb-0">Offers a close-knit, collaborative environment with great work-life balance. However, career growth is limited due to the company’s size and resource constraints."</p>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                                    <div class="review-comments">
+                                        <div class="top-bar">
+                                            <div class="review me-2">
+                                                <svg width="15" height="15" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M8.65489 1.72548C9.20512 0.610612 10.7949 0.61061 11.3451 1.72548L13.1777 5.43873C13.3962 5.88145 13.8185 6.1883 14.3071 6.2593L18.4049 6.85474C19.6353 7.03352 20.1265 8.54548 19.2363 9.41328L16.271 12.3037C15.9175 12.6483 15.7562 13.1448 15.8396 13.6313L16.5396 17.7126C16.7498 18.938 15.4637 19.8724 14.3632 19.2939L10.698 17.367C10.261 17.1372 9.73897 17.1372 9.30199 17.367L5.63679 19.2939C4.53635 19.8724 3.2502 18.938 3.46036 17.7126L4.16035 13.6313C4.24381 13.1448 4.08249 12.6483 3.72896 12.3037L0.763748 9.41329C-0.126528 8.54548 0.364736 7.03352 1.59507 6.85474L5.69289 6.2593C6.18145 6.1883 6.6038 5.88145 6.82229 5.43873L8.65489 1.72548Z" fill="#FBAD48"></path>
+                                                </svg>
+                                                <span>3.5</span>
+                                            </div>
+                                            <h5 class="title mb-0 flex-1">Taylor Reynolds</h5>
+                                            <span class="review-time">2 hr ago</span>
+                                        </div>
+                                        <p class="mb-0">Offers a close-knit, collaborative environment with great work-life balance. However, career growth is limited due to the company’s size and resource constraints."</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>     
+            </div>    
+		</div>
+	</main>
+	<!-- Main Content End -->
+</div>  
+<!-- Scripts -->
+<script src="assets/js/jquery.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="assets/vendor/lightgallery/dist/lightgallery.umd.js"></script>
+<script src="assets/vendor/lightgallery/dist/plugins/thumbnail/lg-thumbnail.umd.js"></script>
+<script src="assets/vendor/lightgallery/dist/plugins/zoom/lg-zoom.umd.js"></script>
+<script src="assets/js/ic.carousel.js"></script>
+<script src="assets/js/settings.js"></script>
+<script src="assets/js/custom.js"></script>
+</body>
+</html>

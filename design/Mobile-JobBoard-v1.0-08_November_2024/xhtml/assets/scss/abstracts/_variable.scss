@@ -1,0 +1,446 @@
+// ------- Variables Style ------- //
+
+// SCSS Function ------
+// Shade a color: mix a color with black
+@function shade-color($color, $weight) {
+  @return mix(black, $color, $weight);
+}
+
+@function tint-color($color, $weight) {
+  @return mix(white, $color, $weight);
+}
+
+$prefix: bs-;
+
+// colors
+$white:    #fff !default;
+$gray-100: #FCF7F3 !default;
+$gray-200: #e9ecef !default;
+$gray-300: #dee2e6 !default;
+$gray-400: #ced4da !default;
+$gray-500: #898C90 !default;
+$gray-600: #000 !default;
+$gray-700: #495057 !default;
+$gray-800: #343a40 !default;
+$gray-900: #242E3C !default;
+$black:    #000 !default;
+
+// Color
+$blue       : #5d87ff !default;
+$indigo     : #6610f2 !default;
+$purple     : #6f42c1 !default;
+$pink       : #d63384 !default;
+$red        : #FF0000 !default;
+$orange     : #fd7e14 !default;
+$yellow     : #FFC107 !default;
+$green      : #159E42 !default;
+$teal       : #20c997 !default;
+$cyan       : #0DCAF0 !default;
+
+
+// Theme Colors
+$primary      : #1967D2 !default;
+$secondary    : #25374D!default;
+$success      : #3CC29C !default;
+$info         : #8E55EA !default;
+$warning      : #FBAD48 !default;
+$danger       : #F36B53 !default;
+$light        : #E8F0FB !default;
+$muted        : #898C90 !default;
+$dark         : #25374D !default;
+$dark-light   : #495057 !default;
+$light-gray   : #FCF7F3 !default;
+$light-indigo : #ebf3fe;
+
+// Theme Colorss
+$theme-colors: (
+  "primary"      :   $primary,
+  "secondary"    :   $secondary,
+  "success"      :   $success,
+  "info"         :   $info,
+  "warning"      :   $warning,
+  "danger"       :   $danger,
+  "light"        :   $light,
+  "dark"         :   $dark,
+  "muted"        :   $muted,
+  "indigo"       :   $indigo,
+  "light-indigo" :   $light-indigo,
+) !default;
+
+$facebook	: #305CCD;
+$twitter	: #1da1f2;
+$youtube	: #FF0000;
+$google-plus: #db4439;
+$linkedin	: #007bb6;
+$instagram	: #c32aa3;
+$pinterest	: #bd081c;
+$google		: #4285f4;
+$snapchat	: #fffc00;
+$whatsapp	: #25d366;
+$tumblr		: #35465d;
+$reddit		: #ff4500;
+$spotify	: #1ed760;
+$yahoo		: #430297;
+$dribbble	: #ea4c89;
+$skype		: #00aff0;
+$quora		: #aa2200;
+$riverBed	: #4C585C;
+$vimeo		: #1ab7ea;
+
+$theme-color: (
+	facebook	  : $facebook,
+	twitter		  : $twitter,
+	youtube		  : $youtube,
+	google-plus : $google-plus,
+	linkedin	  : $linkedin,
+	instagram	  : $instagram,
+	pinterest	  : $pinterest,
+	google		  : $google,
+	snapchat	  : $snapchat,
+	whatsapp	  : $whatsapp,
+	tumblr		  : $tumblr,
+	reddit		  : $reddit,
+	spotify		  : $spotify,
+	yahoo		    : $yahoo,
+	dribbble	  : $dribbble,
+	skype		    : $skype,
+	quora		    : $quora,
+  riverBed	  : $riverBed,
+	vimeo		    : $vimeo,
+);
+
+// scss-docs-start theme-text-variables
+$primary-text-emphasis:   shade-color($primary, 60%) !default;
+$secondary-text-emphasis: shade-color($secondary, 60%) !default;
+$success-text-emphasis:   shade-color($success, 60%) !default;
+$info-text-emphasis:      shade-color($info, 60%) !default;
+$warning-text-emphasis:   shade-color($warning, 60%) !default;
+$danger-text-emphasis:    shade-color($danger, 60%) !default;
+$light-text-emphasis:     $gray-700 !default;
+$dark-text-emphasis:      $gray-700 !default;
+// scss-docs-end theme-text-variables
+
+// scss-docs-start theme-bg-subtle-variables
+$primary-bg-subtle:       tint-color($primary, 70%) !default;
+$secondary-bg-subtle:     tint-color($secondary, 80%) !default;
+$success-bg-subtle:       tint-color($success, 80%) !default;
+$info-bg-subtle:          tint-color($info, 80%) !default;
+$warning-bg-subtle:       tint-color($warning, 80%) !default;
+$danger-bg-subtle:        tint-color($danger, 80%) !default;
+$light-bg-subtle:         mix($gray-100, $white) !default;
+$dark-bg-subtle:          $gray-400 !default;
+// scss-docs-end theme-bg-subtle-variables
+
+// scss-docs-start theme-border-subtle-variables
+$primary-border-subtle:   tint-color($primary, 70%) !default;
+$secondary-border-subtle: tint-color($secondary, 70%) !default;
+$success-border-subtle:   tint-color($success, 70%) !default;
+$info-border-subtle:      tint-color($info, 70%) !default;
+$warning-border-subtle:   tint-color($warning, 70%) !default;
+$danger-border-subtle:    tint-color($danger, 70%) !default;
+$light-border-subtle:     $gray-200 !default;
+$dark-border-subtle:      $gray-500 !default;
+// scss-docs-end theme-border-subtle-variables
+
+
+// Spacer
+$spacer: 1rem !default;
+$spacers: (
+  0: 0,
+  1: $spacer * 0.25,
+  2: $spacer * 0.5,
+  3: $spacer,
+  4: $spacer * 1.5,
+  5: $spacer * 3,
+  6: 12px,
+  7: 30px,
+  8: 10px,
+  9: 20px,
+) !default;
+
+$utilities: () !default;
+$utilities: (
+  "width": (
+    property: width,
+    class: w,
+    values: (
+      20: 20%,
+      25: 25%,
+      30: 30%,
+      40: 40%,
+      50: 50%,
+      60: 60%,
+      70: 70%,
+      75: 75%,
+      85: 85%,
+      100: 100%,
+      auto: auto,
+    ),
+  ),
+);
+
+// Common
+$min-contrast-ratio: 1.7 !default;
+
+// Margins
+$enable-negative-margins: true !default;
+$enable-shadows         : true !default;
+
+// Global
+$text-muted         : $muted !default;
+$grid-gutter-width  : 30px !default;
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1300px,
+  xxl: 1400px,
+) !default;
+
+// Font Weight
+$font-weight-lighter : 300 !default;
+$font-weight-light   : 300 !default;
+$font-weight-normal  : 400 !default;
+$font-weight-bold    : 700 !default;
+$font-weight-bolder  : 800 !default;
+$font-weight-base    : $font-weight-normal !default;
+
+// Font Family
+$font-family-sans-serif: "Plus Jakarta Sans", system-ui !default;
+
+// Font Sizes
+$h1-font-size: 2.5rem;    //(40px)
+$h2-font-size: 1.75rem;   //(28px)
+$h3-font-size: 1.5rem;    //(24px)
+$h4-font-size: 1.25rem;   //(20px)
+$h5-font-size: 1.125rem;  //(18px)
+$h6-font-size: 1rem;      //(16px)
+
+$font-sizes: (
+  1: 10px,
+  2: 12px,
+  3: 14px,
+  4: 16px,
+  5: 18px,
+  6: 20px,
+  7: 24px,
+  8: 30px,
+  9: 36px,
+  10: 40px,
+  11: 45px,
+  12: 48px,
+  13: 55px,
+) !default;
+$font-size-base: 0.875rem !default;
+
+// Line Heght
+$line-height-base : 1.5 !default;
+$line-height-sm   : 1.25 !default;
+$line-height-lg   : 2 !default;
+
+// Body
+$body-bg    : $white !default;
+$body-color : #5F729D !default;
+
+// Heading
+$headings-color       : $secondary !default;
+$headings-font-weight : 600 !default;
+
+// Border Color
+$border-color:  $light !default;
+$border-color2: #DDDDDD !default;
+$border-color3: #E6E6E6 !default;
+
+// Box Shadow
+$box-shadow       : 0px 5px 5px rgba(5, 21, 55, 0.02)!default;
+$box-shadow-sm    : 0px 0px 30px rgba(50, 21, 17, 0.1) !default;
+$box-shadow-lg    : 0px 4px 10px rgba(50, 21, 17, 0.03) !default;
+$box-shadow-inset : inset 0 0 5px -1px $primary !default;
+
+// Buttons
+$btn-padding-y         : 11px !default;
+$btn-padding-x         : 20px !default;
+$btn-font-size         : 15px !default;
+$btn-padding-y-lg      : 15px !default;
+$btn-padding-x-lg      : 30px !default;
+$btn-padding-y-sm      : 7px  !default;
+$btn-padding-x-sm      : 14px !default;
+$btn-font-size-lg      : 1rem !default;
+$btn-font-weight       : 600  !default;
+$btn-border-radius     : 8px  !default;
+$btn-box-shadow        : unset !default;
+$btn-font-size-sm      : 13px !default;
+$btn-border-radius-lg  : 12px !default;
+$btn-line-height       : 24px !default;
+
+// Card
+$card-title-color       : null !default; 
+$card-subtitle-color    : var(--bs-body-color) !default;
+$card-spacer-y          : 15px !default;
+$card-spacer-x          : 15px !default;
+$card-cap-padding-y     : 15px;
+$card-cap-padding-x     : 15px;
+// $card-cap-bg            : $white;
+$card-title-spacer-y    : 10px;
+$card-border-width      : 0px !default;
+$card-border-color      : var(--bs-border-color) !default;
+$card-border-radius     : 8px;
+// $card-cap-bg            : $white;
+$card-box-shadow        : rgba(145, 158, 171, 0.2) 0px 0px 2px 0px,rgba(145, 158, 171, 0.12) 0px 12px 24px -4px !default;
+
+// Border Radius
+$border-radius      : 10px !default;
+$border-radius-sm   : 6px !default;
+$border-radius-lg   : 15px !default;
+$border-radius-xl   : 20px !default;
+
+// Badges
+$badge-font-size    : 15px !default;
+$badge-font-weight  : $font-weight-normal !default;
+$badge-padding-y    : 5px !default;
+$badge-padding-x    : 10px !default;
+$badge-border-radius: $border-radius-sm;
+
+
+
+// Progressbar
+$progress-height    : 8px !default;
+// $progress-bg        : $white !default;
+
+// Table
+$table-cell-padding-y   : 16px !default;
+$table-cell-padding-x   : 16px !default;
+$table-th-font-weight   : 600 !default;
+$table-striped-bg       : $gray-200 !default;
+$table-hover-bg         : $gray-100 !default;
+$table-border-color     : $border-color !default;
+
+// Tabs
+$nav-link-font-size         : 15px !default;
+$nav-link-font-weight       : $font-weight-normal !default;
+
+// Tooltips
+$tooltip-font-size    : 12px !default;
+$tooltip-bg           : $dark;
+
+// Popover
+$popover-inner-border-radius : $border-radius;
+$popover-border-radius : $border-radius;
+
+// Input
+$form-label-margin-bottom       : 5px;
+$form-label-font-weight         : 500;
+$form-label-font-size           : 15px;
+$form-label-color               : $dark;
+$form-select-indicator-padding  : 38px;
+$form-select-border-radius      : 6px !default;
+$form-select-box-shadow         : unset !default;
+$input-border-radius            : 6px !default;
+$input-group-addon-bg           : #E9ECEF !default;
+$input-group-addon-border-color : $light !default;
+$input-focus-border-color       : $primary !default;
+$input-bg                       : var(--bs-light) !default;
+$input-color                    : $gray-600 !default;
+$input-placeholder-color        : $body-color;
+$input-border-color             : var(--bs-light);
+$input-font-weight              : 500;
+$input-border-width             : 2px;
+$input-padding-y                : 10px;
+$input-padding-x                : 15px;
+$input-padding-y-lg             : 12px;
+$input-padding-x-lg             : 16px;
+$input-padding-y-sm             : 10px; 
+$input-padding-x-sm             : 12px;  
+$input-font-size                : 15px;
+$form-check-input-width         : 1.313em;
+$form-check-min-height          : 1.313em;
+$input-height                   : 48px;
+$input-height-sm                : 35px;
+$input-height-lg                : 55px;
+$form-switch-width              : 2.5em;
+$input-focus-box-shadow         : unset;
+
+// Paganation
+$pagination-active-color        : $white !default;
+$pagination-active-bg           : $primary !default;
+$pagination-focus-bg            : $primary-bg-subtle;
+
+// Dropdown
+$dropdown-border-radius     : 7px !default;
+$dropdown-width             : 360px !default;
+$dropdown-border-width      : 0 !default;
+$dropdown-item-padding-y    : 5px !default;
+$dropdown-link-hover-bg     : $gray-100 !default;
+$dropdown-link-active-bg    : $gray-100;
+$dropdown-link-active-color : $dark;
+$dropdown-box-shadow        : rgba(145, 158, 171, 0.2) 0px 0px 2px 0px,rgba(145, 158, 171, 0.12) 0px 12px 24px -4px;
+$link-color                 : #000000 !default;
+
+$link-hover-color: $primary !default;
+
+// Offcanvas
+$offcanvas-border-width     : 0 !default;
+$offcanvas-horizontal-width : 330px !default;
+$offcanvas-padding-y        : 15px;
+$offcanvas-padding-x        : 15px;
+$offcanvas-title-line-height: 1;
+$offcanvas-vertical-height  : auto;
+
+// Modal
+$modal-content-border-width   : 0 !default;
+$modal-header-border-width    : 1px !default;
+$modal-footer-border-width    : 1px !default;
+$modal-content-border-radius  : $border-radius;
+$modal-backdrop-bg            : $dark;
+$modal-backdrop-opacity       : .9;
+
+// Breadcrumb
+$breadcrumb-font-size       : 14px;
+$breadcrumb-padding-y       : 0;
+$breadcrumb-padding-x       : 0;
+$breadcrumb-item-padding-x  : 0.5rem;
+$breadcrumb-margin-bottom   : 0;
+// $breadcrumb-divider-color   : var(--bs-secondary-color);
+// $breadcrumb-active-color    : var(--bs-secondary-color);
+$breadcrumb-divider         : quote("/");
+$breadcrumb-divider-flipped : $breadcrumb-divider;
+
+// Accordion
+$accordion-padding-y            : 15px;
+$accordion-padding-x            : 20px;
+$accordion-button-color         : $dark;
+$accordion-body-padding-y       : 15px;
+$accordion-border-color         : var(--border-color);
+$accordion-button-active-bg     : transparent !default;
+$accordion-button-focus-box-shadow: 0 0 0 4px rgba(253, 152, 0, 0.15);
+
+// Alerts
+$alert-padding-y:               10px;
+$alert-padding-x:               15px;
+$alert-margin-bottom:           15px;
+$alert-border-radius:           var(--#{$prefix}border-radius);
+$alert-link-font-weight:        $font-weight-bold;
+$alert-border-width:            var(--#{$prefix}border-width);
+$alert-dismissible-padding-r:   $alert-padding-x * 3; // 3x covers width of x plus default padding on either side
+
+// toast
+$toast-border-width : 0 !default;
+$toast-box-shadow   : $card-box-shadow;
+$toast-border-radius: $border-radius;
+
+// List 
+$list-group-item-padding-y: 0.5rem;
+$list-group-item-padding-x: 15px;
+$list-group-bg: transparent; 
+
+$hr-border-color : $border-color !default;
+$hr-opacity      : 1 !default;
+
+// for card background 
+html[data-bs-theme="light"]{
+  .card:not([class*="bg-"]){
+    color: $dark !important;
+    background-color: white;
+  }
+}

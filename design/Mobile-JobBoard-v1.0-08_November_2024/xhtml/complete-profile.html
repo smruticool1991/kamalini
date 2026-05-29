@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <!-- Title -->
+	<title>JobBoard - Job Search Mobile App Template ( Bootstrap + PWA )</title>
+
+	<!-- Meta -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="author" content="Indiancoder">
+	<meta name="robots" content="index, follow">
+
+	<meta name="keywords" content="JobBoard, job search app, mobile app template, Bootstrap template, PWA job app, recruitment app, job listings, employment platform, job seekers, responsive design">   
+
+	<meta name="description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+
+	<meta property="og:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta property="og:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+
+	<meta name="format-detection" content="telephone=no">
+
+	<!-- Twitter Specific -->
+	<meta name="twitter:title" content="JobBoard - Job Search Mobile App Template ( Bootstrap + PWA ) | Dexignzone">
+
+	<meta name="twitter:description" content="JobBoard is a Bootstrap + PWA mobile app template designed for job searching and recruitment, offering a user-friendly interface for job seekers and employers.">
+
+	<meta name="twitter:image" content="https://jobboard.dexignzone.com/mobile/social-image.png">
+	<meta name="twitter:card" content="summary_large_image">
+
+	<!-- Mobile Specific -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, minimal-ui, viewport-fit=cover">
+
+	<!-- Favicons Icon -->
+	<link rel="shortcut icon" type="image/x-icon" href="assets/images/app-logo/favicon.png">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    
+	<!-- Animte -->
+    <link rel="stylesheet" href="assets/vendor/wow/css/libs/animate.css">
+	
+    <!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+	
+</head>   
+<body>
+<div class="page-wrapper full-height">
+
+    <!-- Preloader -->
+	<div id="preloader">
+		<div class="loader">
+			<div class="logo">
+				<img src="assets/images/app-logo/preloader/circle.svg" class="circle-vector" alt="">	
+				<img src="assets/images/app-logo/preloader/user.svg" class="user-vector wow fadeInUpBig" alt="">	
+			</div>
+		</div>
+	</div>
+    <!-- Preloader end-->
+
+    <!-- Welcome Start -->
+	<main class="page-content">
+		<div class="container p-0">
+			<div class="dz-authentication-area style-2 dz-flex-box">
+                <div class="account-section">
+					<a href="javascript:void(0);" class="back-btn dz-icon style-2 icon-light">
+						<i class="feather icon-arrow-left"></i>
+					</a>
+					<div class="top-area">
+						<div class="section-head">
+							<h2 class="title">Complete Your Profile</h2>
+							<p>Rest assured, your personal data is visible only to you. No one else will have access to it.</p>
+						</div>
+                        <div class="avatar-upload">
+                            <div class="avatar-preview">
+                                <div id="imagePreview" style="background-image: url(assets/images/svg/user.svg);"></div>
+                                <div class="change-btn">
+                                    <input type="file" class="form-control d-none" id="imageUpload" accept=".png, .jpg, .jpeg">
+                                    <label for="imageUpload">
+                                        <i class="feather icon-edit-1"></i>
+                                        <span>Edit</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+					</div>
+                    <form>	
+                        <div class="form-group">
+                            <label for="Name" class="form-label required">Name</label>
+                            <input type="text" class="form-control" id="Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="Number" class="form-label required">Phone Number</label>
+                            <div class="number-select">
+                                <input type="number" class="form-control" id="Number" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
+                                <select class="form-select" aria-label="Default select example">
+                                    <option selected>+91</option>
+                                    <option value="1">+1</option>
+                                    <option value="2">+355</option>
+                                    <option value="4">+213</option>
+                                    <option value="5">+376</option>
+                                    <option value="6">+54</option>
+                                    <option value="7">+246</option>
+                                    <option value="8">+86</option>
+                                    <option value="9">+33</option>
+                                    <option value="10">+49</option>
+                                    <option value="11">+39</option>
+                                    <option value="12">+852</option>
+                                    <option value="14">+93</option>
+                                    <option value="15">+509</option>
+                                    <option value="16">+504</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="selectGender" class="form-label required">Gender</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="form-check custom-check style-2">
+                                    <input type="radio" class="btn-check" name="selectGender" id="selectGender1" autocomplete="off" checked="">
+                                    <label class="btn" for="selectGender1">
+                                        <span class="radio-check"></span>Male
+                                    </label>
+                                </div>
+                                <div class="form-check custom-check style-2">
+                                    <input type="radio" class="btn-check" name="selectGender" id="selectGender2" autocomplete="off">
+                                    <label class="btn" for="selectGender2">
+                                        <span class="radio-check"></span>Female
+                                    </label>
+                                </div>
+                                <div class="form-check custom-check style-2">
+                                    <input type="radio" class="btn-check" name="selectGender" id="selectGender3" autocomplete="off">
+                                    <label class="btn" for="selectGender3">
+                                        <span class="radio-check"></span>Other
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="bottom-btn mt-auto">
+					<a href="job-wizard.html" class="btn style-2 btn-primary btn-shadow">Complete Profile</a>
+				</div>
+			</div>
+		</div>
+	</main>
+    <!-- Welcome End -->
+    
+</div>
+<!--**********************************
+    Scripts
+***********************************-->
+<script src="assets/js/jquery.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/settings.js"></script>
+<script src="assets/js/custom.js"></script>
+</body>
+</html>

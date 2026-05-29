@@ -1,0 +1,122 @@
+// Notification ==
+.dz-link{
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	background-color: $gray-900;
+	padding: 10px 15px;
+	.link{
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		color: #fff;
+		i{
+			color: var(--bs-primary);
+			font-size: 16px;
+		}
+	}
+}
+
+.notification-list{
+	> ul li {
+		position: relative!important;
+		padding: 10px 15px!important;
+	}
+	.media{
+		position: relative;
+		align-items: flex-start;
+		gap: 10px;
+	}
+	.list-content{
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 3px;
+		.title{
+			font-size: 15px;
+			margin-bottom: 2px;
+			font-weight: 600;
+		}
+		.c-text{
+			font-size: 13px;
+			margin-bottom: 0;
+			padding-right: 50px;
+		}
+		.status{
+			color: var(--bs-body-color);
+			font-size: 12px;
+			font-weight: 500;
+			position: absolute;
+			bottom: 0;
+			right: 0;
+		}
+	}
+}
+
+// Dz Langauage ==
+.dz-langauage{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	width: 100%;
+	padding: 10px 0;
+	.form-check {
+		padding-left: 0;
+		padding-right: 0;
+		margin-bottom: 0;
+		width: calc(33% - 5px);
+		float: left;
+		@include respond ('phone'){
+			width: calc(50% - 5px);
+		}
+		.form-check-input{
+			position: absolute;
+			opacity: 0;
+			min-width: 0;
+			width: 0;
+			height: 0;
+		}
+		.form-check-label {
+			font-weight: 400;
+			border: 1px solid var(--border-color);
+			padding: 8px 10px;
+			margin-right: 0;
+			font-size: 16px;
+			border-radius: 6px;
+			background-color: var(--bs-body-bg);
+			width: 100%;
+		}
+		.dz-select-lang {
+			display: flex;
+			align-items: center;
+			.dz-flag {
+				margin-right: 10px;
+				border-radius: 6px;
+			}
+			.name {
+				flex: 1;
+				font-size: 15px;
+				color: var(--title);
+				font-weight: 500;
+			}
+			.check {
+				font-size: 20px;
+				display: inline-block;
+				line-height: 1;
+				color: var(--bs-light);
+			}
+		}
+		.form-check-input {
+			&:checked {
+				& + .form-check-label {
+					border-color: var(--bs-primary);
+					.dz-select-lang {
+						.check {
+							color: var(--bs-primary);
+						}
+					}
+				}
+			}
+		}
+	}
+}

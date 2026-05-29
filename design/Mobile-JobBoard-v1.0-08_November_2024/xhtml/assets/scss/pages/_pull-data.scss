@@ -1,0 +1,35 @@
+// PULL DATA ===
+.pull_delete {
+    position: relative;
+    min-width: calc(100% + 90px) !important;
+}
+
+.pull_delete.trans {
+    transition: all 0.4s;
+    //transform: translateX(-60px)!important;
+}
+
+.pull_delete .pd_btn {
+    display: flex !important;
+    position: absolute !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 50px !important;
+    font-size: 0.4rem !important;
+    background: var(--bs-primary) !important;
+    color: $white !important;
+    text-align: center !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px 0px 0px 15px;
+}
+
+.pull_delete .pd_btn::before {
+    content: "\f1f0";
+    font-family: uicons-solid-rounded!important;
+    font-size: 24px !important;
+    font-weight: 400;
+    font-style: normal;
+}
+
