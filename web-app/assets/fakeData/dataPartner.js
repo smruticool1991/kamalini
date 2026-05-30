@@ -1,53 +1,54 @@
-import img1 from '../images/partners/Logo.png'
-import img2 from '../images/partners/Logo-1.png'
-import img3 from '../images/partners/Logo-2.png'
-import img4 from '../images/partners/Logo-3.png'
-import img5 from '../images/partners/Logo-4.png'
-import img6 from '../images/partners/Logo-5.png'
-
-
-
 const dataPartner = [
     {
         id: 1,
-        img: img1
+        img: "https://logo.clearbit.com/google.com",
+        alt: "Google",
     },
     {
         id: 2,
-        img: img2
+        img: "https://logo.clearbit.com/microsoft.com",
+        alt: "Microsoft",
     },
     {
         id: 3,
-        img: img3
+        img: "https://logo.clearbit.com/amazon.com",
+        alt: "Amazon",
     },
     {
         id: 4,
-        img: img4
+        img: "https://logo.clearbit.com/apple.com",
+        alt: "Apple",
     },
     {
         id: 5,
-        img: img5
+        img: "https://logo.clearbit.com/meta.com",
+        alt: "Meta",
     },
     {
         id: 6,
-        img: img6
+        img: "https://logo.clearbit.com/netflix.com",
+        alt: "Netflix",
     },
     {
         id: 7,
-        img: img1
+        img: "https://logo.clearbit.com/linkedin.com",
+        alt: "LinkedIn",
     },
     {
         id: 8,
-        img: img2
+        img: "https://logo.clearbit.com/spotify.com",
+        alt: "Spotify",
     },
     {
         id: 9,
-        img: img3
+        img: "https://logo.clearbit.com/uber.com",
+        alt: "Uber",
     },
     {
         id: 10,
-        img: img4
+        img: "https://logo.clearbit.com/airbnb.com",
+        alt: "Airbnb",
     },
 ]
 
-export default dataPartner;
+export default dataPartner;
