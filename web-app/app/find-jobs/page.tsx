@@ -128,6 +128,20 @@ function Breadcrumb({ title, className }: { title: string; className?: string })
   );
 }
 
+// ─── All major Indian cities ──────────────────────────────────────────────────
+const CITY_LIST = [
+  "All Locations",
+  "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai",
+  "Kolkata", "Pune", "Ahmedabad", "Noida", "Gurgaon",
+  "Jaipur", "Lucknow", "Chandigarh", "Bhopal", "Indore",
+  "Nagpur", "Coimbatore", "Surat", "Kochi", "Visakhapatnam",
+  "Vadodara", "Agra", "Nashik", "Thiruvananthapuram", "Patna",
+  "Ranchi", "Bhubaneswar", "Mysuru", "Mangalore", "Madurai",
+  "Tiruchirappalli", "Dehradun", "Amritsar", "Ludhiana",
+  "Guwahati", "Raipur", "Jodhpur", "Udaipur", "Varanasi",
+  "Allahabad", "Meerut", "Remote", "Pan India",
+];
+
 // ─── Search Form Bar ──────────────────────────────────────────────────────────
 function SearchBar({
   filters, setFilters, onSearch,
@@ -137,6 +151,20 @@ function SearchBar({
   onSearch: () => void;
 }) {
   const [filterOpen, setFilterOpen] = useState(false);
+  const [locOpen, setLocOpen] = useState(false);
+  const [locSearch, setLocSearch] = useState('');
+
+  const filteredCities = CITY_LIST.filter((c) =>
+    c.toLowerCase().includes(locSearch.toLowerCase())
+  );
+
+  const selectCity = (city: string) => {
+    setFilters((f) => ({ ...f, location: city === 'All Locations' ? '' : city }));
+    setLocOpen(false);
+    setLocSearch('');
+  };
+
+  const displayLocation = filters.location || 'All Locations';
 
   return (
     <section className="form-sticky stc1">
@@ -154,16 +182,86 @@ function SearchBar({
                 />
                 <span className="icon-search search-job"></span>
               </div>
-              <div className="form-group-2">
+              <div
+                className="form-group-2"
+                style={{ position: 'relative' }}
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Element)) {
+                    setLocOpen(false);
+                    setLocSearch('');
+                  }
+                }}
+              >
                 <span className="icon-map-pin"></span>
-                <input
-                  type="text"
-                  placeholder="Location"
-                  style={{ border: 'none', outline: 'none', width: '100%', background: 'transparent' }}
-                  value={filters.location}
-                  onChange={(e) => setFilters((f) => ({ ...f, location: e.target.value }))}
-                />
+                <div
+                  onClick={() => { setLocOpen(!locOpen); setLocSearch(''); }}
+                  style={{
+                    cursor: 'pointer', padding: '0 30px', display: 'flex',
+                    alignItems: 'center', height: '100%', minWidth: 140,
+                    userSelect: 'none', fontSize: 14,
+                    color: filters.location ? '#333' : '#999',
+                  }}
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && setLocOpen(!locOpen)}
+                >
+                  {displayLocation}
+                  <span style={{ marginLeft: 'auto', fontSize: 10, opacity: 0.5, paddingLeft: 8, transition: 'transform 0.2s', transform: locOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+                </div>
+
+                {locOpen && (
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0,
+                    background: '#fff', borderRadius: 12,
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.18)',
+                    width: 240, zIndex: 999,
+                    border: '1px solid #f0f0f0', overflow: 'hidden',
+                  }}>
+                    {/* Typeahead */}
+                    <div style={{ padding: '10px 12px', borderBottom: '1px solid #f0f0f0' }}>
+                      <input
+                        autoFocus
+                        type="text"
+                        placeholder="Search city..."
+                        value={locSearch}
+                        onChange={(e) => setLocSearch(e.target.value)}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        style={{
+                          width: '100%', border: '1px solid #e0e0e0', borderRadius: 8,
+                          padding: '7px 10px', fontSize: 13, outline: 'none',
+                          background: '#f8f9fa', boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                    {/* City list */}
+                    <div style={{ maxHeight: 240, overflowY: 'auto' }}>
+                      {filteredCities.length === 0 ? (
+                        <div style={{ padding: '14px 30px', fontSize: 13, color: '#999' }}>No cities found</div>
+                      ) : (
+                        filteredCities.map((city) => (
+                          <div
+                            key={city}
+                            onMouseDown={(e) => { e.preventDefault(); selectCity(city); }}
+                            style={{
+                              padding: '10px 16px', fontSize: 14, cursor: 'pointer',
+                              color: displayLocation === city ? '#14a077' : '#333',
+                              fontWeight: displayLocation === city ? 600 : 400,
+                              background: displayLocation === city ? '#f0faf6' : 'transparent',
+                              display: 'flex', alignItems: 'center', gap: 8,
+                              transition: 'background 0.15s',
+                            }}
+                            onMouseEnter={(e) => { if (displayLocation !== city) (e.currentTarget as HTMLDivElement).style.background = '#f8f9fa'; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = displayLocation === city ? '#f0faf6' : 'transparent'; }}
+                          >
+                            {city}
+                            {displayLocation === city && <span style={{ marginLeft: 'auto', fontSize: 12, color: '#14a077' }}>✓</span>}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
+
               <div className="form-group-3">
                 <span className="icon-filter"></span>
                 <div
