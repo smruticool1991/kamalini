@@ -36,10 +36,10 @@ function Jobs(props) {
                     </div>
                     <div className="box-content">
                       <h4>
-                        <Link href="/jobsingle_v1">{idx.cate}</Link>
+                        <Link href={`/jobs/${idx.id}`}>{idx.cate}</Link>
                       </h4>
                       <h3>
-                        <Link href="/jobsingle_v1"> {idx.title} </Link>
+                        <Link href={`/jobs/${idx.id}`}> {idx.title} </Link>
                         <span className="icon-bolt"></span>
                       </h3>
                       <ul>
@@ -86,7 +86,7 @@ function Jobs(props) {
                   </div>
                 </div>
                 <Link
-                  href="/jobsingle_v1"
+                  href={`/jobs/${idx.id}`}
                   className="jobtex-link-item"
                   tabIndex="0"
                 ></Link>

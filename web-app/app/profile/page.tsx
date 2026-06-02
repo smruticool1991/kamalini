@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, signOut, signInWithPopup, type User } from 'firebase/auth';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { auth, googleProvider, db } from '@/lib/firebase';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 import Header4 from '@/components/header/Header4';
 import Footer from '@/components/footer';
 import Gotop from '@/components/gotop';
@@ -13,6 +13,32 @@ import { Collapse } from 'react-collapse';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import logo from '@/assets/images/logo.png';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+
+const ProfileCompleteModal = dynamic(
+  () => import('@/components/profileComplete/ProfileCompleteModal'),
+  { ssr: false }
+);
+
+// ─── User Profile type ────────────────────────────────────────────────────────
+interface UserProfile {
+  name?: string;
+  educationLevel?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  workStatus?: string;
+  currentCity?: string;
+  openToRelocation?: boolean;
+  preferredCities?: string[];
+  keySkills?: string;
+  preferredJobRoles?: string[];
+  englishLevel?: string;
+  collegeName?: string;
+  degree?: string;
+  specialization?: string;
+  completionYear?: string;
+  profileComplete?: boolean;
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Application {
@@ -52,6 +78,7 @@ function StatusBadge({ status }: { status: string }) {
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
   const [appsLoading, setAppsLoading] = useState(true);
@@ -59,6 +86,7 @@ export default function ProfilePage() {
   const [toggle, setToggle] = useState({ key: '', status: false });
   const [isShowMobile, setShowMobile] = useState(false);
   const [expandedApp, setExpandedApp] = useState<string | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const handleToggle = (key: string) =>
     setToggle(prev => prev.key === key ? { key: '', status: false } : { key, status: true });
@@ -77,6 +105,17 @@ export default function ProfilePage() {
       if (!u) {
         router.push('/');
         return;
+      }
+      // Fetch Firestore profile
+      try {
+        const snap = await getDoc(doc(db, 'users', u.uid));
+        if (snap.exists()) {
+          setUserProfile(snap.data() as UserProfile);
+        } else {
+          setUserProfile(null);
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
       }
       // Fetch this user's applications
       try {
@@ -142,8 +181,25 @@ export default function ProfilePage() {
     hired: applications.filter(a => a.status === 'hired').length,
   };
 
+  const isProfileComplete = userProfile?.profileComplete === true;
+
   return (
     <>
+      {/* Profile Completion Modal */}
+      {showProfileModal && user && (
+        <ProfileCompleteModal
+          userEmail={user.email || ''}
+          userName={user.displayName || ''}
+          onComplete={async () => {
+            setShowProfileModal(false);
+            // Refresh profile data
+            const snap = await getDoc(doc(db, 'users', user.uid));
+            if (snap.exists()) setUserProfile(snap.data() as UserProfile);
+          }}
+          onDismiss={() => setShowProfileModal(false)}
+        />
+      )}
+
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -297,37 +353,164 @@ export default function ProfilePage() {
           {activeTab === 0 && (
             <div className="row profile-card">
               <div className="col-lg-8">
-                <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.07)', overflow: 'hidden' }}>
-                  {/* Header */}
-                  <div style={{ background: 'linear-gradient(135deg,#f0faf6,#e8f4ff)', padding: '24px 28px', borderBottom: '1px solid #f0f0f0' }}>
-                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1a1a2e' }}>Account Information</h3>
+
+                {/* ── Complete Profile Banner ── */}
+                {!isProfileComplete && (
+                  <div style={{
+                    background: 'linear-gradient(135deg, #fff8e1, #fff3cd)',
+                    border: '1.5px solid #f59e0b',
+                    borderRadius: 14, padding: '18px 22px', marginBottom: 20,
+                    display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+                  }}>
+                    <span style={{ fontSize: 32 }}>🚀</span>
+                    <div style={{ flex: 1, minWidth: 180 }}>
+                      <div style={{ fontWeight: 700, color: '#92400e', fontSize: 15 }}>Your profile is incomplete!</div>
+                      <div style={{ color: '#b45309', fontSize: 13, marginTop: 2 }}>Complete your profile to get matched with the best jobs</div>
+                    </div>
+                    <button
+                      onClick={() => setShowProfileModal(true)}
+                      style={{
+                        padding: '10px 20px', borderRadius: 10, border: 'none',
+                        background: 'linear-gradient(135deg,#f59e0b,#d97706)',
+                        color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Complete Now →
+                    </button>
+                  </div>
+                )}
+
+                {/* ── Account Info ── */}
+                <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.07)', overflow: 'hidden', marginBottom: 20 }}>
+                  <div style={{ background: 'linear-gradient(135deg,#f0faf6,#e8f4ff)', padding: '20px 24px', borderBottom: '1px solid #f0f0f0' }}>
+                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#1a1a2e' }}>Account Information</h3>
                     <p style={{ margin: '4px 0 0', color: '#888', fontSize: 13 }}>Your Google account details</p>
                   </div>
-                  <div style={{ padding: '28px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                  <div style={{ padding: '22px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                       {[
-                        { label: 'Full Name', value: user.displayName, icon: '👤' },
+                        { label: 'Full Name', value: userProfile?.name || user.displayName, icon: '👤' },
                         { label: 'Email Address', value: user.email, icon: '✉' },
-                        { label: 'Account Type', value: 'Google Account', icon: '🔑' },
                         { label: 'Email Verified', value: user.emailVerified ? '✓ Verified' : '✗ Not Verified', icon: '🛡' },
-                        { label: 'User ID', value: user.uid.substring(0, 16) + '...', icon: '#' },
                         { label: 'Member Since', value: user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A', icon: '📅' },
                       ].map(item => (
-                        <div key={item.label} style={{ padding: '16px', background: '#fafafa', borderRadius: 10, border: '1px solid #f0f0f0' }}>
-                          <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+                        <div key={item.label} style={{ padding: '14px', background: '#fafafa', borderRadius: 10, border: '1px solid #f0f0f0' }}>
+                          <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 5 }}>
                             {item.icon} {item.label}
                           </div>
-                          <div style={{ fontSize: 14, color: '#1a1a2e', fontWeight: 600 }}>
-                            {item.value || 'Not provided'}
-                          </div>
+                          <div style={{ fontSize: 14, color: '#1a1a2e', fontWeight: 600 }}>{item.value || 'Not provided'}</div>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
+
+                {/* ── Personal Details (Firestore) ── */}
+                {isProfileComplete && userProfile && (
+                  <>
+                    <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.07)', overflow: 'hidden', marginBottom: 20 }}>
+                      <div style={{ background: 'linear-gradient(135deg,#f0faf6,#e8f4ff)', padding: '20px 24px', borderBottom: '1px solid #f0f0f0' }}>
+                        <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#1a1a2e' }}>Personal Details</h3>
+                      </div>
+                      <div style={{ padding: '22px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                          {[
+                            { label: 'Date of Birth', value: userProfile.dateOfBirth, icon: '🎂' },
+                            { label: 'Gender', value: userProfile.gender, icon: '👥' },
+                            { label: 'Work Status', value: userProfile.workStatus, icon: '💼' },
+                            { label: 'Education Level', value: userProfile.educationLevel, icon: '🎓' },
+                            { label: 'Current City', value: userProfile.currentCity, icon: '📍' },
+                            { label: 'English Level', value: userProfile.englishLevel, icon: '🗣' },
+                          ].filter(f => f.value).map(item => (
+                            <div key={item.label} style={{ padding: '14px', background: '#fafafa', borderRadius: 10, border: '1px solid #f0f0f0' }}>
+                              <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 5 }}>
+                                {item.icon} {item.label}
+                              </div>
+                              <div style={{ fontSize: 14, color: '#1a1a2e', fontWeight: 600 }}>{item.value}</div>
+                            </div>
+                          ))}
+                        </div>
+                        {userProfile.openToRelocation && (
+                          <div style={{ marginTop: 14, padding: '10px 14px', background: '#e8f5ef', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span>🚗</span>
+                            <span style={{ color: '#14a077', fontWeight: 600, fontSize: 13 }}>Open to Relocation</span>
+                            {userProfile.preferredCities && userProfile.preferredCities.length > 0 && (
+                              <span style={{ color: '#555', fontSize: 13 }}>— {userProfile.preferredCities.join(', ')}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Skills */}
+                    {userProfile.keySkills && (
+                      <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.07)', overflow: 'hidden', marginBottom: 20 }}>
+                        <div style={{ background: 'linear-gradient(135deg,#f0faf6,#e8f4ff)', padding: '20px 24px', borderBottom: '1px solid #f0f0f0' }}>
+                          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#1a1a2e' }}>🛠 Key Skills</h3>
+                        </div>
+                        <div style={{ padding: '18px 22px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                          {userProfile.keySkills.split(',').map(s => s.trim()).filter(Boolean).map(skill => (
+                            <span key={skill} style={{
+                              padding: '6px 14px', borderRadius: 20,
+                              background: '#e8f5ef', color: '#14a077',
+                              fontSize: 13, fontWeight: 600,
+                              border: '1px solid #c8e6da',
+                            }}>{skill}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Preferred Job Roles */}
+                    {userProfile.preferredJobRoles && userProfile.preferredJobRoles.length > 0 && (
+                      <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.07)', overflow: 'hidden', marginBottom: 20 }}>
+                        <div style={{ background: 'linear-gradient(135deg,#f0faf6,#e8f4ff)', padding: '20px 24px', borderBottom: '1px solid #f0f0f0' }}>
+                          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#1a1a2e' }}>🎯 Preferred Job Roles</h3>
+                        </div>
+                        <div style={{ padding: '18px 22px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                          {userProfile.preferredJobRoles.map(role => (
+                            <span key={role} style={{
+                              padding: '6px 14px', borderRadius: 20,
+                              background: '#e8f0fe', color: '#4f46e5',
+                              fontSize: 13, fontWeight: 600,
+                              border: '1px solid #c7d2fe',
+                            }}>{role}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Education Details */}
+                    {(userProfile.collegeName || userProfile.degree) && (
+                      <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.07)', overflow: 'hidden', marginBottom: 20 }}>
+                        <div style={{ background: 'linear-gradient(135deg,#f0faf6,#e8f4ff)', padding: '20px 24px', borderBottom: '1px solid #f0f0f0' }}>
+                          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#1a1a2e' }}>🎓 Education Details</h3>
+                        </div>
+                        <div style={{ padding: '18px 22px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                            {[
+                              { label: 'College / Institute', value: userProfile.collegeName, icon: '🏫' },
+                              { label: 'Degree', value: userProfile.degree, icon: '📜' },
+                              { label: 'Specialization', value: userProfile.specialization, icon: '📚' },
+                              { label: 'Completion Year', value: userProfile.completionYear, icon: '📅' },
+                            ].filter(f => f.value).map(item => (
+                              <div key={item.label} style={{ padding: '12px', background: '#fafafa', borderRadius: 10, border: '1px solid #f0f0f0' }}>
+                                <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+                                  {item.icon} {item.label}
+                                </div>
+                                <div style={{ fontSize: 13, color: '#1a1a2e', fontWeight: 600 }}>{item.value}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
-              {/* Quick Actions */}
+              {/* Quick Actions sidebar */}
               <div className="col-lg-4">
                 <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.07)', overflow: 'hidden' }}>
                   <div style={{ background: 'linear-gradient(135deg,#f0faf6,#e8f4ff)', padding: '24px 28px', borderBottom: '1px solid #f0f0f0' }}>
@@ -360,17 +543,28 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Profile completion */}
-                <div style={{ background: 'linear-gradient(135deg,#0f2557,#14a077)', borderRadius: 16, padding: '24px', marginTop: 20, color: '#fff' }}>
-                  <h4 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 700 }}>🚀 Complete Your Profile</h4>
-                  <p style={{ margin: '0 0 16px', fontSize: 13, opacity: 0.85 }}>Apply to jobs faster with a complete profile</p>
-                  <Link href="/find-jobs" style={{
-                    display: 'block', textAlign: 'center', padding: '10px 0',
-                    background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)',
-                    borderRadius: 8, color: '#fff', fontWeight: 600, fontSize: 14,
-                    textDecoration: 'none',
-                  }}>Find Jobs Now</Link>
-                </div>
+                {/* Profile completion CTA */}
+                {!isProfileComplete ? (
+                  <div style={{ background: 'linear-gradient(135deg,#0f2557,#14a077)', borderRadius: 16, padding: '24px', marginTop: 20, color: '#fff' }}>
+                    <h4 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 700 }}>🚀 Complete Your Profile</h4>
+                    <p style={{ margin: '0 0 16px', fontSize: 13, opacity: 0.85 }}>Get matched with the best jobs in 2 minutes</p>
+                    <button
+                      onClick={() => setShowProfileModal(true)}
+                      style={{
+                        display: 'block', width: '100%', textAlign: 'center', padding: '11px 0',
+                        background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)',
+                        borderRadius: 8, color: '#fff', fontWeight: 600, fontSize: 14,
+                        cursor: 'pointer',
+                      }}
+                    >Complete Profile →</button>
+                  </div>
+                ) : (
+                  <div style={{ background: 'linear-gradient(135deg,#e8f5ef,#d1fae5)', borderRadius: 16, padding: '20px', marginTop: 20 }}>
+                    <div style={{ fontSize: 28, marginBottom: 6 }}>✅</div>
+                    <div style={{ fontWeight: 700, color: '#065f46', fontSize: 15 }}>Profile Complete!</div>
+                    <div style={{ color: '#047857', fontSize: 13, marginTop: 4 }}>Your profile is fully set up. You're getting the best job matches.</div>
+                  </div>
+                )}
               </div>
             </div>
           )}
