@@ -3019,3 +3019,53 @@ input[type="color"],
     transform: rotate(360deg);
   }
 }
+
+/* Candidate Registration Button
+---------------------------------------------- */
+.sticky-area-wrap .header-ct-right .candidate-reg-btn {
+  margin-right: 10px;
+}
+
+/* Link variant (logged in) */
+.sticky-area-wrap .header-ct-right .candidate-reg-btn a,
+/* Button variant (logged out) */
+.sticky-area-wrap .header-ct-right .candidate-reg-btn button {
+  padding: 12px 22px;
+  border: none;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 26px;
+  border-radius: 4px;
+  display: block;
+  color: #fff !important;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(249, 115, 22, 0.35);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  width: 100%;
+}
+
+.sticky-area-wrap .header-ct-right .candidate-reg-btn a:hover,
+.sticky-area-wrap .header-ct-right .candidate-reg-btn button:hover {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(249, 115, 22, 0.5);
+}
+
+/* When header is scrolled (is-small) — keep same orange style */
+#header.style-absolute.is-small .sticky-area-wrap .header-ct-right .candidate-reg-btn a,
+#header.style-absolute.is-small .sticky-area-wrap .header-ct-right .candidate-reg-btn button {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff !important;
+}
+
+#header.style-absolute.is-small .sticky-area-wrap .header-ct-right .candidate-reg-btn a:hover,
+#header.style-absolute.is-small .sticky-area-wrap .header-ct-right .candidate-reg-btn button:hover {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  color: #fff !important;
+}
+

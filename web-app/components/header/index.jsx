@@ -4,13 +4,9 @@ import Link from "next/link";
 import { onAuthStateChanged, signOut, signInWithPopup } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, googleProvider, db } from "@/lib/firebase";
-import dynamic from "next/dynamic";
+// Direct import — pre-bundled so no chunk-load delay on mobile after sign-in
+import ProfileCompleteModal from "@/components/profileComplete/ProfileCompleteModal";
 
-// Lazy-load the modal so it doesn't add to initial bundle
-const ProfileCompleteModal = dynamic(
-  () => import("@/components/profileComplete/ProfileCompleteModal"),
-  { ssr: false }
-);
 
 Header.propTypes = {};
 
@@ -24,29 +20,52 @@ function Header({ clname = "", handleMobile }) {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const dropRef = useRef(null);
 
+  const prevUserRef = useRef(undefined); // undefined = auth not yet checked (page load)
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
+      // null  = was explicitly signed out
+      // undefined = first check on page load (auth state being restored)
+      const wasSignedOut = prevUserRef.current === null;
+      prevUserRef.current = u ?? null;
       setUser(u);
+
       if (u) {
-        // Check if profile is already complete (skip if dismissed in this session)
         const dismissed = sessionStorage.getItem("profileModalDismissed");
-        if (!dismissed) {
-          try {
-            const snap = await getDoc(doc(db, "users", u.uid));
-            const profileComplete = snap.exists() && snap.data()?.profileComplete === true;
-            if (!profileComplete) {
-              setShowProfileModal(true);
-            }
-          } catch (e) {
-            console.error("Error checking profile:", e);
+        if (dismissed) return;
+
+        if (wasSignedOut) {
+          // ✅ Genuine new sign-in — show modal instantly, no Firestore wait
+          setShowProfileModal(true);
+        }
+
+        // Firestore check runs in background for both new sign-in and page reload
+        try {
+          const snap = await getDoc(doc(db, "users", u.uid));
+          const profileComplete = snap.exists() && snap.data()?.profileComplete === true;
+          if (profileComplete) {
+            // Profile already complete — keep hidden (or hide if it flashed open)
+            setShowProfileModal(false);
+          } else if (!wasSignedOut) {
+            // Page reload: profile incomplete — show modal now that we know
+            setShowProfileModal(true);
           }
+          // If wasSignedOut + incomplete: modal is already open, do nothing
+        } catch (e) {
+          console.error("Error checking profile:", e);
+          // On Firestore error: show modal so user can still fill profile
+          setShowProfileModal(true);
         }
       } else {
+        prevUserRef.current = null;
         setShowProfileModal(false);
+        // Clear dismissal on sign-out so next sign-in triggers a fresh check
+        sessionStorage.removeItem("profileModalDismissed");
       }
     });
     return () => unsub();
   }, []);
+
 
   useEffect(() => {
     const handler = (e) => {
@@ -136,7 +155,8 @@ function Header({ clname = "", handleMobile }) {
                   </div>
                 </div>
                 <div className="header-ct-right">
-                  {user ? (
+                  {/* Profile avatar & dropdown — shown only when logged in */}
+                  {user && (
                     <div className="header-customize-item account" ref={dropRef} style={{ position: "relative", cursor: "pointer" }}>
                       <div onClick={() => setDropOpen(!dropOpen)} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         {user.photoURL ? (
@@ -170,12 +190,13 @@ function Header({ clname = "", handleMobile }) {
                         </div>
                       )}
                     </div>
-                  ) : (
-                    <div className="header-customize-item account" style={{ cursor: "pointer" }} onClick={handleGoogleLogin}>
-                      <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <i className="icon-user" style={{ color: "#fff", fontSize: 18 }} />
-                      </div>
-                      <div className="name">Sign In</div>
+                  )}
+                  {/* Candidate Registration — only shown when NOT logged in */}
+                  {!user && (
+                    <div className="header-customize-item button candidate-reg-btn">
+                      <button onClick={handleGoogleLogin}>
+                        Candidate Registration
+                      </button>
                     </div>
                   )}
                   <div className="header-customize-item button">

@@ -1161,6 +1161,20 @@
     display: none;
   }
 
+  /* Keep Candidate Registration button visible on mobile */
+  .sticky-area-wrap .header-ct-right .button.candidate-reg-btn {
+    display: flex !important;
+    margin-right: 6px;
+  }
+
+  .sticky-area-wrap .header-ct-right .candidate-reg-btn a,
+  .sticky-area-wrap .header-ct-right .candidate-reg-btn button {
+    font-size: 12px !important;
+    padding: 9px 12px !important;
+    line-height: 20px !important;
+    white-space: nowrap;
+  }
+
   .review-job-section-five {
     padding-top: 80px;
   }
@@ -2241,10 +2255,10 @@
   }
 
   /* -----------------header------------------------------= */
-  #header .sticky-area-wrap .header-ct-left .logo .site-logo {
+  /* #header .sticky-area-wrap .header-ct-left .logo .site-logo {
     width: 140px;
     display: block;
-  }
+  } */
 
 
 

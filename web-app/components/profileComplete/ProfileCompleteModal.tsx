@@ -688,12 +688,12 @@ export default function ProfileCompleteModal({ userEmail, userName, onComplete, 
       }} />
 
       {/* Modal */}
-      <div style={{
+      <div className="pc-modal-wrap" style={{
         position: 'fixed', inset: 0, zIndex: 99999,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '16px',
       }}>
-        <div style={{
+        <div className="pc-modal-card" style={{
           background: '#f5f7fa',
           borderRadius: 20,
           width: '100%',
@@ -754,7 +754,7 @@ export default function ProfileCompleteModal({ userEmail, userName, onComplete, 
           </div>
 
           {/* ── Scrollable Body ── */}
-          <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+          <div ref={scrollRef} className="pc-modal-body" style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
 
             {/* Welcome message on first step */}
             {step === 0 && (
@@ -835,6 +835,22 @@ export default function ProfileCompleteModal({ userEmail, userName, onComplete, 
         @keyframes pcFadeIn { from { opacity: 0 } to { opacity: 1 } }
         @keyframes pcSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.97) } to { opacity: 1; transform: translateY(0) scale(1) } }
         @keyframes pcSpin { to { transform: rotate(360deg) } }
+
+        /* Mobile: full-screen modal for fast, native feel */
+        @media (max-width: 600px) {
+          .pc-modal-wrap {
+            padding: 0 !important;
+            align-items: flex-end !important;
+          }
+          .pc-modal-card {
+            border-radius: 20px 20px 0 0 !important;
+            max-height: 92dvh !important;
+            max-width: 100% !important;
+          }
+          .pc-modal-body {
+            -webkit-overflow-scrolling: touch;
+          }
+        }
       `}</style>
     </>
   );
