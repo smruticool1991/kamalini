@@ -192,7 +192,9 @@ export default function ProfilePage() {
           userName={user.displayName || ''}
           onComplete={async () => {
             setShowProfileModal(false);
-            // Refresh profile data
+            // Update localStorage cache
+            if (user) localStorage.setItem(`pc_${user.uid}`, '1');
+            // Refresh profile data from Firestore
             const snap = await getDoc(doc(db, 'users', user.uid));
             if (snap.exists()) setUserProfile(snap.data() as UserProfile);
           }}
@@ -410,8 +412,27 @@ export default function ProfilePage() {
                 {isProfileComplete && userProfile && (
                   <>
                     <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.07)', overflow: 'hidden', marginBottom: 20 }}>
-                      <div style={{ background: 'linear-gradient(135deg,#f0faf6,#e8f4ff)', padding: '20px 24px', borderBottom: '1px solid #f0f0f0' }}>
+                    <div style={{ background: 'linear-gradient(135deg,#f0faf6,#e8f4ff)', padding: '20px 24px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#1a1a2e' }}>Personal Details</h3>
+                        <button
+                          onClick={() => {
+                            // Clear cache so re-save is recognized
+                            if (user) localStorage.removeItem(`pc_${user.uid}`);
+                            setShowProfileModal(true);
+                          }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 6,
+                            padding: '7px 16px', borderRadius: 8,
+                            border: '1.5px solid #14a077',
+                            background: '#fff', color: '#14a077',
+                            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.background = '#14a077'; e.currentTarget.style.color = '#fff'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#14a077'; }}
+                        >
+                          ✏ Edit Profile
+                        </button>
                       </div>
                       <div style={{ padding: '22px' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -562,7 +583,21 @@ export default function ProfilePage() {
                   <div style={{ background: 'linear-gradient(135deg,#e8f5ef,#d1fae5)', borderRadius: 16, padding: '20px', marginTop: 20 }}>
                     <div style={{ fontSize: 28, marginBottom: 6 }}>✅</div>
                     <div style={{ fontWeight: 700, color: '#065f46', fontSize: 15 }}>Profile Complete!</div>
-                    <div style={{ color: '#047857', fontSize: 13, marginTop: 4 }}>Your profile is fully set up. You're getting the best job matches.</div>
+                    <div style={{ color: '#047857', fontSize: 13, marginTop: 4, marginBottom: 16 }}>Your profile is fully set up. You're getting the best job matches.</div>
+                    <button
+                      onClick={() => {
+                        if (user) localStorage.removeItem(`pc_${user.uid}`);
+                        setShowProfileModal(true);
+                      }}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                        width: '100%', padding: '10px 0', borderRadius: 8,
+                        border: '1.5px solid #14a077', background: '#fff',
+                        color: '#14a077', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                      }}
+                    >
+                      ✏ Edit Profile
+                    </button>
                   </div>
                 )}
               </div>
