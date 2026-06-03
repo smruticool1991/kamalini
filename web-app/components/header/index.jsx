@@ -24,7 +24,7 @@ function Header({ clname = "", handleMobile }) {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
-      // null  = was explicitly signed out
+      // null      = was explicitly signed out
       // undefined = first check on page load (auth state being restored)
       const wasSignedOut = prevUserRef.current === null;
       prevUserRef.current = u ?? null;
@@ -34,37 +34,42 @@ function Header({ clname = "", handleMobile }) {
         const dismissed = sessionStorage.getItem("profileModalDismissed");
         if (dismissed) return;
 
+        // ✅ Fast local cache — avoids flash for returning users who finished profile
+        const cachedComplete = localStorage.getItem(`pc_${u.uid}`) === '1';
+        if (cachedComplete) return;
+
         if (wasSignedOut) {
-          // ✅ Genuine new sign-in — show modal instantly, no Firestore wait
+          // Genuine new sign-in — show modal instantly, no Firestore wait
           setShowProfileModal(true);
         }
 
-        // Firestore check runs in background for both new sign-in and page reload
+        // Firestore verification runs in background
         try {
           const snap = await getDoc(doc(db, "users", u.uid));
           const profileComplete = snap.exists() && snap.data()?.profileComplete === true;
           if (profileComplete) {
-            // Profile already complete — keep hidden (or hide if it flashed open)
+            // Cache so future sign-ins skip the modal with zero flash
+            localStorage.setItem(`pc_${u.uid}`, '1');
             setShowProfileModal(false);
           } else if (!wasSignedOut) {
-            // Page reload: profile incomplete — show modal now that we know
+            // Page reload + profile incomplete — show modal now
             setShowProfileModal(true);
           }
-          // If wasSignedOut + incomplete: modal is already open, do nothing
+          // wasSignedOut + incomplete: modal already open, do nothing
         } catch (e) {
           console.error("Error checking profile:", e);
-          // On Firestore error: show modal so user can still fill profile
           setShowProfileModal(true);
         }
       } else {
         prevUserRef.current = null;
         setShowProfileModal(false);
-        // Clear dismissal on sign-out so next sign-in triggers a fresh check
+        // Clear session dismissal on sign-out (localStorage cache is kept — profile completion is permanent)
         sessionStorage.removeItem("profileModalDismissed");
       }
     });
     return () => unsub();
   }, []);
+
 
 
   useEffect(() => {
@@ -95,7 +100,11 @@ function Header({ clname = "", handleMobile }) {
         <ProfileCompleteModal
           userEmail={user.email || ""}
           userName={user.displayName || ""}
-          onComplete={() => setShowProfileModal(false)}
+          onComplete={() => {
+            // Cache completion permanently so future sign-ins never flash the modal
+            if (user) localStorage.setItem(`pc_${user.uid}`, '1');
+            setShowProfileModal(false);
+          }}
           onDismiss={() => {
             // Remember dismissal for this browser session only
             sessionStorage.setItem("profileModalDismissed", "1");
