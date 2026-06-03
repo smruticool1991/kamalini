@@ -190,6 +190,7 @@ export default function ProfilePage() {
         <ProfileCompleteModal
           userEmail={user.email || ''}
           userName={user.displayName || ''}
+          initialData={userProfile ?? undefined}
           onComplete={async () => {
             setShowProfileModal(false);
             // Update localStorage cache

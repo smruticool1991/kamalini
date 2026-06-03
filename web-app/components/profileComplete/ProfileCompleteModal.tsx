@@ -29,6 +29,7 @@ interface ProfileData {
 interface Props {
   userEmail: string;
   userName: string;
+  initialData?: Partial<ProfileData>;
   onComplete: () => void;
   onDismiss: () => void;
 }
@@ -155,7 +156,7 @@ function Card({ children }: { children: React.ReactNode }) {
 }
 
 // ─── Main Modal ───────────────────────────────────────────────────────────────
-export default function ProfileCompleteModal({ userEmail, userName, onComplete, onDismiss }: Props) {
+export default function ProfileCompleteModal({ userEmail, userName, initialData, onComplete, onDismiss }: Props) {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -163,26 +164,27 @@ export default function ProfileCompleteModal({ userEmail, userName, onComplete, 
   const [roleSearch, setRoleSearch] = useState('');
   const [citySearch, setCitySearch] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isEditing = !!initialData;
 
   const [data, setData] = useState<ProfileData>({
-    name: userName || '',
-    educationLevel: '',
-    dateOfBirth: '',
-    gender: '',
-    email: userEmail || '',
-    workStatus: '',
-    currentlyPursuing: false,
-    pursuingLevel: '',
-    collegeName: '',
-    degree: '',
-    specialization: '',
-    completionYear: '',
-    currentCity: '',
-    openToRelocation: false,
-    preferredCities: [],
-    keySkills: '',
-    preferredJobRoles: [],
-    englishLevel: '',
+    name:              initialData?.name              ?? userName    ?? '',
+    educationLevel:    initialData?.educationLevel    ?? '',
+    dateOfBirth:       initialData?.dateOfBirth       ?? '',
+    gender:            initialData?.gender            ?? '',
+    email:             initialData?.email             ?? userEmail   ?? '',
+    workStatus:        initialData?.workStatus        ?? '',
+    currentlyPursuing: initialData?.currentlyPursuing ?? false,
+    pursuingLevel:     initialData?.pursuingLevel     ?? '',
+    collegeName:       initialData?.collegeName       ?? '',
+    degree:            initialData?.degree            ?? '',
+    specialization:    initialData?.specialization    ?? '',
+    completionYear:    initialData?.completionYear    ?? '',
+    currentCity:       initialData?.currentCity       ?? '',
+    openToRelocation:  initialData?.openToRelocation  ?? false,
+    preferredCities:   initialData?.preferredCities   ?? [],
+    keySkills:         initialData?.keySkills         ?? '',
+    preferredJobRoles: initialData?.preferredJobRoles ?? [],
+    englishLevel:      initialData?.englishLevel      ?? '',
   });
 
   const set = <K extends keyof ProfileData>(key: K, value: ProfileData[K]) =>
@@ -499,13 +501,19 @@ export default function ProfileCompleteModal({ userEmail, userName, onComplete, 
               <FieldLabel required>Current City</FieldLabel>
               <StyledInput
                 type="text"
-                placeholder="Search city..."
+                placeholder="Search or type your city..."
                 value={citySearch || data.currentCity}
                 onChange={e => { setCitySearch(e.target.value); if (!e.target.value) set('currentCity', ''); }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && citySearch.trim()) {
+                    set('currentCity', citySearch.trim());
+                    setCitySearch('');
+                  }
+                }}
               />
               {citySearch && (
                 <div style={{
-                  maxHeight: 180, overflowY: 'auto', border: '1px solid #e0e0e0',
+                  maxHeight: 200, overflowY: 'auto', border: '1px solid #e0e0e0',
                   borderRadius: 10, marginTop: 6, background: '#fff',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                 }}>
@@ -524,6 +532,25 @@ export default function ProfileCompleteModal({ userEmail, userName, onComplete, 
                       {city}
                     </div>
                   ))}
+                  {/* Allow typing any city not in the list */}
+                  {citySearch.trim() &&
+                    !filteredCities.some(c => c.toLowerCase() === citySearch.trim().toLowerCase()) && (
+                    <div
+                      onClick={() => { set('currentCity', citySearch.trim()); setCitySearch(''); }}
+                      style={{
+                        padding: '10px 14px', cursor: 'pointer', fontSize: 13,
+                        color: '#14a077', fontWeight: 600,
+                        borderTop: filteredCities.length > 0 ? '1px dashed #e0e0e0' : 'none',
+                        display: 'flex', alignItems: 'center', gap: 6,
+                        background: '#fff',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#f0faf6'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                    >
+                      <span style={{ fontSize: 16 }}>📍</span>
+                      Use &quot;<strong>{citySearch.trim()}</strong>&quot; as my city
+                    </div>
+                  )}
                 </div>
               )}
               {data.currentCity && !citySearch && (
@@ -721,24 +748,6 @@ export default function ProfileCompleteModal({ userEmail, userName, onComplete, 
                   {STEP_TITLES[step]}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={onDismiss}
-                title="Complete Later"
-                style={{
-                  background: 'rgba(255,255,255,0.15)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: 8,
-                  color: '#fff',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  padding: '6px 12px',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Later
-              </button>
             </div>
 
             {/* Progress Bar */}
@@ -759,14 +768,22 @@ export default function ProfileCompleteModal({ userEmail, userName, onComplete, 
             {/* Welcome message on first step */}
             {step === 0 && (
               <div style={{
-                background: 'linear-gradient(135deg, #e8f5ef, #e3f2fd)',
+                background: isEditing
+                  ? 'linear-gradient(135deg, #fef3c7, #fff8e1)'
+                  : 'linear-gradient(135deg, #e8f5ef, #e3f2fd)',
                 borderRadius: 12, padding: '14px 18px', marginBottom: 14,
                 display: 'flex', alignItems: 'center', gap: 12,
               }}>
-                <span style={{ fontSize: 28 }}>👋</span>
+                <span style={{ fontSize: 28 }}>{isEditing ? '✏️' : '👋'}</span>
                 <div>
-                  <div style={{ fontWeight: 700, color: '#1a1a2e', fontSize: 14 }}>Build Your Profile</div>
-                  <div style={{ color: '#555', fontSize: 12, marginTop: 2 }}>Takes ~2 minutes. Get matched with the best jobs!</div>
+                  <div style={{ fontWeight: 700, color: '#1a1a2e', fontSize: 14 }}>
+                    {isEditing ? 'Update Your Profile' : 'Build Your Profile'}
+                  </div>
+                  <div style={{ color: '#555', fontSize: 12, marginTop: 2 }}>
+                    {isEditing
+                      ? 'Your existing data is pre-filled. Update any fields and save.'
+                      : 'Takes ~2 minutes. Get matched with the best jobs!'}
+                  </div>
                 </div>
               </div>
             )}
