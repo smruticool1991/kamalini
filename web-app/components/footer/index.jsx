@@ -81,7 +81,7 @@ function Footer(props) {
                             <li> <Link href="/profile">Profile</Link> </li>
                             <li> <Link href="/profile">My Application</Link> </li>
                             <li> <Link href="/find-jobs">Find Jobs</Link> </li>
-                            <li> <Link href="/employeers">Employeers</Link> </li>
+                            <li> <Link href="/employers">Employers</Link> </li>
                         </ul>
                         </div>
                     </div>
@@ -91,10 +91,10 @@ function Footer(props) {
                             For Employers
                         </h6>
                         <ul className="navigation-menu-footer">
-                            <li> <Link href="/post-new-job">Post New Job</Link> </li>
-                            <li> <Link href="employers-list.html">Employer Listing</Link> </li>
-                            <li> <Link href="employers-grid-sidebar.html">Employers Grid</Link> </li>
-                            <li> <Link href="find-jobs-list.html">Job Packages</Link> </li>
+                            <li> <Link href="https://employer.kajobs.in/dashboard/jobs">Post New Job</Link> </li>
+                            <li> <Link href="https://employer.kajobs.in/register">Company Registration</Link> </li>
+                            <li> <Link href="https://employer.kajobs.in/login">Login</Link> </li>
+                            <li> <Link href="https://employer.kajobs.in/dashboard/profile">Profile</Link> </li>
                         </ul>
                         </div>
                     </div>
