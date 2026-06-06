@@ -4,21 +4,8 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Header4 from '@/components/header/Header4';
 import Footer from '@/components/footer';
-
-const BLOG_POSTS = [
-  { id: 1, img: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&q=80', title: "The 9-to-5 workday doesn't work anymore", cate: 'Career', author: 'KA Jobs Team', time: 'May 20, 2025', text: 'The traditional workday is changing. Here\'s why flexible schedules are the future of work and how to adapt your career accordingly.', readTime: '4 min read' },
-  { id: 2, img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80', title: '3 ways to spot a transparent company during your job search', cate: 'Job Search', author: 'KA Jobs Team', time: 'May 18, 2025', text: 'Transparency in the workplace matters more than ever. Learn the telltale signs of an open, honest company culture before you join.', readTime: '5 min read' },
-  { id: 3, img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80', title: 'KA Jobs Announces Awards for Best Places to Work 2025', cate: 'News', author: 'KA Jobs Team', time: 'May 15, 2025', text: 'We\'re thrilled to announce our annual Best Places to Work awards recognising employers who prioritise their people.', readTime: '3 min read' },
-  { id: 4, img: 'https://images.unsplash.com/photo-1455849318743-b2233052fcff?w=600&q=80', title: 'How Does Writing Influence Your Personal Brand?', cate: 'Personal Growth', author: 'Priya Sharma', time: 'May 12, 2025', text: 'Your writing — emails, LinkedIn posts, resumes — shapes how the professional world perceives you. Here\'s how to use it strategically.', readTime: '6 min read' },
-  { id: 5, img: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80', title: 'How To Write Content That Gets You Hired', cate: 'Career', author: 'Rahul Verma', time: 'May 10, 2025', text: 'Content creation skills are now a must-have across almost every industry. Discover how to showcase them effectively in your applications.', readTime: '5 min read' },
-  { id: 6, img: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80', title: 'Where To Grow Your Career: Startup or Corporate?', cate: 'Career', author: 'Ananya Iyer', time: 'May 8, 2025', text: 'Both paths have pros and cons. We break down the key differences to help you choose the right environment for your growth.', readTime: '7 min read' },
-  { id: 7, img: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=600&q=80', title: 'Caring Is The New Marketing — What HR Leaders Need to Know', cate: 'HR Insights', author: 'KA Jobs Team', time: 'May 5, 2025', text: 'Employee wellbeing isn\'t just a perk anymore. It\'s a competitive advantage. Here\'s how leading companies are making it central to their brand.', readTime: '4 min read' },
-  { id: 8, img: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&q=80', title: 'Remote Work: Self-Discovery and Professional Progress', cate: 'Remote Work', author: 'Kiran Patel', time: 'May 2, 2025', text: 'Working remotely changes how we relate to our work and ourselves. Explore the unexpected benefits and how to make the most of them.', readTime: '5 min read' },
-  { id: 9, img: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=600&q=80', title: '5 Tips to Create an ATS-Friendly Resume', cate: 'Job Search', author: 'Meena Nair', time: 'Apr 28, 2025', text: 'Most resumes never reach a human. Learn how to optimise yours for Applicant Tracking Systems and get past the first filter.', readTime: '6 min read' },
-  { id: 10, img: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&q=80', title: 'How To Choose The Right Job Offer', cate: 'Career', author: 'Arjun Mehta', time: 'Apr 25, 2025', text: 'Multiple offers on the table? This guide walks you through the criteria that matter beyond salary — culture, growth, and alignment.', readTime: '5 min read' },
-  { id: 11, img: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=600&q=80', title: 'Start A Blog To Accelerate Your Career Growth', cate: 'Personal Growth', author: 'KA Jobs Team', time: 'Apr 22, 2025', text: 'Blogging builds authority, improves your writing, and opens doors you never expected. Here\'s how to start — even with zero followers.', readTime: '4 min read' },
-  { id: 12, img: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600&q=80', title: '20 HR Podcasts Every Professional Should Listen To', cate: 'HR Insights', author: 'KA Jobs Team', time: 'Apr 18, 2025', text: 'From talent acquisition to employee experience, these podcasts cover everything HR professionals need to stay ahead of the curve.', readTime: '3 min read' },
-];
+import { generateBlogUrl } from '@/lib/slug';
+import { BLOG_POSTS } from '@/lib/blogData';
 
 const CATEGORIES = ['All', 'Career', 'Job Search', 'News', 'Personal Growth', 'HR Insights', 'Remote Work'];
 const POSTS_PER_PAGE = 9;
@@ -163,7 +150,7 @@ export default function BlogPage() {
                       <span>⏱ {post.readTime}</span>
                     </div>
                     <h3 className="main-title" style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.4, marginBottom: 10 }}>
-                      <Link href={`/blog/${post.id}`} style={{ color: '#111827', textDecoration: 'none' }}
+                      <Link href={generateBlogUrl(post.id, post.title)} style={{ color: '#111827', textDecoration: 'none' }}
                         onMouseEnter={e => (e.currentTarget.style.color = '#1565c0')}
                         onMouseLeave={e => (e.currentTarget.style.color = '#111827')}
                       >
@@ -175,7 +162,7 @@ export default function BlogPage() {
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: 12, color: '#9ca3af' }}>by <strong style={{ color: '#374151' }}>{post.author}</strong></span>
-                      <Link href={`/blog/${post.id}`} style={{
+                      <Link href={generateBlogUrl(post.id, post.title)} style={{
                         fontSize: 13, fontWeight: 600, color: '#1565c0', textDecoration: 'none',
                         display: 'flex', alignItems: 'center', gap: 4,
                       }}>

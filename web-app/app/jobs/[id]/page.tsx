@@ -17,6 +17,7 @@ import {
   type User,
 } from 'firebase/auth';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { extractId, generateJobUrl } from '@/lib/slug';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const getInitial = (name?: string) => (name || '?')[0]?.toUpperCase() ?? '?';
@@ -447,7 +448,8 @@ function ApplicationModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { job, loading, error } = useFirebaseJob(id);
+  const actualId = extractId(id);
+  const { job, loading, error } = useFirebaseJob(actualId);
   const { jobs: relatedJobs } = useFirebaseJobs(6);
 
   const [toggle, setToggle] = useState({ key: '', status: false });
@@ -492,7 +494,7 @@ export default function JobDetailPage() {
     setShowAppModal(true);
   };
 
-  const otherJobs = relatedJobs.filter(j => j.id !== id).slice(0, 3);
+  const otherJobs = relatedJobs.filter(j => j.id !== actualId).slice(0, 3);
 
   if (loading) return (
     <>
@@ -527,7 +529,7 @@ export default function JobDetailPage() {
       {showAppModal && user && (
         <ApplicationModal
           user={user}
-          job={{ id, title: job.title, company: job.company, location: job.location, category: job.category }}
+          job={{ id: actualId, title: job.title, company: job.company, location: job.location, category: job.category }}
           onClose={() => setShowAppModal(false)}
         />
       )}
@@ -833,8 +835,8 @@ export default function JobDetailPage() {
                                   </div>
                                 </div>
                                 <div className="box-content">
-                                  <h4><Link href={`/jobs/${rj.id}`}>{rj.company}</Link></h4>
-                                  <h3><Link href={`/jobs/${rj.id}`}>{rj.title}</Link><span className="icon-bolt"></span></h3>
+                                  <h4><Link href={generateJobUrl(rj.id, rj.company)}>{rj.company}</Link></h4>
+                                  <h3><Link href={generateJobUrl(rj.id, rj.title)}>{rj.title}</Link><span className="icon-bolt"></span></h3>
                                   <ul>
                                     {rj.location && <li><span className="icon-map-pin"></span>{rj.location}</li>}
                                   </ul>
@@ -854,7 +856,7 @@ export default function JobDetailPage() {
                                 <p className="days">Apply Now</p>
                               </div>
                             </div>
-                            <Link href={`/jobs/${rj.id}`} className="jobtex-link-item" tabIndex={0}></Link>
+                            <Link href={generateJobUrl(rj.id, rj.title)} className="jobtex-link-item" tabIndex={0}></Link>
                           </div>
                         ))}
                       </div>
@@ -873,8 +875,8 @@ export default function JobDetailPage() {
                               </div>
                             </div>
                             <div className="box-content">
-                              <h4><Link href={`/jobs/${rj.id}`}>{rj.company}</Link></h4>
-                              <h3><Link href={`/jobs/${rj.id}`}>{rj.title}</Link><span className="icon-bolt"></span></h3>
+                              <h4><Link href={generateJobUrl(rj.id, rj.company)}>{rj.company}</Link></h4>
+                              <h3><Link href={generateJobUrl(rj.id, rj.title)}>{rj.title}</Link><span className="icon-bolt"></span></h3>
                               <span className="icon-heart"></span>
                             </div>
                           </div>
@@ -889,7 +891,7 @@ export default function JobDetailPage() {
                             <p className="days">Apply Now</p>
                           </div>
                         </div>
-                        <Link href={`/jobs/${rj.id}`} className="jobtex-link-item" tabIndex={0}></Link>
+                        <Link href={generateJobUrl(rj.id, rj.title)} className="jobtex-link-item" tabIndex={0}></Link>
                       </div>
                     ))}
                   </TabPanel>

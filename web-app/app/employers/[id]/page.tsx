@@ -19,6 +19,7 @@ import {
   useFirebaseReviews,
   addFirebaseReview,
 } from '@/lib/useFirebaseData';
+import { generateJobUrl } from '@/lib/slug';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const COLORS = ['#4f46e5', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed', '#db2777'];
@@ -643,7 +644,7 @@ export default function EmployerDetailPage() {
                             </div>
                             <div className="box-content">
                               <h4><Link href={`/employers/${id}`}>{job.company}</Link></h4>
-                              <h3><Link href={`/jobs/${job.id}`}>{job.title}</Link><span className="icon-bolt"></span></h3>
+                              <h3><Link href={generateJobUrl(job.id, job.title)}>{job.title}</Link><span className="icon-bolt"></span></h3>
                               <ul>
                                 {job.location && <li><span className="icon-map-pin"></span>{job.location}</li>}
                                 {job.createdAt && <li><span className="icon-calendar"></span>{timeAgo(job.createdAt as any)}</li>}
@@ -668,7 +669,7 @@ export default function EmployerDetailPage() {
                             }
                           </div>
                         </div>
-                        <Link href={`/jobs/${job.id}`} className="jobtex-link-item" tabIndex={0}></Link>
+                        <Link href={generateJobUrl(job.id, job.title)} className="jobtex-link-item" tabIndex={0}></Link>
                       </div>
                     ))}
                   </TabPanel>

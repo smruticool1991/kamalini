@@ -14,6 +14,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import logo from '@/assets/images/logo.png';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { generateJobUrl } from '@/lib/slug';
 
 const ProfileCompleteModal = dynamic(
   () => import('@/components/profileComplete/ProfileCompleteModal'),
@@ -735,7 +736,7 @@ export default function ProfilePage() {
 
                             {/* Action buttons */}
                             <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-                              <Link href={`/jobs/${app.jobId}`} style={{ padding: '9px 18px', borderRadius: 8, border: '1px solid #14a077', color: '#14a077', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+                              <Link href={generateJobUrl(app.jobId, app.jobTitle)} style={{ padding: '9px 18px', borderRadius: 8, border: '1px solid #14a077', color: '#14a077', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
                                 View Job Post
                               </Link>
                             </div>

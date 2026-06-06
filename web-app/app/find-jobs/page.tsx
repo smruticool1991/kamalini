@@ -12,6 +12,7 @@ import Footer from '@/components/footer';
 import Gotop from '@/components/gotop';
 
 import { useFirebaseJobs } from '@/lib/useFirebaseData';
+import { generateJobUrl } from '@/lib/slug';
 
 
 
@@ -741,9 +742,9 @@ function FindJobsInner() {
                                 </div>
                               </div>
                               <div className="box-content">
-                                <h4><Link href={`/jobs/${job.id}`}>{job.company}</Link></h4>
+                                <h4><Link href={generateJobUrl(job.id, job.company)}>{job.company}</Link></h4>
                                 <h3>
-                                  <Link href={`/jobs/${job.id}`}> {job.title} </Link>
+                                  <Link href={generateJobUrl(job.id, job.title)}> {job.title} </Link>
                                   <span className="icon-bolt"></span>
                                 </h3>
                                 <ul>
@@ -785,7 +786,7 @@ function FindJobsInner() {
                               <p className="days">Apply Now</p>
                             </div>
                           </div>
-                          <Link href={`/jobs/${job.id}`} className="jobtex-link-item" tabIndex={0}></Link>
+                          <Link href={generateJobUrl(job.id, job.title)} className="jobtex-link-item" tabIndex={0}></Link>
                         </div>
                       ))}
                     </div>
@@ -847,9 +848,9 @@ function FindJobsInner() {
                               </div>
                             </div>
                             <div className="box-content">
-                              <h4><Link href={`/jobs/${job.id}`}>{job.company}</Link></h4>
+                              <h4><Link href={generateJobUrl(job.id, job.company)}>{job.company}</Link></h4>
                               <h3>
-                                <Link href={`/jobs/${job.id}`}>{job.title}</Link>
+                                <Link href={generateJobUrl(job.id, job.title)}>{job.title}</Link>
                                 <span className="icon-bolt"></span>
                               </h3>
                               <div className="star">
@@ -879,10 +880,10 @@ function FindJobsInner() {
                           </div>
                           <div className="group-btn">
                             <span className="icon-heart"></span>
-                            <Link href={`/jobs/${job.id}`}><button>Apply</button></Link>
+                            <Link href={generateJobUrl(job.id, job.title)}><button>Apply</button></Link>
                           </div>
                         </div>
-                        <Link href={`/jobs/${job.id}`} className="jobtex-link-item" tabIndex={0}></Link>
+                        <Link href={generateJobUrl(job.id, job.title)} className="jobtex-link-item" tabIndex={0}></Link>
                       </div>
                     ))
                   )}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import Button2 from "../button/Button2";
 import Link from "next/link";
+import { generateJobUrl } from "@/lib/slug";
 
 Jobs.propTypes = {};
 
@@ -36,10 +37,10 @@ function Jobs(props) {
                     </div>
                     <div className="box-content">
                       <h4>
-                        <Link href={`/jobs/${idx.id}`}>{idx.cate}</Link>
+                        <Link href={generateJobUrl(idx.id, idx.cate)}>{idx.cate}</Link>
                       </h4>
                       <h3>
-                        <Link href={`/jobs/${idx.id}`}> {idx.title} </Link>
+                        <Link href={generateJobUrl(idx.id, idx.title)}> {idx.title} </Link>
                         <span className="icon-bolt"></span>
                       </h3>
                       <ul>
@@ -86,7 +87,7 @@ function Jobs(props) {
                   </div>
                 </div>
                 <Link
-                  href={`/jobs/${idx.id}`}
+                  href={generateJobUrl(idx.id, idx.title)}
                   className="jobtex-link-item"
                   tabIndex="0"
                 ></Link>
