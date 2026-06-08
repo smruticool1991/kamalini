@@ -22,12 +22,12 @@ function Footer(props) {
                         <div className="wd-social d-flex aln-center">
                         <span>Follow Us:</span>
                         <ul className="list-social d-flex aln-center">
-                            <li><Link href="#"><i className="icon-facebook"></i></Link></li>
-                            <li><Link href="#"><i className="icon-linkedin2"></i></Link></li>
+                            <li><Link href="https://www.facebook.com/people/Kamalini-Associates/100063942944288"><i className="icon-facebook"></i></Link></li>
+                            {/* <li><Link href="#"><i className="icon-linkedin2"></i></Link></li>
                             <li><Link href="#"><i className="icon-twitter"></i></Link></li>
                             <li><Link href="#"><i className="icon-pinterest"></i></Link></li>
-                            <li><Link href="#"><i className="icon-instagram1"></i></Link></li>
-                            <li><Link href="#"><i className="icon-youtube"></i></Link></li>
+                            <li><Link href="#"><i className="icon-instagram1"></i></Link></li> */}
+                            <li><Link href="https://www.youtube.com/@kamaliniassociates"><i className="icon-youtube"></i></Link></li>
                         </ul>
                         </div>
                     </div>
@@ -46,11 +46,11 @@ function Footer(props) {
                             </div>
                             <div className="content">
                             <p>Need help? 24/7</p>
-                            <h6><Link href="tel:0123456678">001-1234-88888</Link></h6>
+                            <h6><Link href="tel:916370662699">+91 6370662699</Link></h6>
                             </div>
                         </div>
                         <p>Job Searching Just Got Easy. Use KAJobs to run a hiring site and earn money in the process!</p>
-                        <div className="ft-icon"> <i className="icon-map-pin"></i> 101 E 129th St, Navi Mumbai, IN 46312</div>
+                        <div className="ft-icon"> <i className="icon-map-pin"></i>Sector A Zone A Nearby CIPET campus 2 Mancheswar Industrial Estate, BBSR</div>
                         <form action="#" id="subscribe-form">
                             <input type="email" placeholder="Your email address" required="" id="subscribe-email" />
                             <button className="tf-button" type="submit" id="subscribe-button"><i
