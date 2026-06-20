@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "543414932327-bf6nbuula8a24sm8bgsqcecrqmerhk69.apps.googleusercontent.com",
+          "client_id": "543414932327-o8d4c3qr6viuuj5vfpuie954tbjcntcm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.kamaliniapp.india",
-            "certificate_hash": "adb49873a96c87f887c5e26bcd32449ec9030380"
+            "certificate_hash": "bcf1ec2d50284d7ee2d7ab858c1343bd36656eba"
           }
         },
         {

@@ -22,6 +22,7 @@ android {
     ndkVersion = "28.2.13676358"
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -37,8 +38,8 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion  // explicitly set to support Android 5.0+ (flutter.minSdkVersion is now 24 in Flutter 3.38.x)
         targetSdk = flutter.targetSdkVersion
-        versionCode = 6
-        versionName = "0.1.6"
+        versionCode = 10
+        versionName = "0.1.10"
     }
 
     signingConfigs {
@@ -67,4 +68,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

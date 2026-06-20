@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,25 +13,149 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'dart:convert';
 import 'dart:io';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:http/http.dart' as http;
 import 'screens/splash_screen.dart';
 import 'screens/search_job_screen.dart';
+import 'screens/tests_screen.dart';
 import 'services/recommendation_service.dart';
 import 'firebase_options.dart';
 
+// ── FCM: top-level plugin and notification channel ──────────────────────────
+
+final FlutterLocalNotificationsPlugin _localNotif =
+    FlutterLocalNotificationsPlugin();
+
+const AndroidNotificationChannel _notifChannel = AndroidNotificationChannel(
+  'new_tests_channel',
+  'New Tests',
+  description: 'Notifications when new tests are published',
+  importance: Importance.high,
+);
+
+// Single shared GoogleSignIn instance
+final _googleSignInClient = GoogleSignIn();
+
+/// Gets the Google OAuth credential without signing into Firebase.
+Future<OAuthCredential?> _getGoogleCredential() async {
+  final googleUser = await _googleSignInClient.signIn();
+  if (googleUser == null) return null;
+  final googleAuth = await googleUser.authentication;
+  return GoogleAuthProvider.credential(
+    accessToken: googleAuth.accessToken,
+    idToken: googleAuth.idToken,
+  );
+}
+
+/// Signs in with Google. If the email already exists under email/password,
+/// shows a dialog to link both providers onto the same account (same UID).
+/// Returns null if the user cancelled.
+Future<UserCredential?> _signInOrLinkGoogle(BuildContext context) async {
+  final oauthCred = await _getGoogleCredential();
+  if (oauthCred == null) return null;
+
+  try {
+    return await FirebaseAuth.instance.signInWithCredential(oauthCred);
+  } on FirebaseAuthException catch (e) {
+    if (e.code == 'account-exists-with-different-credential' && e.email != null) {
+      return _linkGoogleToEmailAccount(context, e.email!, oauthCred);
+    }
+    rethrow;
+  }
+}
+
+/// Prompts for the existing password, then links Google onto the same account.
+Future<UserCredential?> _linkGoogleToEmailAccount(
+  BuildContext context,
+  String email,
+  OAuthCredential googleCred,
+) async {
+  final passCtrl = TextEditingController();
+  final confirmed = await showDialog<bool>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => _LinkAccountDialog(email: email, passCtrl: passCtrl),
+  );
+  if (confirmed != true) {
+    passCtrl.dispose();
+    return null;
+  }
+  final password = passCtrl.text.trim();
+  passCtrl.dispose();
+
+  final existing = await FirebaseAuth.instance.signInWithEmailAndPassword(
+    email: email,
+    password: password,
+  );
+  await existing.user!.linkWithCredential(googleCred);
+  return existing;
+}
+
+/// Ensures a Firestore user document exists for a Google sign-in.
+/// For existing users (linked accounts), preserves name/photo set during
+/// onboarding — only fills in fields that are missing.
+Future<void> _ensureGoogleUserDoc(User user, {bool isNew = false}) async {
+  final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+  if (isNew) {
+    await docRef.set({
+      'name': user.displayName ?? '',
+      'email': user.email ?? '',
+      'photoURL': user.photoURL ?? '',
+      'profileComplete': false,
+      'signInMethod': 'google',
+      'createdAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  } else {
+    // Read existing doc so we don't overwrite name/photo the user already set.
+    final snap = await docRef.get();
+    final existing = (snap.data() ?? {}) as Map<String, dynamic>;
+    final updates = <String, dynamic>{
+      'email': user.email ?? '',
+    };
+    if ((existing['name'] ?? '').toString().trim().isEmpty) {
+      updates['name'] = user.displayName ?? '';
+    }
+    if ((existing['photoURL'] ?? '').toString().trim().isEmpty &&
+        (user.photoURL ?? '').isNotEmpty) {
+      updates['photoURL'] = user.photoURL!;
+    }
+    await docRef.set(updates, SetOptions(merge: true));
+  }
+}
+
+/// Must be a top-level function — called when app is killed/background.
+@pragma('vm:entry-point')
+Future<void> _fcmBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+}
+
+Future<void> _initFcm() async {
+  try {
+    FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
+    await _localNotif
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_notifChannel);
+    await _localNotif.initialize(
+      const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      ),
+    );
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    await FirebaseMessaging.instance.subscribeToTopic('new_tests');
+  } catch (_) {}
+}
+
 void main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  // Phone Auth uses Play Integrity / reCAPTCHA for app verification.
-  // Do NOT set appVerificationDisabledForTesting=true for real phone numbers —
-  // it causes error 17093. Use Firebase Console test numbers for emulator testing.
-
-  FlutterNativeSplash.remove();
 
   // Determine start screen based on saved session
   final bool isLoggedIn = FirebaseAuth.instance.currentUser != null;
@@ -36,11 +163,17 @@ void main() async {
   if (isLoggedIn) {
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
-      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
       profileComplete = (doc.data()?['profileComplete'] == true);
     } catch (_) {}
   }
   runApp(MainApp(isLoggedIn: isLoggedIn, profileComplete: profileComplete));
+
+  // FCM runs after runApp() so the permission dialog has a live UI context.
+  _initFcm();
 }
 
 class MainApp extends StatelessWidget {
@@ -503,6 +636,7 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
 
   bool _isEmailLoading = false;
+  bool _isGoogleLoading = false;
   bool _obscurePassword = true;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -528,12 +662,26 @@ class _SignInScreenState extends State<SignInScreen> {
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       String msg;
+      bool offerGoogle = false;
       switch (e.code) {
         case 'user-not-found':
           msg = 'No account found for this email.';
           break;
         case 'wrong-password':
-          msg = 'Incorrect password. Please try again.';
+        case 'invalid-credential':
+          // Check if this email belongs to a Google-only account so we can
+          // suggest the right sign-in method instead of a confusing error.
+          final methods = await FirebaseAuth.instance
+              .fetchSignInMethodsForEmail(_emailController.text.trim())
+              .catchError((_) => <String>[]);
+          if (methods.contains('google.com') && !methods.contains('password')) {
+            msg = 'This account uses Google Sign-In. Tap "Continue with Google" below to sign in.';
+            offerGoogle = true;
+          } else {
+            msg = e.code == 'wrong-password'
+                ? 'Incorrect password. Please try again.'
+                : 'Invalid email or password.';
+          }
           break;
         case 'invalid-email':
           msg = 'Please enter a valid email address.';
@@ -541,15 +689,15 @@ class _SignInScreenState extends State<SignInScreen> {
         case 'user-disabled':
           msg = 'This account has been disabled.';
           break;
-        case 'invalid-credential':
-          msg = 'Invalid email or password.';
-          break;
         default:
           msg = e.message ?? 'Sign-in failed. Try again.';
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3)),
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: offerGoogle ? const Color(0xFF1D4ED8) : Colors.red,
+          duration: Duration(seconds: offerGoogle ? 5 : 3),
+        ),
       );
     } catch (_) {
       if (!mounted) return;
@@ -585,6 +733,38 @@ class _SignInScreenState extends State<SignInScreen> {
         SnackBar(content: Text(e.message ?? 'Could not send reset email.'),
             backgroundColor: Colors.red, duration: const Duration(seconds: 3)),
       );
+    }
+  }
+
+  // ── Google Sign-In ────────────────────────────────────────────────────────
+  Future<void> _signInWithGoogle() async {
+    setState(() => _isGoogleLoading = true);
+    try {
+      final cred = await _signInOrLinkGoogle(context);
+      if (cred == null) return; // user cancelled
+      if (cred.user != null) {
+        await _ensureGoogleUserDoc(
+          cred.user!,
+          isNew: cred.additionalUserInfo?.isNewUser ?? false,
+        );
+      }
+      await _navigateAfterLogin();
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message ?? 'Google sign-in failed.'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Google sign-in failed. Please try again.'),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 3),
+      ));
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
     }
   }
 
@@ -628,7 +808,7 @@ class _SignInScreenState extends State<SignInScreen> {
   // ── UI ─────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final bool anyLoading = _isEmailLoading;
+    final bool anyLoading = _isEmailLoading || _isGoogleLoading;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -811,7 +991,19 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
+
+                // ── OR divider ────────────────────────────────────────────────
+                const _OrDivider(),
+                const SizedBox(height: 16),
+
+                // ── Google Sign-In button ─────────────────────────────────────
+                _GoogleSignInButton(
+                  loading: _isGoogleLoading,
+                  disabled: anyLoading,
+                  onPressed: _signInWithGoogle,
+                ),
+                const SizedBox(height: 24),
 
                 // ── Don't have an account? ────────────────────────────────────
                 Center(
@@ -878,7 +1070,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _obscurePassword = true;
   bool _agreeToTerms = false;
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> _signInWithGoogle() async {
+    setState(() => _isGoogleLoading = true);
+    try {
+      final cred = await _signInOrLinkGoogle(context);
+      if (cred == null) return;
+      if (cred.user != null) {
+        await _ensureGoogleUserDoc(
+          cred.user!,
+          isNew: cred.additionalUserInfo?.isNewUser ?? false,
+        );
+      }
+      if (mounted) await _navigateAfterLogin(context);
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message ?? 'Google sign-in failed.'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Google sign-in failed. Please try again.'),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 3),
+      ));
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
+    }
+  }
 
   Future<void> _navigateAfterLogin(BuildContext ctx) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -1322,6 +1546,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                 ),
                 const SizedBox(height: 20),
+
+                // ── OR divider ────────────────────────────────────────────────
+                const _OrDivider(),
+                const SizedBox(height: 16),
+
+                // ── Google Sign-In button ─────────────────────────────────────
+                _GoogleSignInButton(
+                  loading: _isGoogleLoading,
+                  disabled: _isLoading || _isGoogleLoading,
+                  onPressed: _signInWithGoogle,
+                ),
+                const SizedBox(height: 20),
+
                 // Sign in link
                 Center(
                   child: RichText(
@@ -1360,6 +1597,178 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 }
 
+// ── Shared auth UI widgets ────────────────────────────────────────────────────
+
+class _OrDivider extends StatelessWidget {
+  const _OrDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Text(
+            'OR',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade500,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
+      ],
+    );
+  }
+}
+
+class _GoogleSignInButton extends StatelessWidget {
+  final bool loading;
+  final bool disabled;
+  final VoidCallback onPressed;
+
+  const _GoogleSignInButton({
+    required this.loading,
+    required this.disabled,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: OutlinedButton(
+        onPressed: disabled ? null : onPressed,
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF1F2937),
+        ),
+        child: loading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Color(0xFF4285F4),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _GoogleLogo(),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Continue with Google',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+class _GoogleLogo extends StatelessWidget {
+  // Official Google "G" logo SVG paths (18×18 viewBox).
+  static const _svg = '''
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+  <path fill="#4285f4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+  <path fill="#34a853" d="M9.003 18c2.43 0 4.467-.806 5.956-2.18L12.05 13.56c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z"/>
+  <path fill="#fbbc05" d="M3.965 10.712c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.96H.957C.347 6.175 0 7.55 0 9.002c0 1.452.348 2.827.957 4.042l3.008-2.332z"/>
+  <path fill="#ea4335" d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9.003 0 5.485 0 2.44 2.017.957 4.958L3.965 7.29c.708-2.127 2.692-3.71 5.038-3.71z"/>
+</svg>''';
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.string(_svg, width: 20, height: 20);
+  }
+}
+
+/// Dialog shown when a Google sign-in email already exists under email/password.
+/// Collects the existing password so the two providers can be linked.
+class _LinkAccountDialog extends StatefulWidget {
+  final String email;
+  final TextEditingController passCtrl;
+  const _LinkAccountDialog({required this.email, required this.passCtrl});
+
+  @override
+  State<_LinkAccountDialog> createState() => _LinkAccountDialogState();
+}
+
+class _LinkAccountDialogState extends State<_LinkAccountDialog> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('Link Accounts', style: TextStyle(fontWeight: FontWeight.w700)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              style: TextStyle(fontSize: 13.5, color: Colors.grey.shade700, height: 1.45),
+              children: [
+                const TextSpan(text: 'The email '),
+                TextSpan(
+                  text: widget.email,
+                  style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF1F2937)),
+                ),
+                const TextSpan(
+                  text: ' is already registered with a password. Enter your password to link your Google account so you can use both.',
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: widget.passCtrl,
+            obscureText: _obscure,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              suffixIcon: IconButton(
+                icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility, size: 18),
+                onPressed: () => setState(() => _obscure = !_obscure),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text('Cancel', style: TextStyle(color: Colors.grey.shade600)),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, true),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF2563EB),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: const Text('Link & Sign In'),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 class JobBoardHome extends StatefulWidget {
   const JobBoardHome({super.key});
 
@@ -1373,11 +1782,82 @@ class _JobBoardHomeState extends State<JobBoardHome> {
   double _profileCompletion = 0.0;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  int _pendingTestsCount = 0;
 
   @override
   void initState() {
     super.initState();
     _calculateProfileCompletion();
+    _listenPendingTests();
+    _setupFCMHandlers();
+  }
+
+  void _setupFCMHandlers() {
+    // Foreground: app is open → show as a system notification via local plugin
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      final notification = message.notification;
+      final android = message.notification?.android;
+      if (notification != null && android != null) {
+        _localNotif.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              _notifChannel.id,
+              _notifChannel.name,
+              channelDescription: _notifChannel.description,
+              icon: '@mipmap/ic_launcher',
+              color: const Color(0xFF7C3AED),
+              importance: Importance.high,
+              priority: Priority.high,
+            ),
+          ),
+        );
+      }
+    });
+
+    // Background → foreground: user tapped the notification
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      if (mounted) setState(() => _selectedIndex = 3); // Tests tab
+    });
+
+    // Killed → opened via notification tap
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+      if (message != null && mounted) {
+        setState(() => _selectedIndex = 3); // Tests tab
+      }
+    });
+  }
+
+  void _listenPendingTests() {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    _firestore
+        .collection('tests')
+        .where('status', isEqualTo: 'published')
+        .snapshots()
+        .listen((testSnap) async {
+      if (!mounted) return;
+      final publishedIds = testSnap.docs.map((d) => d.id).toSet();
+      if (publishedIds.isEmpty) {
+        if (mounted) setState(() => _pendingTestsCount = 0);
+        return;
+      }
+      final resultSnap = await _firestore
+          .collection('testResults')
+          .where('userId', isEqualTo: user.uid)
+          .get();
+      final doneIds = resultSnap.docs
+          .map((d) => (d.data()['testId'] ?? '') as String)
+          .toSet();
+      if (mounted) {
+        setState(() {
+          _pendingTestsCount = publishedIds.difference(doneIds).length;
+        });
+      }
+    });
   }
 
   Future<void> _calculateProfileCompletion() async {
@@ -1432,34 +1912,62 @@ class _JobBoardHomeState extends State<JobBoardHome> {
         body: _buildBody(),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-        },
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF2563EB),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Bookmark',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school_outlined),
-            label: 'Training',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
+          onTap: (index) => setState(() => _selectedIndex = index),
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          selectedItemColor: const Color(0xFF2563EB),
+          unselectedItemColor: Colors.grey,
+          items: [
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.bookmark),
+              label: 'Bookmark',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.school_outlined),
+              label: 'Training',
+            ),
+            BottomNavigationBarItem(
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Icon(Icons.quiz_outlined),
+                  if (_pendingTestsCount > 0)
+                    Positioned(
+                      top: -4,
+                      right: -6,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            _pendingTestsCount > 9 ? '9+' : '$_pendingTestsCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              label: 'Tests',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1551,7 +2059,7 @@ class _JobBoardHomeState extends State<JobBoardHome> {
                           icon: const Icon(Icons.edit),
                           onPressed: () {
                             Navigator.pop(context);
-                            _selectedIndex = 3;
+                            _selectedIndex = 4;
                             setState(() {});
                           },
                           color: const Color(0xFF2563EB),
@@ -1607,11 +2115,19 @@ class _JobBoardHomeState extends State<JobBoardHome> {
                       },
                     ),
                     _buildDrawerItem(
+                      icon: Icons.quiz_outlined,
+                      label: 'Tests',
+                      onTap: () {
+                        Navigator.pop(context);
+                        setState(() => _selectedIndex = 3);
+                      },
+                    ),
+                    _buildDrawerItem(
                       icon: Icons.person,
                       label: 'My Profile',
                       onTap: () {
                         Navigator.pop(context);
-                        setState(() => _selectedIndex = 3);
+                        setState(() => _selectedIndex = 4);
                       },
                     ),
                     _buildDrawerItem(
@@ -1696,6 +2212,8 @@ class _JobBoardHomeState extends State<JobBoardHome> {
       case 2:
         return const TrainingScreen();
       case 3:
+        return const TestsScreen();
+      case 4:
         return ProfileScreen(
           onBackPressed: () {
             setState(() {
@@ -1924,7 +2442,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchJobScreen())),
                     child: const Text(
                       'See All',
                       style: TextStyle(
@@ -2228,7 +2746,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchJobScreen())),
                     child: const Text(
                       'See All',
                       style: TextStyle(
@@ -2498,20 +3016,26 @@ class JobCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.location_on,
-                      size: 14, color: Color(0xFF6B7280)),
-                  const SizedBox(width: 4),
-                  Text(
-                    location,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF6B7280),
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on,
+                        size: 14, color: Color(0xFF6B7280)),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        location,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF6B7280),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Text(
                 posted_days_ago,
                 style: const TextStyle(
@@ -2757,20 +3281,26 @@ class _JobListItemState extends State<JobListItem> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.location_on,
-                        size: 14, color: Color(0xFF6B7280)),
-                    const SizedBox(width: 4),
-                    Text(
-                      widget.location,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF6B7280),
+                Expanded(
+                  child: Row(
+                    children: [
+                      const Icon(Icons.location_on,
+                          size: 14, color: Color(0xFF6B7280)),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          widget.location,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6B7280),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   widget.posted_days_ago,
                   style: const TextStyle(
@@ -5934,12 +6464,13 @@ class ProfileOnboardingFlow extends StatefulWidget {
 class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
   final PageController _pageController = PageController();
   int _step = 0;
-  static const int _totalSteps = 8;
+  static const int _totalSteps = 10;
 
   // ── Collected data ──────────────────────────────────────────────────────
   String _name = FirebaseAuth.instance.currentUser?.displayName ?? '';
   String _dob = '';
   String _gender = '';
+  String _phone = '';
   String _email = FirebaseAuth.instance.currentUser?.email ?? '';
   String _educationLevel = '';
   String _currentCity = '';
@@ -5949,6 +6480,10 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
   List<String> _jobRoles = [];
   String _englishLevel = '';
   String _workStatus = '';
+  String _profileSummary = '';
+  String _companyName = '';
+  String _jobTitle = '';
+  bool _isCurrentJob = false;
   bool _currentlyPursuing = false;
   String _pursuingLevel = '';
   String _collegeName = '';
@@ -5959,6 +6494,10 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
   final _nameCtrl = TextEditingController(
       text: FirebaseAuth.instance.currentUser?.displayName ?? '');
   final _dobCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _profileSummaryCtrl = TextEditingController();
+  final _companyNameCtrl = TextEditingController();
+  final _jobTitleCtrl = TextEditingController();
   final _citySearchCtrl = TextEditingController();
   final _skillSearchCtrl = TextEditingController();
   final _jobRoleSearchCtrl = TextEditingController();
@@ -5967,19 +6506,6 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
   String _jobRoleSearchQuery = '';
 
   // Indian cities list
-  final List<String> _allCities = [
-    'Ahmedabad', 'Ajmer', 'Aligarh', 'Amritsar', 'Asansol',
-    'Aurangabad', 'Bangalore', 'Bhopal', 'Bhubaneswar', 'Chandigarh',
-    'Chennai', 'Coimbatore', 'Cuttack', 'Dehradun', 'Delhi',
-    'Dhanbad', 'Faridabad', 'Ghaziabad', 'Guwahati', 'Gwalior',
-    'Hyderabad', 'Indore', 'Jaipur', 'Jalandhar', 'Jammu',
-    'Jamshedpur', 'Jodhpur', 'Kanpur', 'Kochi', 'Kolkata',
-    'Lucknow', 'Ludhiana', 'Madurai', 'Meerut', 'Mumbai',
-    'Mysore', 'Nagpur', 'Nashik', 'Noida', 'Patna',
-    'Pune', 'Raipur', 'Rajkot', 'Ranchi', 'Surat',
-    'Thiruvananthapuram', 'Vadodara', 'Varanasi', 'Visakhapatnam',
-  ];
-
   final List<String> _commonSkills = [
     'Communication', 'MS Office', 'Data Entry', 'Sales', 'Customer Service',
     'Accounting', 'Tally', 'Python', 'Java', 'React', 'Flutter',
@@ -6003,6 +6529,10 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
     _pageController.dispose();
     _nameCtrl.dispose();
     _dobCtrl.dispose();
+    _phoneCtrl.dispose();
+    _profileSummaryCtrl.dispose();
+    _companyNameCtrl.dispose();
+    _jobTitleCtrl.dispose();
     _citySearchCtrl.dispose();
     _skillSearchCtrl.dispose();
     _jobRoleSearchCtrl.dispose();
@@ -6018,28 +6548,29 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
       case 1:
         if (_dob.isEmpty) return 'Please select your date of birth';
         if (_gender.isEmpty) return 'Please select your gender';
+        if (_phone.trim().isEmpty) return 'Please enter your phone number';
         return null;
-      case 2:
-        if (_workStatus.isEmpty) return 'Please select your work status';
+      case 2: // Profile Summary — optional
         return null;
       case 3:
-        // Education details – required only when pursuing
-        if (_currentlyPursuing) {
-          if (_pursuingLevel.isEmpty) return 'Please select the education level you are pursuing';
-          if (_collegeName.trim().isEmpty) return 'Please enter your college name';
-          if (_degree.isEmpty) return 'Please select your degree';
-        }
+        if (_workStatus.isEmpty) return 'Please select your work status';
         return null;
-      case 4:
-        if (_currentCity.isEmpty) return 'Please select your current city';
+      case 4: // Work Experience — optional (fresher can skip)
         return null;
       case 5:
-        if (_skills.isEmpty) return 'Please select at least one skill';
+        // Education details — college name always required
+        if (_collegeName.trim().isEmpty) return 'Please enter your college / school name';
         return null;
       case 6:
-        if (_jobRoles.isEmpty) return 'Please select at least one preferred job role';
+        if (_currentCity.isEmpty) return 'Please select your current city';
         return null;
       case 7:
+        if (_skills.isEmpty) return 'Please select at least one skill';
+        return null;
+      case 8:
+        if (_jobRoles.isEmpty) return 'Please select at least one preferred job role';
+        return null;
+      case 9:
         if (_englishLevel.isEmpty) return 'Please select your English proficiency level';
         return null;
       default:
@@ -6092,10 +6623,11 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
   Future<void> _saveAndFinish() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
-    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+    final data = <String, dynamic>{
       'name': _name,
       'dateOfBirth': _dob,
       'gender': _gender,
+      'phone': _phone,
       'email': _email,
       'educationLevel': _educationLevel,
       'currentCity': _currentCity,
@@ -6105,6 +6637,7 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
       'preferredJobRoles': _jobRoles,
       'englishLevel': _englishLevel,
       'workStatus': _workStatus,
+      'profileSummary': _profileSummary,
       'currentlyPursuing': _currentlyPursuing,
       'pursuingLevel': _pursuingLevel,
       'collegeName': _collegeName,
@@ -6112,7 +6645,27 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
       'specialization': _specialization,
       'completionYear': _completionYear,
       'profileComplete': true,
-    }, SetOptions(merge: true));
+    };
+    // Save education as structured array for profile completion check
+    if (_collegeName.trim().isNotEmpty) {
+      data['educationHistory'] = [{
+        'collegeName': _collegeName.trim(),
+        'degree': _degree,
+        'specialization': _specialization,
+        'completionYear': _completionYear,
+        'currentlyPursuing': _currentlyPursuing,
+      }];
+    }
+    // Save work experience if provided
+    if (_companyName.trim().isNotEmpty) {
+      data['employmentHistory'] = [{
+        'companyName': _companyName.trim(),
+        'jobTitle': _jobTitle.trim(),
+        'isCurrentCompany': _isCurrentJob,
+        'employmentType': 'Full-Time',
+      }];
+    }
+    await FirebaseFirestore.instance.collection('users').doc(uid).set(data, SetOptions(merge: true));
     if (mounted) {
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (_) => const JobBoardHome()));
@@ -6144,13 +6697,25 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
               controller: _pageController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
+                // Step 0 – Name + Education Level
                 _StepBasicName(name: _name, onChanged: (v) => setState(() => _name = v), ctrl: _nameCtrl, educationLevel: _educationLevel, onEduChanged: (v) => setState(() => _educationLevel = v)),
-                _StepBasicDetails(name: _name, dob: _dob, gender: _gender, email: _email, onNameChanged: (v) => setState(() => _name = v), onDobChanged: (v) => setState(() => _dob = v), onGenderChanged: (v) => setState(() => _gender = v)),
+                // Step 1 – DOB, Gender, Phone
+                _StepBasicDetails(name: _name, dob: _dob, gender: _gender, email: _email, phone: _phone, phoneCtrl: _phoneCtrl, onNameChanged: (v) => setState(() => _name = v), onDobChanged: (v) => setState(() => _dob = v), onGenderChanged: (v) => setState(() => _gender = v), onPhoneChanged: (v) => setState(() => _phone = v)),
+                // Step 2 – Profile Summary (new)
+                _StepProfileSummary(ctrl: _profileSummaryCtrl, onChanged: (v) => setState(() => _profileSummary = v)),
+                // Step 3 – Work Status
                 _StepWorkStatus(workStatus: _workStatus, onChanged: (v) => setState(() => _workStatus = v)),
+                // Step 4 – Work Experience (new)
+                _StepWorkExperience(companyNameCtrl: _companyNameCtrl, jobTitleCtrl: _jobTitleCtrl, isCurrentJob: _isCurrentJob, onCompanyChanged: (v) => setState(() => _companyName = v), onJobTitleChanged: (v) => setState(() => _jobTitle = v), onCurrentJobChanged: (v) => setState(() => _isCurrentJob = v)),
+                // Step 5 – Education Details
                 _StepEducationDetails(currentlyPursuing: _currentlyPursuing, pursuingLevel: _pursuingLevel, collegeName: _collegeName, degree: _degree, specialization: _specialization, completionYear: _completionYear, onPursuingChanged: (v) => setState(() => _currentlyPursuing = v), onLevelChanged: (v) => setState(() => _pursuingLevel = v), onCollegeChanged: (v) => setState(() => _collegeName = v), onDegreeChanged: (v) => setState(() => _degree = v), onSpecChanged: (v) => setState(() => _specialization = v), onYearChanged: (v) => setState(() => _completionYear = v)),
-                _StepLocation(currentCity: _currentCity, openToRelocation: _openToRelocation, preferredCities: _preferredCities, allCities: _allCities, searchCtrl: _citySearchCtrl, searchQuery: _citySearchQuery, onSearchChanged: (v) => setState(() => _citySearchQuery = v), onCitySelected: (v) => setState(() => _currentCity = v), onRelocationChanged: (v) => setState(() => _openToRelocation = v), onPreferredCitiesChanged: (v) => setState(() => _preferredCities = v)),
+                // Step 6 – Location
+                _StepLocation(currentCity: _currentCity, openToRelocation: _openToRelocation, preferredCities: _preferredCities, searchCtrl: _citySearchCtrl, searchQuery: _citySearchQuery, onSearchChanged: (v) => setState(() => _citySearchQuery = v), onCitySelected: (v) => setState(() => _currentCity = v), onRelocationChanged: (v) => setState(() => _openToRelocation = v), onPreferredCitiesChanged: (v) => setState(() => _preferredCities = v)),
+                // Step 7 – Skills
                 _StepSkills(selected: _skills, allSkills: _commonSkills, searchCtrl: _skillSearchCtrl, searchQuery: _skillSearchQuery, onSearchChanged: (v) => setState(() => _skillSearchQuery = v), onChanged: (v) => setState(() => _skills = v)),
+                // Step 8 – Job Roles
                 _StepJobRoles(selected: _jobRoles, allRoles: _commonJobRoles, searchCtrl: _jobRoleSearchCtrl, searchQuery: _jobRoleSearchQuery, onSearchChanged: (v) => setState(() => _jobRoleSearchQuery = v), onChanged: (v) => setState(() => _jobRoles = v)),
+                // Step 9 – Language
                 _StepLanguage(englishLevel: _englishLevel, onChanged: (v) => setState(() => _englishLevel = v)),
               ],
             ),
@@ -6205,9 +6770,9 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
 
   String _stepTitle(int step) {
     const titles = [
-      'Basic Details', 'Basic Details', 'Experience Details',
-      'Education Details', 'Location Details', 'Skills',
-      'Preferred Job Role', 'Preferred Language',
+      'Basic Details', 'Basic Details', 'Profile Summary',
+      'Experience Details', 'Work Experience', 'Education Details',
+      'Location Details', 'Skills', 'Preferred Job Role', 'Preferred Language',
     ];
     return titles[step];
   }
@@ -6361,9 +6926,10 @@ class _StepBasicName extends StatelessWidget {
 
 // Step 1 – Name, DOB, Gender, Email
 class _StepBasicDetails extends StatelessWidget {
-  final String name, dob, gender, email;
-  final ValueChanged<String> onNameChanged, onDobChanged, onGenderChanged;
-  const _StepBasicDetails({required this.name, required this.dob, required this.gender, required this.email, required this.onNameChanged, required this.onDobChanged, required this.onGenderChanged});
+  final String name, dob, gender, email, phone;
+  final TextEditingController phoneCtrl;
+  final ValueChanged<String> onNameChanged, onDobChanged, onGenderChanged, onPhoneChanged;
+  const _StepBasicDetails({required this.name, required this.dob, required this.gender, required this.email, required this.phone, required this.phoneCtrl, required this.onNameChanged, required this.onDobChanged, required this.onGenderChanged, required this.onPhoneChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -6409,6 +6975,13 @@ class _StepBasicDetails extends StatelessWidget {
               enabled: false,
               controller: TextEditingController(text: email),
               decoration: _inputDec(''),
+            )),
+            const SizedBox(height: 16),
+            _fieldWithRequired('Phone Number', child: TextField(
+              controller: phoneCtrl,
+              onChanged: onPhoneChanged,
+              keyboardType: TextInputType.phone,
+              decoration: _inputDec('Enter your mobile number'),
             )),
           ],
         ),
@@ -6549,52 +7122,55 @@ class _StepEducationDetails extends StatelessWidget {
               ],
             ),
           ),
-          if (currentlyPursuing) ..._buildPursuingFields(context),
+          if (currentlyPursuing)
+            _onboardCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('What are you currently pursuing?',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 12),
+                  Wrap(spacing: 10, runSpacing: 10,
+                    children: _levels.map((l) => _onboardChip(l, pursuingLevel == l, onTap: () => onLevelChanged(l))).toList()),
+                ],
+              ),
+            ),
+          // Always show education details
+          _onboardCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  currentlyPursuing ? 'College / Institution Details' : 'Highest Education Details',
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 14),
+                _labelField(currentlyPursuing ? 'College / Institution Name *' : 'College / School Name *', TextField(
+                  controller: TextEditingController(text: collegeName),
+                  onChanged: onCollegeChanged,
+                  decoration: _dec('e.g. St. Stephens College'),
+                )),
+                const SizedBox(height: 14),
+                _labelField('Degree / Qualification', _dropdown(_degrees, degree, onDegreeChanged)),
+                const SizedBox(height: 14),
+                _labelField('Specialization', _dropdown(_specs, specialization, onSpecChanged)),
+                const SizedBox(height: 14),
+                _labelField(currentlyPursuing ? 'Expected Completion Year' : 'Completion Year', Row(
+                  children: [
+                    Expanded(child: _dropdown(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], '', (_) {})),
+                    const SizedBox(width: 10),
+                    Expanded(child: _dropdown(
+                      List.generate(30, (i) => (DateTime.now().year - 10 + i).toString()),
+                      completionYear, onYearChanged)),
+                  ],
+                )),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
-
-  List<Widget> _buildPursuingFields(BuildContext context) => [
-    _onboardCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('What are you currently pursing?',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          Wrap(spacing: 10, runSpacing: 10,
-            children: _levels.map((l) => _onboardChip(l, pursuingLevel == l, onTap: () => onLevelChanged(l))).toList()),
-        ],
-      ),
-    ),
-    _onboardCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _labelField('College Name', TextField(
-            controller: TextEditingController(text: collegeName),
-            onChanged: onCollegeChanged,
-            decoration: _dec('e.g. St. Stephens'),
-          )),
-          const SizedBox(height: 14),
-          _labelField('Degree', _dropdown(_degrees, degree, onDegreeChanged)),
-          const SizedBox(height: 14),
-          _labelField('Specialization', _dropdown(_specs, specialization, onSpecChanged)),
-          const SizedBox(height: 14),
-          _labelField('Completion year (or expected)', Row(
-            children: [
-              Expanded(child: _dropdown(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], '', (_) {})),
-              const SizedBox(width: 10),
-              Expanded(child: _dropdown(
-                List.generate(30, (i) => (DateTime.now().year - 10 + i).toString()),
-                completionYear, onYearChanged)),
-            ],
-          )),
-        ],
-      ),
-    ),
-  ];
 
   Widget _labelField(String label, Widget child) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -6626,14 +7202,14 @@ class _StepEducationDetails extends StatelessWidget {
 class _StepLocation extends StatefulWidget {
   final String currentCity;
   final bool openToRelocation;
-  final List<String> preferredCities, allCities;
+  final List<String> preferredCities;
   final TextEditingController searchCtrl;
   final String searchQuery;
   final ValueChanged<String> onSearchChanged, onCitySelected;
   final ValueChanged<bool> onRelocationChanged;
   final ValueChanged<List<String>> onPreferredCitiesChanged;
 
-  const _StepLocation({required this.currentCity, required this.openToRelocation, required this.preferredCities, required this.allCities, required this.searchCtrl, required this.searchQuery, required this.onSearchChanged, required this.onCitySelected, required this.onRelocationChanged, required this.onPreferredCitiesChanged});
+  const _StepLocation({required this.currentCity, required this.openToRelocation, required this.preferredCities, required this.searchCtrl, required this.searchQuery, required this.onSearchChanged, required this.onCitySelected, required this.onRelocationChanged, required this.onPreferredCitiesChanged});
 
   @override
   State<_StepLocation> createState() => _StepLocationState();
@@ -6641,6 +7217,36 @@ class _StepLocation extends StatefulWidget {
 
 class _StepLocationState extends State<_StepLocation> {
   bool _showCityPicker = false;
+  List<String> _cities = [];
+  bool _citiesLoading = true;
+  bool _citiesError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCities();
+  }
+
+  Future<void> _fetchCities() async {
+    setState(() { _citiesLoading = true; _citiesError = false; });
+    try {
+      final res = await http.post(
+        Uri.parse('https://countriesnow.space/api/v0.1/countries/cities'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'country': 'India'}),
+      ).timeout(const Duration(seconds: 10));
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body) as Map<String, dynamic>;
+        if (body['error'] == false) {
+          final raw = (body['data'] as List).cast<String>();
+          raw.sort();
+          if (mounted) setState(() { _cities = raw; _citiesLoading = false; });
+          return;
+        }
+      }
+    } catch (_) {}
+    if (mounted) setState(() { _citiesLoading = false; _citiesError = true; });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -6713,8 +7319,10 @@ class _StepLocationState extends State<_StepLocation> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => StatefulBuilder(
         builder: (ctx, setModalState) {
-          final q = ctrl.text.toLowerCase();
-          final filtered = widget.allCities.where((c) => c.toLowerCase().contains(q)).toList();
+          final q = ctrl.text.toLowerCase().trim();
+          final filtered = q.isEmpty
+              ? _cities
+              : _cities.where((c) => c.toLowerCase().contains(q)).toList();
           return DraggableScrollableSheet(
             expand: false, initialChildSize: 0.85,
             builder: (_, scrollCtrl) => Column(
@@ -6729,6 +7337,7 @@ class _StepLocationState extends State<_StepLocation> {
                 Padding(padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextField(
                     controller: ctrl,
+                    autofocus: true,
                     onChanged: (_) => setModalState(() {}),
                     decoration: InputDecoration(
                       hintText: 'Search for a city',
@@ -6737,18 +7346,31 @@ class _StepLocationState extends State<_StepLocation> {
                     ),
                   )),
                 const SizedBox(height: 8),
-                Expanded(child: ListView.builder(
-                  controller: scrollCtrl,
-                  itemCount: filtered.length,
-                  itemBuilder: (_, i) => ListTile(
-                    leading: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: const Color(0xFFF0F0F0), borderRadius: BorderRadius.circular(6)), child: const Icon(Icons.location_on_outlined, size: 18)),
-                    title: Text(filtered[i]),
-                    onTap: () {
-                      widget.onCitySelected(filtered[i]);
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                )),
+                if (_citiesLoading)
+                  const Expanded(child: Center(child: CircularProgressIndicator()))
+                else if (_citiesError)
+                  Expanded(child: Center(
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.wifi_off, size: 40, color: Colors.grey),
+                      const SizedBox(height: 12),
+                      const Text('Could not load cities', style: TextStyle(color: Colors.grey)),
+                      const SizedBox(height: 12),
+                      ElevatedButton(onPressed: () { _fetchCities(); setModalState(() {}); }, child: const Text('Retry')),
+                    ]),
+                  ))
+                else
+                  Expanded(child: ListView.builder(
+                    controller: scrollCtrl,
+                    itemCount: filtered.length,
+                    itemBuilder: (_, i) => ListTile(
+                      leading: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: const Color(0xFFF0F0F0), borderRadius: BorderRadius.circular(6)), child: const Icon(Icons.location_on_outlined, size: 18)),
+                      title: Text(filtered[i]),
+                      onTap: () {
+                        widget.onCitySelected(filtered[i]);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                  )),
               ],
             ),
           );
@@ -6824,8 +7446,10 @@ class _StepLocationState extends State<_StepLocation> {
   }
 
   Widget _buildPreferredCitySheet() {
-    final q = widget.searchQuery.toLowerCase();
-    final filtered = widget.allCities.where((c) => c.toLowerCase().contains(q) && c != widget.currentCity).toList();
+    final q = widget.searchQuery.toLowerCase().trim();
+    final filtered = (q.isEmpty ? _cities : _cities.where((c) => c.toLowerCase().contains(q)).toList())
+        .where((c) => c != widget.currentCity)
+        .toList();
     final suggested = filtered.take(3).toList();
     return Column(
       children: [
@@ -7185,6 +7809,142 @@ class _StepLanguage extends StatelessWidget {
                     ),
                   );
                 }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Onboarding Step: Profile Summary ─────────────────────────────────────────
+class _StepProfileSummary extends StatelessWidget {
+  final TextEditingController ctrl;
+  final ValueChanged<String> onChanged;
+  const _StepProfileSummary({required this.ctrl, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: _onboardCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('About Yourself', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87)),
+            const SizedBox(height: 6),
+            Text(
+              'A short summary helps recruiters understand your background and career goals.',
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: ctrl,
+              onChanged: onChanged,
+              maxLines: 6,
+              maxLength: 500,
+              decoration: InputDecoration(
+                hintText: 'E.g. I am a software developer with 3 years of experience in Flutter and backend development, looking for growth opportunities...',
+                hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 13),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD0D0D0))),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD0D0D0))),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: _kTeal)),
+                alignLabelWithHint: true,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text('Optional — you can fill this later from your profile.', style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Onboarding Step: Work Experience ─────────────────────────────────────────
+class _StepWorkExperience extends StatelessWidget {
+  final TextEditingController companyNameCtrl, jobTitleCtrl;
+  final bool isCurrentJob;
+  final ValueChanged<String> onCompanyChanged, onJobTitleChanged;
+  final ValueChanged<bool> onCurrentJobChanged;
+  const _StepWorkExperience({required this.companyNameCtrl, required this.jobTitleCtrl, required this.isCurrentJob, required this.onCompanyChanged, required this.onJobTitleChanged, required this.onCurrentJobChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: _onboardCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Current / Most Recent Job', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text(
+              'Add your current or last employer. You can add more from your profile later.',
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 16),
+            // Company Name
+            const Text('Company Name', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            TextField(
+              controller: companyNameCtrl,
+              onChanged: onCompanyChanged,
+              decoration: InputDecoration(
+                hintText: 'e.g. Tata Consultancy Services',
+                hintStyle: const TextStyle(color: Color(0xFF9E9E9E)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD0D0D0))),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD0D0D0))),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: _kTeal)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Job Title
+            const Text('Job Title / Designation', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            TextField(
+              controller: jobTitleCtrl,
+              onChanged: onJobTitleChanged,
+              decoration: InputDecoration(
+                hintText: 'e.g. Software Developer',
+                hintStyle: const TextStyle(color: Color(0xFF9E9E9E)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD0D0D0))),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD0D0D0))),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: _kTeal)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Currently working here toggle
+            GestureDetector(
+              onTap: () => onCurrentJobChanged(!isCurrentJob),
+              child: Row(
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    width: 22, height: 22,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: isCurrentJob ? _kTeal : Colors.grey.shade400, width: 2),
+                      color: isCurrentJob ? _kTeal : Colors.transparent,
+                    ),
+                    child: isCurrentJob ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
+                  ),
+                  const SizedBox(width: 10),
+                  const Text('I currently work here', style: TextStyle(fontSize: 14)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(color: const Color(0xFFF0FDF4), borderRadius: BorderRadius.circular(8)),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, size: 16, color: _kTeal),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text('Fresher? Leave company name blank and tap Next to skip.', style: TextStyle(fontSize: 12, color: Colors.grey.shade700))),
+                ],
               ),
             ),
           ],
@@ -9326,36 +10086,42 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 26,
-                                  height: 26,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFF59E0B),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    widget.currency,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 26,
+                                    height: 26,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFF59E0B),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      widget.currency,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 7),
-                                Text(
-                                  widget.salary.isNotEmpty ? widget.salary : 'Not specified',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF1F2937),
+                                  const SizedBox(width: 7),
+                                  Expanded(
+                                    child: Text(
+                                      widget.salary.isNotEmpty ? widget.salary : 'Not specified',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF1F2937),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             Text(
                               widget.posted_days_ago,
                               style: const TextStyle(
@@ -9402,9 +10168,11 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           ),
 
           // ── Apply Button (pinned at bottom) ───────────────────────
-          Container(
+          SafeArea(
+            top: false,
+            child: Container(
             color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
             child: SizedBox(
               width: double.infinity,
               height: 52,
@@ -9474,6 +10242,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                     ),
             ),
           ),
+          ), // SafeArea
         ],
       ),
     );

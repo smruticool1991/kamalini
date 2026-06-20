@@ -104,7 +104,7 @@ function Footer(props) {
                             Download App
                         </h6>
                         <ul className="ft-download">
-                            <li> <Link href="#"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Google Play Store" /></Link></li>
+                            <li> <Link href="https://play.google.com/store/apps/details?id=com.kamaliniapp.india"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Google Play Store" /></Link></li>
                         </ul>
                         </div>
                     </div>
