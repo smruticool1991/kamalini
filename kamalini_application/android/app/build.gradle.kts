@@ -38,8 +38,8 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion  // explicitly set to support Android 5.0+ (flutter.minSdkVersion is now 24 in Flutter 3.38.x)
         targetSdk = flutter.targetSdkVersion
-        versionCode = 10
-        versionName = "0.1.10"
+        versionCode = 11
+        versionName = "0.1.11"
     }
 
     signingConfigs {

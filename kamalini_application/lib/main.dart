@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -7087,7 +7088,7 @@ class _StepWorkStatus extends StatelessWidget {
 }
 
 // Step 3 – Education Details
-class _StepEducationDetails extends StatelessWidget {
+class _StepEducationDetails extends StatefulWidget {
   final bool currentlyPursuing;
   final String pursuingLevel, collegeName, degree, specialization, completionYear;
   final ValueChanged<bool> onPursuingChanged;
@@ -7095,9 +7096,36 @@ class _StepEducationDetails extends StatelessWidget {
 
   const _StepEducationDetails({required this.currentlyPursuing, required this.pursuingLevel, required this.collegeName, required this.degree, required this.specialization, required this.completionYear, required this.onPursuingChanged, required this.onLevelChanged, required this.onCollegeChanged, required this.onDegreeChanged, required this.onSpecChanged, required this.onYearChanged});
 
+  @override
+  State<_StepEducationDetails> createState() => _StepEducationDetailsState();
+}
+
+class _StepEducationDetailsState extends State<_StepEducationDetails> {
   static const _levels = ['10th or Below 10th', '12th Pass', 'Diploma', 'ITI', 'Graduate', 'Post Graduate'];
   static const _degrees = ['B.Tech', 'B.Sc', 'B.Com', 'B.A', 'M.Tech', 'M.Sc', 'M.Com', 'M.A', 'MBA', 'PhD', 'Diploma', 'Other'];
   static const _specs = ['Computer Science', 'Mechanical', 'Electrical', 'Civil', 'Electronics', 'Commerce', 'Arts', 'Science', 'Other'];
+
+  late TextEditingController _collegeCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _collegeCtrl = TextEditingController(text: widget.collegeName);
+  }
+
+  @override
+  void didUpdateWidget(_StepEducationDetails oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.collegeName != oldWidget.collegeName && widget.collegeName != _collegeCtrl.text) {
+      _collegeCtrl.text = widget.collegeName;
+    }
+  }
+
+  @override
+  void dispose() {
+    _collegeCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -7114,15 +7142,15 @@ class _StepEducationDetails extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _onboardChip('Yes', currentlyPursuing, onTap: () => onPursuingChanged(true)),
+                    _onboardChip('Yes', widget.currentlyPursuing, onTap: () => widget.onPursuingChanged(true)),
                     const SizedBox(width: 10),
-                    _onboardChip('No', !currentlyPursuing, onTap: () => onPursuingChanged(false)),
+                    _onboardChip('No', !widget.currentlyPursuing, onTap: () => widget.onPursuingChanged(false)),
                   ],
                 ),
               ],
             ),
           ),
-          if (currentlyPursuing)
+          if (widget.currentlyPursuing)
             _onboardCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -7131,7 +7159,7 @@ class _StepEducationDetails extends StatelessWidget {
                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   Wrap(spacing: 10, runSpacing: 10,
-                    children: _levels.map((l) => _onboardChip(l, pursuingLevel == l, onTap: () => onLevelChanged(l))).toList()),
+                    children: _levels.map((l) => _onboardChip(l, widget.pursuingLevel == l, onTap: () => widget.onLevelChanged(l))).toList()),
                 ],
               ),
             ),
@@ -7141,27 +7169,27 @@ class _StepEducationDetails extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  currentlyPursuing ? 'College / Institution Details' : 'Highest Education Details',
+                  widget.currentlyPursuing ? 'College / Institution Details' : 'Highest Education Details',
                   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 14),
-                _labelField(currentlyPursuing ? 'College / Institution Name *' : 'College / School Name *', TextField(
-                  controller: TextEditingController(text: collegeName),
-                  onChanged: onCollegeChanged,
+                _labelField(widget.currentlyPursuing ? 'College / Institution Name *' : 'College / School Name *', TextField(
+                  controller: _collegeCtrl,
+                  onChanged: widget.onCollegeChanged,
                   decoration: _dec('e.g. St. Stephens College'),
                 )),
                 const SizedBox(height: 14),
-                _labelField('Degree / Qualification', _dropdown(_degrees, degree, onDegreeChanged)),
+                _labelField('Degree / Qualification', _dropdown(_degrees, widget.degree, widget.onDegreeChanged)),
                 const SizedBox(height: 14),
-                _labelField('Specialization', _dropdown(_specs, specialization, onSpecChanged)),
+                _labelField('Specialization', _dropdown(_specs, widget.specialization, widget.onSpecChanged)),
                 const SizedBox(height: 14),
-                _labelField(currentlyPursuing ? 'Expected Completion Year' : 'Completion Year', Row(
+                _labelField(widget.currentlyPursuing ? 'Expected Completion Year' : 'Completion Year', Row(
                   children: [
                     Expanded(child: _dropdown(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], '', (_) {})),
                     const SizedBox(width: 10),
                     Expanded(child: _dropdown(
                       List.generate(30, (i) => (DateTime.now().year - 10 + i).toString()),
-                      completionYear, onYearChanged)),
+                      widget.completionYear, widget.onYearChanged)),
                   ],
                 )),
               ],
@@ -7186,14 +7214,15 @@ class _StepEducationDetails extends StatelessWidget {
   Widget _dropdown(List<String> items, String value, ValueChanged<String> onChanged) =>
     DropdownButtonFormField<String>(
       value: value.isEmpty ? null : value,
-      hint: const Text('Select an option', style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 13)),
+      isExpanded: true,
+      hint: const Text('Select an option', style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 13), overflow: TextOverflow.ellipsis),
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD0D0D0))),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD0D0D0))),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
       icon: const Icon(Icons.keyboard_arrow_down, color: _kTeal),
-      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 13)))).toList(),
+      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis))).toList(),
       onChanged: (v) { if (v != null) onChanged(v); },
     );
 }
@@ -7227,25 +7256,41 @@ class _StepLocationState extends State<_StepLocation> {
     _fetchCities();
   }
 
+  static const _fallbackCities = [
+    'Agra','Ahmedabad','Ajmer','Aligarh','Allahabad','Amravati','Amritsar','Aurangabad',
+    'Bangalore','Bareilly','Bhopal','Bhubaneswar','Bikaner','Chandigarh','Chennai',
+    'Coimbatore','Cuttack','Dehradun','Delhi','Dhanbad','Durg','Faridabad',
+    'Ghaziabad','Gorakhpur','Gurgaon','Guwahati','Gwalior','Hubli','Hyderabad',
+    'Indore','Jabalpur','Jaipur','Jalandhar','Jammu','Jamshedpur','Jodhpur',
+    'Kanpur','Kochi','Kolkata','Kozhikode','Lucknow','Ludhiana','Madurai',
+    'Mangalore','Meerut','Mumbai','Mysore','Nagpur','Nashik','Navi Mumbai',
+    'Noida','Patna','Pune','Raipur','Rajkot','Ranchi','Salem','Shillong',
+    'Shimla','Siliguri','Solapur','Srinagar','Surat','Thane','Thiruvananthapuram',
+    'Tiruchirappalli','Udaipur','Vadodara','Varanasi','Vijayawada','Visakhapatnam',
+    'Warangal',
+  ];
+
   Future<void> _fetchCities() async {
     setState(() { _citiesLoading = true; _citiesError = false; });
+
+    // Primary: load from bundled assets/data/cities.json
     try {
-      final res = await http.post(
-        Uri.parse('https://countriesnow.space/api/v0.1/countries/cities'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'country': 'India'}),
-      ).timeout(const Duration(seconds: 10));
-      if (res.statusCode == 200) {
-        final body = jsonDecode(res.body) as Map<String, dynamic>;
-        if (body['error'] == false) {
-          final raw = (body['data'] as List).cast<String>();
-          raw.sort();
-          if (mounted) setState(() { _cities = raw; _citiesLoading = false; });
-          return;
-        }
-      }
+      final jsonStr = await rootBundle.loadString('assets/data/cities.json');
+      final decoded = jsonDecode(jsonStr);
+      // Support both {"cities": [...]} wrapper and a bare [...]
+      final list = (decoded is Map ? decoded['cities'] : decoded) as List<dynamic>;
+      final cities = list
+          .map((e) => (e as Map<String, dynamic>)['City'] as String? ?? '')
+          .where((c) => c.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort();
+      if (mounted) setState(() { _cities = cities; _citiesLoading = false; });
+      return;
     } catch (_) {}
-    if (mounted) setState(() { _citiesLoading = false; _citiesError = true; });
+
+    // Fallback: bundled hardcoded list
+    if (mounted) setState(() { _cities = List<String>.from(_fallbackCities); _citiesLoading = false; });
   }
 
   @override
@@ -10491,6 +10536,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -11340,43 +11386,46 @@ class _JobAppliedScreenState extends State<JobAppliedScreen> {
           ),
 
           // ── Status Bottom Bar ─────────────────────────────────
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          SafeArea(
+            top: false,
             child: Container(
-              width: double.infinity,
-              height: 52,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                gradient: LinearGradient(
-                  colors: _activeStep >= 3
-                      ? [const Color(0xFF6366F1), const Color(0xFF4338CA)]
-                      : _activeStep >= 2
-                          ? [const Color(0xFFF59E0B), const Color(0xFFD97706)]
-                          : _activeStep >= 1
-                              ? [const Color(0xFF3B82F6), const Color(0xFF2563EB)]
-                              : [const Color(0xFF34D399), const Color(0xFF10B981)],
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.check_circle_outline,
-                      color: Colors.white, size: 22),
-                  const SizedBox(width: 10),
-                  Text(
-                    _status == 'Applied' ? 'Applied Successfully'
-                        : _status == 'Shortlist' || _status == 'Shortlisted' ? 'Shortlisted 🎉'
-                        : _status == 'Application Review' ? 'Under Review'
-                        : _status == 'Interview' ? 'Interview Scheduled 🎊'
-                        : _status,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Container(
+                width: double.infinity,
+                height: 52,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: _activeStep >= 3
+                        ? [const Color(0xFF6366F1), const Color(0xFF4338CA)]
+                        : _activeStep >= 2
+                            ? [const Color(0xFFF59E0B), const Color(0xFFD97706)]
+                            : _activeStep >= 1
+                                ? [const Color(0xFF3B82F6), const Color(0xFF2563EB)]
+                                : [const Color(0xFF34D399), const Color(0xFF10B981)],
                   ),
-                ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.check_circle_outline,
+                        color: Colors.white, size: 22),
+                    const SizedBox(width: 10),
+                    Text(
+                      _status == 'Applied' ? 'Applied Successfully'
+                          : _status == 'Shortlist' || _status == 'Shortlisted' ? 'Shortlisted 🎉'
+                          : _status == 'Application Review' ? 'Under Review'
+                          : _status == 'Interview' ? 'Interview Scheduled 🎊'
+                          : _status,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

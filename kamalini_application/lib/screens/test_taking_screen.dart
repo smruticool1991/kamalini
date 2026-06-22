@@ -371,7 +371,9 @@ class _TestTakingScreenState extends State<TestTakingScreen> {
           ),
 
           // Navigation bar
-          Container(
+          SafeArea(
+            top: false,
+            child: Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             decoration: const BoxDecoration(
               color: Colors.white,
@@ -427,6 +429,7 @@ class _TestTakingScreenState extends State<TestTakingScreen> {
                 ),
               ],
             ),
+          ),
           ),
         ],
       ),
