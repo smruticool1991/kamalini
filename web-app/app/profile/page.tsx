@@ -85,18 +85,12 @@ export default function ProfilePage() {
   const [appsLoading, setAppsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
   const [toggle, setToggle] = useState({ key: '', status: false });
-  const [isShowMobile, setShowMobile] = useState(false);
   const [expandedApp, setExpandedApp] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   const handleToggle = (key: string) =>
     setToggle(prev => prev.key === key ? { key: '', status: false } : { key, status: true });
 
-  const handleMobile = () => {
-    const el = document.querySelector('.menu-mobile-popup');
-    setShowMobile(!isShowMobile);
-    !isShowMobile ? el?.classList.add('modal-menu--open') : el?.classList.remove('modal-menu--open');
-  };
 
   // Auth listener
   useEffect(() => {
@@ -161,7 +155,7 @@ export default function ProfilePage() {
 
   if (loading) return (
     <>
-      <Header4 clname="" handleMobile={handleMobile} />
+      <Header4 clname="" />
       <div style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: 48, height: 48, border: '3px solid #e0e0e0', borderTopColor: '#14a077', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
@@ -214,57 +208,7 @@ export default function ProfilePage() {
         .tab-btn.active { background: linear-gradient(135deg,#14a077,#0f7a5a) !important; color: #fff !important; }
       `}</style>
 
-      {/* Mobile Menu */}
-      <div className="menu-mobile-popup">
-        <div className="modal-menu__backdrop" onClick={handleMobile}></div>
-        <div className="widget-filter">
-          <div className="mobile-header">
-            <div id="logo" className="logo">
-              <Link href="/"><Image className="site-logo" src={logo} alt="Logo" width={100} height={40} /></Link>
-            </div>
-            <span className="title-button-group" onClick={handleMobile} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>
-              <i className="icon-close"></i>
-            </span>
-          </div>
-          <Tabs className="tf-tab">
-            <TabList className="menu-tab">
-              <Tab className="user-tag">Menu</Tab>
-              <Tab className="user-tag">Categories</Tab>
-            </TabList>
-            <div className="content-tab">
-              <TabPanel className="header-ct-center menu-moblie animation-tab">
-                <div className="nav-wrap">
-                  <nav className="main-nav mobile">
-                    <ul id="menu-primary-menu" className="menu">
-                      {[
-                        { key: 'home', label: 'Home', items: [{ href: '/', label: 'Home' }] },
-                        { key: 'job', label: 'Find Jobs', items: [{ href: '/find-jobs', label: 'Browse Jobs' }] },
-                      ].map(item => (
-                        <li key={item.key} className="menu-item menu-item-has-children-mobile">
-                          <Link href="#" className="iteam-menu" onClick={() => handleToggle(item.key)}>{item.label}</Link>
-                          <Collapse isOpened={toggle.key === item.key}>
-                            <ul className="sub-menu-mobile" style={{ display: toggle.key === item.key ? 'block' : 'none' }}>
-                              {item.items.map(s => <li key={s.href} className="menu-item menu-item-mobile"><Link href={s.href}>{s.label}</Link></li>)}
-                            </ul>
-                          </Collapse>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
-                </div>
-              </TabPanel>
-              <TabPanel className="categories animation-tab"><div /></TabPanel>
-            </div>
-          </Tabs>
-          <div className="mobile-footer">
-            <div className="icon-infor d-flex aln-center">
-              <div className="content"><p>Need help? 24/7</p><h6><Link href="tel:0123456678">001-1234-88888</Link></h6></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Header4 clname="actJob2" handleMobile={handleMobile} />
+      <Header4 clname="actJob2" />
 
       {/* ── Hero ── */}
       <section style={{

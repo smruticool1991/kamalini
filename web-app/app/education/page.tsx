@@ -383,7 +383,7 @@ export default function EducationPage() {
   return (
     <>
       <style>{eduStyles}</style>
-      <Header clname="act1" handleMobile={() => {}} />
+      <Header clname="act1" />
 
       {/* ── Hero ── */}
       <section className="edu-hero">

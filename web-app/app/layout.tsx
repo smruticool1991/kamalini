@@ -3,6 +3,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://kajobs.in'),
+  icons: {
+    icon: '/app_icon.png',
+    apple: '/app_icon.png',
+  },
   title: {
     default: 'KA Jobs – Find Jobs, Hire Talent & Build Your Career in India',
     template: '%s | KA Jobs',

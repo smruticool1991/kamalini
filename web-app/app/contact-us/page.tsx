@@ -6,12 +6,6 @@ import Footer from '@/components/footer';
 import Link from 'next/link';
 
 export default function ContactUs() {
-  const [isShowMobile, setShowMobile] = useState(false);
-
-  const handleMobile = () => {
-    setShowMobile(!isShowMobile);
-  };
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -42,7 +36,7 @@ export default function ContactUs() {
   return (
     <>
       <div style={{ backgroundColor: '#f8f9fa' }}>
-        <Header4 handleMobile={handleMobile} />
+        <Header4 />
       </div>
       <main className="main-content">
         <div className="page-header" style={{ background: '#f5f5f5', padding: '60px 0' }}>

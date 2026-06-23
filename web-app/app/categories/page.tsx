@@ -61,19 +61,11 @@ export default function CategoriesPage() {
   const { jobs: allJobs } = useFirebaseAllJobs();
 
   const [toggle, setToggle] = useState({ key: '', status: false });
-  const [isShowMobile, setShowMobile] = useState(false);
   const [search, setSearch] = useState('');
 
   const handleToggle = (key: string) =>
     setToggle(prev => prev.key === key ? { key: '', status: false } : { key, status: true });
 
-  const handleMobile = () => {
-    const el = document.querySelector('.menu-mobile-popup');
-    setShowMobile(!isShowMobile);
-    !isShowMobile
-      ? el?.classList.add('modal-menu--open')
-      : el?.classList.remove('modal-menu--open');
-  };
 
   useEffect(() => {
     const WOW = require('wowjs');
@@ -199,56 +191,8 @@ export default function CategoriesPage() {
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
-      {/* ── Mobile Menu ── */}
-      <div className="menu-mobile-popup">
-        <div className="modal-menu__backdrop" onClick={handleMobile}></div>
-        <div className="widget-filter">
-          <div className="mobile-header">
-            <div id="logo" className="logo">
-              <Link href="/"><Image className="site-logo" src={logo} alt="Logo" width={100} height={40} /></Link>
-            </div>
-            <span className="title-button-group" onClick={handleMobile} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>
-              <i className="icon-close"></i>
-            </span>
-          </div>
-          <Tabs className="tf-tab">
-            <TabList className="menu-tab">
-              <Tab className="user-tag">Menu</Tab>
-              <Tab className="user-tag">Categories</Tab>
-            </TabList>
-            <div className="content-tab">
-              <TabPanel className="header-ct-center menu-moblie animation-tab">
-                <div className="nav-wrap">
-                  <nav className="main-nav mobile">
-                    <ul id="menu-primary-menu" className="menu">
-                      {[
-                        { key: 'home', label: 'Home', href: '/' },
-                        { key: 'jobs', label: 'Find Jobs', href: '/find-jobs' },
-                      ].map(item => (
-                        <li key={item.key} className="menu-item">
-                          <Link href={item.href} className="iteam-menu">{item.label}</Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
-                </div>
-              </TabPanel>
-              <TabPanel className="categories animation-tab"><div /></TabPanel>
-            </div>
-          </Tabs>
-          <div className="mobile-footer">
-            <div className="icon-infor d-flex aln-center">
-              <div className="content">
-                <p>Need help? 24/7</p>
-                <h6><Link href="tel:0123456678">001-1234-88888</Link></h6>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* ── Header ── */}
-      <Header clname="act1" handleMobile={handleMobile} />
+      <Header clname="act1" />
 
       {/* ── Page Hero ── */}
       <section style={{

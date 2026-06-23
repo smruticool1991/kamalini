@@ -453,7 +453,6 @@ export default function JobDetailPage() {
   const { jobs: relatedJobs } = useFirebaseJobs(6);
 
   const [toggle, setToggle] = useState({ key: '', status: false });
-  const [isShowMobile, setShowMobile] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -462,11 +461,6 @@ export default function JobDetailPage() {
   const handleToggle = (key: string) =>
     setToggle(prev => prev.key === key ? { key: '', status: false } : { key, status: true });
 
-  const handleMobile = () => {
-    const el = document.querySelector('.menu-mobile-popup');
-    setShowMobile(!isShowMobile);
-    !isShowMobile ? el?.classList.add('modal-menu--open') : el?.classList.remove('modal-menu--open');
-  };
 
   // Auth listener
   useEffect(() => {
@@ -498,7 +492,7 @@ export default function JobDetailPage() {
 
   if (loading) return (
     <>
-      <Header4 clname="actJob2" handleMobile={handleMobile} />
+      <Header4 clname="actJob2" />
       <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <p style={{ fontSize: 18, color: '#999' }}>Loading job details...</p>
       </div>
@@ -508,7 +502,7 @@ export default function JobDetailPage() {
 
   if (error || !job) return (
     <>
-      <Header4 clname="actJob2" handleMobile={handleMobile} />
+      <Header4 clname="actJob2" />
       <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
         <p style={{ fontSize: 20, fontWeight: 600, color: '#333' }}>Job not found</p>
         <Link href="/find-jobs" style={{ color: '#14a077', textDecoration: 'underline' }}>Browse all jobs</Link>
@@ -534,85 +528,8 @@ export default function JobDetailPage() {
         />
       )}
 
-      {/* ── Mobile Menu ─────────────────────────────────────────────── */}
-      <div className="menu-mobile-popup">
-        <div className="modal-menu__backdrop" onClick={handleMobile}></div>
-        <div className="widget-filter">
-          <div className="mobile-header">
-            <div id="logo" className="logo">
-              <Link href="/"><Image className="site-logo" src={logo} alt="Logo" width={100} height={40} /></Link>
-            </div>
-            <span className="title-button-group" onClick={handleMobile} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>
-              <i className="icon-close"></i>
-            </span>
-          </div>
-          <Tabs className="tf-tab">
-            <TabList className="menu-tab">
-              <Tab className="user-tag">Menu</Tab>
-              <Tab className="user-tag">Categories</Tab>
-            </TabList>
-            <div className="content-tab">
-              <TabPanel className="header-ct-center menu-moblie animation-tab">
-                <div className="nav-wrap">
-                  <nav className="main-nav mobile">
-                    <ul id="menu-primary-menu" className="menu">
-                      {[
-                        { key: 'home', label: 'Home', items: [{ href: '/', label: 'Home Page 01' }] },
-                        { key: 'job', label: 'Find Jobs', items: [{ href: '/find-jobs', label: 'Grid Layout' }], current: true },
-                        { key: 'employers', label: 'Employers', items: [{ href: '/employers-v1', label: 'List Layout' }] },
-                        { key: 'candidate', label: 'Candidates', items: [{ href: '/candidates-v1', label: 'List Layout' }] },
-                        { key: 'blog', label: 'Blog', items: [{ href: '/blog-v1', label: 'Blog List' }] },
-                        { key: 'pages', label: 'Pages', items: [{ href: '/aboutus', label: 'About Us' }, { href: '/login', label: 'Login' }, { href: '/contactus', label: 'Contact Us' }] },
-                      ].map(item => (
-                        <li key={item.key} className={`menu-item menu-item-has-children-mobile${item.current ? ' current-item' : ''}`}>
-                          <Link href="#" className="iteam-menu" onClick={() => handleToggle(item.key)}>{item.label}</Link>
-                          <Collapse isOpened={toggle.key === item.key}>
-                            <ul className="sub-menu-mobile" style={{ display: toggle.key === item.key ? 'block' : 'none' }}>
-                              {item.items.map(s => (
-                                <li key={s.href} className="menu-item menu-item-mobile"><Link href={s.href}>{s.label}</Link></li>
-                              ))}
-                            </ul>
-                          </Collapse>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
-                </div>
-              </TabPanel>
-              <TabPanel className="categories animation-tab">
-                <div className="sub-categorie-mobile">
-                  <ul className="pop-up">
-                    {[['Design & Creative', '1'], ['Digital Marketing', '8'], ['Development & IT', '2'], ['Finance & Accounting', '4'], ['Programming & Tech', '5']].map(([cat, icon]) => (
-                      <li key={cat} className="categories-mobile">
-                        <Link href={`/find-jobs?category=${encodeURIComponent(cat)}`}><span className={`icon-categorie-${icon}`}></span>{cat}</Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </TabPanel>
-            </div>
-          </Tabs>
-          <div className="header-customize-item button"><Link href="/">Upload Resume</Link></div>
-          <div className="mobile-footer">
-            <div className="icon-infor d-flex aln-center">
-              <div className="icon">
-                <span className="icon-call-calling"><span className="path1"></span><span className="path2"></span><span className="path3"></span><span className="path4"></span></span>
-              </div>
-              <div className="content"><p>Need help? 24/7</p><h6><Link href="tel:0123456678">001-1234-88888</Link></h6></div>
-            </div>
-            <div className="wd-social d-flex aln-center">
-              <ul className="list-social d-flex aln-center">
-                {['facebook', 'linkedin2', 'twitter', 'pinterest', 'instagram1', 'youtube'].map(icon => (
-                  <li key={icon}><Link href="#"><i className={`icon-${icon}`}></i></Link></li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* ── Header ── */}
-      <Header4 clname="actJob2" handleMobile={handleMobile} />
+      <Header4 clname="actJob2" />
 
       {/* ── Hero Banner ── */}
       <section className="single-job-thumb">

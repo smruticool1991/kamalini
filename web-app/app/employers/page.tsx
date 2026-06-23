@@ -177,7 +177,6 @@ export default function EmployersPage() {
   const { jobs: allJobs } = useFirebaseAllJobs();
 
   const [toggle, setToggle] = useState({ key: '', status: false });
-  const [isShowMobile, setShowMobile] = useState(false);
   const [search, setSearch]   = useState('');
   const [industry, setIndustry] = useState('All Industries');
   const [sortBy, setSortBy]   = useState('name_asc');
@@ -186,11 +185,6 @@ export default function EmployersPage() {
   const handleToggle = (key: string) =>
     setToggle(prev => prev.key === key ? { key: '', status: false } : { key, status: true });
 
-  const handleMobile = () => {
-    const el = document.querySelector('.menu-mobile-popup');
-    setShowMobile(!isShowMobile);
-    !isShowMobile ? el?.classList.add('modal-menu--open') : el?.classList.remove('modal-menu--open');
-  };
 
   useEffect(() => {
     const WOW = require('wowjs');
@@ -290,57 +284,8 @@ export default function EmployersPage() {
         .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
       `}</style>
 
-      {/* ── Mobile Menu ── */}
-      <div className="menu-mobile-popup">
-        <div className="modal-menu__backdrop" onClick={handleMobile}></div>
-        <div className="widget-filter">
-          <div className="mobile-header">
-            <div id="logo" className="logo">
-              <Link href="/"><Image className="site-logo" src={logo} alt="Logo" width={100} height={40} /></Link>
-            </div>
-            <span className="title-button-group" onClick={handleMobile} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>
-              <i className="icon-close"></i>
-            </span>
-          </div>
-          <Tabs className="tf-tab">
-            <TabList className="menu-tab">
-              <Tab className="user-tag">Menu</Tab>
-              <Tab className="user-tag">Categories</Tab>
-            </TabList>
-            <div className="content-tab">
-              <TabPanel className="header-ct-center menu-moblie animation-tab">
-                <div className="nav-wrap">
-                  <nav className="main-nav mobile">
-                    <ul id="menu-primary-menu" className="menu">
-                      {[
-                        { key: 'home', label: 'Home', href: '/' },
-                        { key: 'jobs', label: 'Find Jobs', href: '/find-jobs' },
-                        { key: 'employers', label: 'Employers', href: '/employers' },
-                      ].map(item => (
-                        <li key={item.key} className="menu-item">
-                          <Link href={item.href} className="iteam-menu">{item.label}</Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
-                </div>
-              </TabPanel>
-              <TabPanel className="categories animation-tab"><div /></TabPanel>
-            </div>
-          </Tabs>
-          <div className="mobile-footer">
-            <div className="icon-infor d-flex aln-center">
-              <div className="content">
-                <p>Need help? 24/7</p>
-                <h6><Link href="tel:0123456678">001-1234-88888</Link></h6>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* ── Header ── */}
-      <Header4 clname="actEm1" handleMobile={handleMobile} />
+      <Header4 clname="actEm1" />
 
       {/* ── Breadcrumb ── */}
       <section className="breadcrumb-section">

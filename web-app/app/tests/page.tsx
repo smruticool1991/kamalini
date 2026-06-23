@@ -590,9 +590,6 @@ export default function TestsPage() {
   const [resultData, setResultData] = useState<{ score: number; total: number; pct: number; passed: boolean; answers: number[]; results: TestResult[] } | null>(null);
   const [showLogin, setShowLogin] = useState(false);
 
-  const handleMobile = () => {
-    document.querySelector('.menu-mobile-popup')?.classList.toggle('modal-menu--open');
-  };
 
   // Auth
   useEffect(() => onAuthStateChanged(auth, u => { setUser(u); setAuthLoading(false); }), []);
@@ -757,38 +754,7 @@ export default function TestsPage() {
   return (
     <>
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
-      <div className="menu-mobile-popup">
-        <div className="modal-menu__backdrop" onClick={handleMobile}></div>
-        <div className="widget-filter">
-          <div className="mobile-header">
-            <div id="logo" className="logo">
-              <Link href="/">
-                <img className="site-logo" src="/logo.png" alt="KA Jobs" />
-              </Link>
-            </div>
-            <span className="title-button-group" onClick={handleMobile} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>
-              <i className="icon-close"></i>
-            </span>
-          </div>
-          <div className="header-ct-center menu-moblie">
-            <div className="nav-wrap">
-              <nav className="main-nav mobile">
-                <ul id="menu-primary-menu" className="menu">
-                  <li className="menu-item"><Link href="/">Home</Link></li>
-                  <li className="menu-item"><Link href="/find-jobs">Find Jobs</Link></li>
-                  <li className="menu-item"><Link href="/employers">Employers</Link></li>
-                  <li className="menu-item"><Link href="/training">Training</Link></li>
-                  <li className="menu-item"><Link href="/education">Education</Link></li>
-                  <li className="menu-item current-item"><Link href="/tests">Tests</Link></li>
-                  <li className="menu-item"><Link href="/blog">Blog</Link></li>
-                </ul>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Header4 clname="actPage1" handleMobile={handleMobile} />
+      <Header4 clname="actPage1" />
 
       {/* Breadcrumb */}
       <div style={{ background: '#fff', borderBottom: '1px solid #f1f5f9', padding: '16px 0' }}>

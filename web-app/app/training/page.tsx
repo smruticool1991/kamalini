@@ -231,7 +231,7 @@ export default function TrainingPage() {
   return (
     <>
       <style>{pageStyles}</style>
-      <Header clname="act1" handleMobile={() => {}} />
+      <Header clname="act1" />
 
       <section className="training-hero">
         <div className="tf-container">

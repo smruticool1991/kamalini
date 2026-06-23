@@ -1,9 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { Collapse } from "react-collapse";
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import React, { useEffect } from "react";
 import Banner01 from "@/components/banner/Banner01";
 import Category from "@/components/category";
 import Jobs from "@/components/jobs";
@@ -75,33 +72,6 @@ export default function Home() {
   }))
   // ── End Firebase data ─────────────────────────────────────
 
-  const [toggle, setToggle] = useState({
-    key: "",
-    status: false,
-  });
-  const [isShowMobile, setShowMobile] = useState(false);
-
-  const handleToggle = (key: string) => {
-    if (toggle.key === key) {
-      setToggle({
-        key: "",
-        status: false,
-      });
-    } else {
-      setToggle({
-        status: true,
-        key,
-      });
-    }
-  };
-
-  const handleMobile = () => {
-    const getMobile = document.querySelector(".menu-mobile-popup");
-    setShowMobile(!isShowMobile);
-    !isShowMobile
-      ? getMobile?.classList.add("modal-menu--open")
-      : getMobile?.classList.remove("modal-menu--open");
-  };
 
   useEffect(() => {
     const WOW = require("wowjs");
@@ -120,97 +90,7 @@ export default function Home() {
 
   return (
     <>
-
-      <div className="menu-mobile-popup">
-        <div className="modal-menu__backdrop" onClick={handleMobile}></div>
-        <div className="widget-filter">
-          {/* ── Logo ── */}
-          <div className="mobile-header">
-            <div id="logo" className="logo">
-              <Link href="/">
-                <img className="site-logo" src="/logo.png" alt="KA Jobs" style={{ height: '40px', width: 'auto' }} />
-              </Link>
-            </div>
-            <span className="title-button-group" onClick={handleMobile} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>
-              <i className="icon-close"></i>
-            </span>
-          </div>
-
-          {/* ── Nav — matches desktop Header exactly ── */}
-          <div className="nav-wrap" style={{ padding: '16px 0' }}>
-            <nav className="main-nav mobile">
-              <ul id="menu-primary-menu" className="menu" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                <li className="menu-item" style={{ borderBottom: '1px solid #f0f0f0' }}>
-                  <Link href="/" className="iteam-menu" onClick={handleMobile}
-                    style={{ display: 'block', padding: '14px 20px', fontWeight: 600, color: '#1a1a2e', textDecoration: 'none', fontSize: 15 }}>
-                    Home
-                  </Link>
-                </li>
-                <li className="menu-item" style={{ borderBottom: '1px solid #f0f0f0' }}>
-                  <Link href="/find-jobs" className="iteam-menu" onClick={handleMobile}
-                    style={{ display: 'block', padding: '14px 20px', fontWeight: 600, color: '#1a1a2e', textDecoration: 'none', fontSize: 15 }}>
-                    Find Jobs
-                  </Link>
-                </li>
-                <li className="menu-item" style={{ borderBottom: '1px solid #f0f0f0' }}>
-                  <Link href="/employers" className="iteam-menu" onClick={handleMobile}
-                    style={{ display: 'block', padding: '14px 20px', fontWeight: 600, color: '#1a1a2e', textDecoration: 'none', fontSize: 15 }}>
-                    Employers
-                  </Link>
-                </li>
-                <li className="menu-item" style={{ borderBottom: '1px solid #f0f0f0' }}>
-                  <Link href="/training" className="iteam-menu" onClick={handleMobile}
-                    style={{ display: 'block', padding: '14px 20px', fontWeight: 600, color: '#1a1a2e', textDecoration: 'none', fontSize: 15 }}>
-                    Training
-                  </Link>
-                </li>
-                <li className="menu-item" style={{ borderBottom: '1px solid #f0f0f0' }}>
-                  <Link href="/education" className="iteam-menu" onClick={handleMobile}
-                    style={{ display: 'block', padding: '14px 20px', fontWeight: 600, color: '#1a1a2e', textDecoration: 'none', fontSize: 15 }}>
-                    Education
-                  </Link>
-                </li>
-                <li className="menu-item">
-                  <Link href="/blog" className="iteam-menu" onClick={handleMobile}
-                    style={{ display: 'block', padding: '14px 20px', fontWeight: 600, color: '#1a1a2e', textDecoration: 'none', fontSize: 15 }}>
-                    Blog
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-          </div>
-
-          {/* ── CTA Button ── */}
-          <div style={{ padding: '16px 20px' }}>
-            <Link href="/find-jobs" onClick={handleMobile}
-              style={{
-                display: 'block', textAlign: 'center', padding: '14px',
-                background: 'linear-gradient(135deg, #14a077, #0f7a5a)',
-                color: '#fff', borderRadius: 10, fontWeight: 700,
-                fontSize: 15, textDecoration: 'none',
-                boxShadow: '0 4px 14px rgba(20,160,119,0.35)',
-              }}>
-              Find Jobs
-            </Link>
-          </div>
-
-          {/* ── Footer info ── */}
-          <div className="mobile-footer" style={{ marginTop: 8 }}>
-            <div className="wd-social d-flex aln-center">
-              <ul className="list-social d-flex aln-center">
-                <li><Link href="#"><i className="icon-facebook"></i></Link></li>
-                <li><Link href="#"><i className="icon-linkedin2"></i></Link></li>
-                <li><Link href="#"><i className="icon-twitter"></i></Link></li>
-                <li><Link href="#"><i className="icon-instagram1"></i></Link></li>
-              </ul>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-
-      <Header clname="act1" handleMobile={handleMobile} />
+      <Header clname="act1" />
       <Banner01 />
 
       <Category data={dataCate.slice(0, 10)} className="job-category-section" />

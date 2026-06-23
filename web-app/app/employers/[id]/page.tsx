@@ -98,7 +98,6 @@ export default function EmployerDetailPage() {
   const { reviews, loading: reviewsLoading, refetch } = useFirebaseReviews(id);
 
   const [toggle, setToggle] = useState({ key: '', status: false });
-  const [isShowMobile, setShowMobile] = useState(false);
   const [followed, setFollowed] = useState(false);
   const [showAll, setShowAll] = useState(false);
 
@@ -118,11 +117,6 @@ export default function EmployerDetailPage() {
   const handleToggle = (key: string) =>
     setToggle(prev => prev.key === key ? { key: '', status: false } : { key, status: true });
 
-  const handleMobile = () => {
-    const el = document.querySelector('.menu-mobile-popup');
-    setShowMobile(!isShowMobile);
-    !isShowMobile ? el?.classList.add('modal-menu--open') : el?.classList.remove('modal-menu--open');
-  };
 
   // Watch auth state & pre-fill form from Google profile
   useEffect(() => {
@@ -198,7 +192,7 @@ export default function EmployerDetailPage() {
   // ─── Loading / Error states ──
   if (loading) return (
     <>
-      <Header4 clname="actEm2" handleMobile={handleMobile} />
+      <Header4 clname="actEm2" />
       <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: 48, height: 48, border: '3px solid #e0e0e0', borderTopColor: '#14a077', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
@@ -212,7 +206,7 @@ export default function EmployerDetailPage() {
 
   if (error || !company) return (
     <>
-      <Header4 clname="actEm2" handleMobile={handleMobile} />
+      <Header4 clname="actEm2" />
       <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
         <p style={{ fontSize: 20, fontWeight: 600, color: '#333' }}>Company not found</p>
         <Link href="/find-jobs" style={{ color: '#14a077', textDecoration: 'underline' }}>Browse Jobs</Link>
@@ -233,58 +227,8 @@ export default function EmployerDetailPage() {
         .star-pick-btn:hover { transform: scale(1.25); }
       `}</style>
 
-      {/* ── Mobile Menu ── */}
-      <div className="menu-mobile-popup">
-        <div className="modal-menu__backdrop" onClick={handleMobile}></div>
-        <div className="widget-filter">
-          <div className="mobile-header">
-            <div id="logo" className="logo">
-              <Link href="/"><Image className="site-logo" src={logo} alt="Logo" width={100} height={40} /></Link>
-            </div>
-            <span className="title-button-group" onClick={handleMobile} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>
-              <i className="icon-close"></i>
-            </span>
-          </div>
-          <Tabs className="tf-tab">
-            <TabList className="menu-tab">
-              <Tab className="user-tag">Menu</Tab>
-              <Tab className="user-tag">Categories</Tab>
-            </TabList>
-            <div className="content-tab">
-              <TabPanel className="header-ct-center menu-moblie animation-tab">
-                <div className="nav-wrap">
-                  <nav className="main-nav mobile">
-                    <ul id="menu-primary-menu" className="menu">
-                      {[
-                        { key: 'home', label: 'Home', items: [{ href: '/', label: 'Home' }] },
-                        { key: 'job', label: 'Find Jobs', items: [{ href: '/find-jobs', label: 'Browse Jobs' }] },
-                      ].map(item => (
-                        <li key={item.key} className="menu-item menu-item-has-children-mobile">
-                          <Link href="#" className="iteam-menu" onClick={() => handleToggle(item.key)}>{item.label}</Link>
-                          <Collapse isOpened={toggle.key === item.key}>
-                            <ul className="sub-menu-mobile" style={{ display: toggle.key === item.key ? 'block' : 'none' }}>
-                              {item.items.map(s => <li key={s.href} className="menu-item menu-item-mobile"><Link href={s.href}>{s.label}</Link></li>)}
-                            </ul>
-                          </Collapse>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
-                </div>
-              </TabPanel>
-              <TabPanel className="categories animation-tab"><div /></TabPanel>
-            </div>
-          </Tabs>
-          <div className="mobile-footer">
-            <div className="icon-infor d-flex aln-center">
-              <div className="content"><p>Need help? 24/7</p><h6><Link href="tel:0123456678">001-1234-88888</Link></h6></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* ── Header ── */}
-      <Header4 clname="actEm2" handleMobile={handleMobile} />
+      <Header4 clname="actEm2" />
 
       {/* ── Hero Banner ── */}
       <section className="single-job-thumb">

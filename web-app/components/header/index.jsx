@@ -11,14 +11,24 @@ import ProfileCompleteModal from "@/components/profileComplete/ProfileCompleteMo
 Header.propTypes = {};
 
 /**
- * @param {{ clname?: string, handleMobile?: () => void }} props
+ * @param {{ clname?: string }} props
  */
-function Header({ clname = "", handleMobile }) {
+function Header({ clname = "" }) {
   const [scroll, setScroll] = useState(0);
   const [user, setUser] = useState(null);
   const [dropOpen, setDropOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const dropRef = useRef(null);
+
+  const handleMobile = () => {
+    setIsMobileOpen((prev) => {
+      const next = !prev;
+      const menu = document.querySelector(".menu-mobile-popup");
+      next ? menu?.classList.add("modal-menu--open") : menu?.classList.remove("modal-menu--open");
+      return next;
+    });
+  };
 
   const prevUserRef = useRef(undefined); // undefined = auth not yet checked (page load)
 
@@ -95,6 +105,57 @@ function Header({ clname = "", handleMobile }) {
 
   return (
     <>
+      {/* ── Mobile slide-out menu ── */}
+      <div className="menu-mobile-popup">
+        <div className="modal-menu__backdrop" onClick={handleMobile} />
+        <div className="widget-filter">
+          <div className="mobile-header">
+            <div id="logo" className="logo">
+              <Link href="/"><img className="site-logo" src="/logo.png" alt="KA Jobs" style={{ height: '40px', width: 'auto' }} /></Link>
+            </div>
+            <span className="title-button-group" onClick={handleMobile} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>
+              <i className="icon-close" />
+            </span>
+          </div>
+          <div className="nav-wrap" style={{ padding: '16px 0' }}>
+            <nav className="main-nav mobile">
+              <ul className="menu" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                {[
+                  { href: '/', label: 'Home' },
+                  { href: '/find-jobs', label: 'Find Jobs' },
+                  { href: '/employers', label: 'Employers' },
+                  { href: '/training', label: 'Training' },
+                  { href: '/education', label: 'Education' },
+                  { href: '/tests', label: 'Tests' },
+                  { href: '/blog', label: 'Blog' },
+                ].map(({ href, label }, i, arr) => (
+                  <li key={href} className="menu-item" style={{ borderBottom: i < arr.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
+                    <Link href={href} onClick={handleMobile}
+                      style={{ display: 'block', padding: '14px 20px', fontWeight: 600, color: '#1a1a2e', textDecoration: 'none', fontSize: 15 }}>
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+          <div style={{ padding: '16px 20px' }}>
+            <Link href="/find-jobs" onClick={handleMobile}
+              style={{ display: 'block', textAlign: 'center', padding: '14px', background: 'linear-gradient(135deg, #14a077, #0f7a5a)', color: '#fff', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 4px 14px rgba(20,160,119,0.35)' }}>
+              Find Jobs
+            </Link>
+          </div>
+          <div className="mobile-footer" style={{ marginTop: 8 }}>
+            <ul className="list-social d-flex aln-center" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li><Link href="#"><i className="icon-facebook" /></Link></li>
+              <li><Link href="#"><i className="icon-linkedin2" /></Link></li>
+              <li><Link href="#"><i className="icon-twitter" /></Link></li>
+              <li><Link href="#"><i className="icon-instagram1" /></Link></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       {/* Profile Completion Modal — shown after login when profile is incomplete */}
       {showProfileModal && user && (
         <ProfileCompleteModal
