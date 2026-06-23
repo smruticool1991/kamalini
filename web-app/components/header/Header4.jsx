@@ -77,6 +77,7 @@ function Header4({ clname = "", handleMobile }) {
                       <li className="menu-item sub4"><Link href="/training">Training</Link></li>
                       <li className="menu-item sub5"><Link href="/education">Education</Link></li>
                       <li className="menu-item sub5"><Link href="/blog">Blog</Link></li>
+                      <li className="menu-item sub6"><Link href="/tests">Tests</Link></li>
                     </ul>
                   </nav>
                 </div>

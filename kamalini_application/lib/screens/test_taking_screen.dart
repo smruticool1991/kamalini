@@ -108,6 +108,17 @@ class _TestTakingScreenState extends State<TestTakingScreen> {
       }
     } catch (_) {}
 
+    // Count existing attempts for this user + test
+    int attemptNumber = 1;
+    try {
+      final prevSnap = await FirebaseFirestore.instance
+          .collection('testResults')
+          .where('testId', isEqualTo: widget.test['id'] as String)
+          .where('userId', isEqualTo: user.uid)
+          .get();
+      attemptNumber = prevSnap.docs.length + 1;
+    } catch (_) {}
+
     await FirebaseFirestore.instance.collection('testResults').add({
       'testId': widget.test['id'] as String,
       'userId': user.uid,
@@ -118,6 +129,7 @@ class _TestTakingScreenState extends State<TestTakingScreen> {
       'percentage': pct,
       'passed': pass,
       'answers': _answers.map((a) => a ?? -1).toList(),
+      'attemptNumber': attemptNumber,
       'completedAt': FieldValue.serverTimestamp(),
     });
 
@@ -128,6 +140,7 @@ class _TestTakingScreenState extends State<TestTakingScreen> {
         builder: (_) => TestResultScreen(
           testId: widget.test['id'] as String,
           userId: user.uid,
+          test: widget.test,
           score: score,
           total: total,
           percentage: pct,

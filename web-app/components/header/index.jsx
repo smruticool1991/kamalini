@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { onAuthStateChanged, signOut, signInWithPopup } from "firebase/auth";
@@ -158,6 +158,7 @@ function Header({ clname = "", handleMobile }) {
                         </li>
                         <li className="menu-item sub4"><Link href="/training">Training</Link></li>
                         <li className="menu-item sub5"><Link href="/education">Education</Link></li>
+                        <li className="menu-item sub5"><Link href="/tests">Tests</Link></li>
                         <li className="menu-item sub5"><Link href="/blog">Blog</Link></li>
                       </ul>
                     </nav>

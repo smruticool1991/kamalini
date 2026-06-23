@@ -14,12 +14,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'screens/splash_screen.dart';
 import 'screens/search_job_screen.dart';
 import 'screens/tests_screen.dart';
+import 'screens/notifications_screen.dart';
+import 'screens/notification_detail_screen.dart';
 import 'services/recommendation_service.dart';
 import 'firebase_options.dart';
 
@@ -28,10 +31,21 @@ import 'firebase_options.dart';
 final FlutterLocalNotificationsPlugin _localNotif =
     FlutterLocalNotificationsPlugin();
 
+// Broadcast stream — fires with the notification payload when user taps one.
+final StreamController<String?> _notifPayloadStream =
+    StreamController<String?>.broadcast();
+
 const AndroidNotificationChannel _notifChannel = AndroidNotificationChannel(
   'new_tests_channel',
   'New Tests',
   description: 'Notifications when new tests are published',
+  importance: Importance.high,
+);
+
+const AndroidNotificationChannel _jobsNotifChannel = AndroidNotificationChannel(
+  'jobs_channel',
+  'Job Notifications',
+  description: 'Notifications for new job postings and alerts',
   importance: Importance.high,
 );
 
@@ -134,14 +148,18 @@ Future<void> _fcmBackgroundHandler(RemoteMessage message) async {
 Future<void> _initFcm() async {
   try {
     FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
-    await _localNotif
+    final androidPlugin = _localNotif
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(_notifChannel);
+            AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.createNotificationChannel(_notifChannel);
+    await androidPlugin?.createNotificationChannel(_jobsNotifChannel);
     await _localNotif.initialize(
       const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        _notifPayloadStream.add(response.payload);
+      },
     );
     await FirebaseMessaging.instance.requestPermission(
       alert: true,
@@ -1785,12 +1803,209 @@ class _JobBoardHomeState extends State<JobBoardHome> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   int _pendingTestsCount = 0;
 
+  StreamSubscription<String?>? _notifPayloadSub;
+
   @override
   void initState() {
     super.initState();
     _calculateProfileCompletion();
     _listenPendingTests();
     _setupFCMHandlers();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkAdminPopup());
+    _notifPayloadSub = _notifPayloadStream.stream.listen((payload) async {
+      if (!mounted || payload == null) return;
+      if (payload.startsWith('jobs:')) {
+        final notifId = payload.substring(5);
+        try {
+          final doc = await FirebaseFirestore.instance
+              .collection('job_notifications')
+              .doc(notifId)
+              .get();
+          if (!mounted) return;
+          final data = doc.exists ? {'id': doc.id, ...doc.data()!} : <String, dynamic>{};
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => NotificationDetailScreen(notification: data),
+            ),
+          );
+        } catch (_) {
+          // Fallback: just switch to Home tab
+          if (mounted) setState(() => _selectedIndex = 0);
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _notifPayloadSub?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _checkAdminPopup() async {
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('app_settings')
+          .doc('popup')
+          .get();
+      if (!mounted) return;
+      final data = snap.data();
+      if (data == null || data['enabled'] != true) return;
+
+      final title = (data['title'] ?? '').toString().trim();
+      final message = (data['message'] ?? '').toString().trim();
+      final buttonText = (data['buttonText'] ?? '').toString().trim();
+      final buttonUrl = (data['buttonUrl'] ?? '').toString().trim();
+      final imageUrl = (data['imageUrl'] ?? '').toString().trim();
+      final dismissText = (data['dismissText'] ?? '').toString().trim().isNotEmpty
+          ? (data['dismissText'] as String).trim()
+          : 'Not now';
+
+      if (title.isEmpty && message.isEmpty) return;
+
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierColor: Colors.black54,
+        builder: (ctx) => Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
+            children: [
+              // White card — top margin makes room for the floating icon
+              Container(
+                margin: const EdgeInsets.only(top: 44),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.fromLTRB(24, 52, 24, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (title.isNotEmpty)
+                      Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1A1A1A),
+                          height: 1.3,
+                        ),
+                      ),
+                    if (message.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        message,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF888888),
+                          height: 1.55,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    // Primary teal pill button
+                    if (buttonText.isNotEmpty)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            Navigator.of(ctx).pop();
+                            if (buttonUrl.isNotEmpty) {
+                              final uri = Uri.tryParse(buttonUrl);
+                              if (uri != null && await canLaunchUrl(uri)) {
+                                await launchUrl(uri,
+                                    mode: LaunchMode.externalApplication);
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00BFA5),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: Text(
+                            buttonText,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 4),
+                    // Dismiss link — label set from admin panel
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF00BFA5),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      child: Text(
+                        dismissText,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Floating circular icon at the top
+              Positioned(
+                top: 0,
+                child: Container(
+                  width: 88,
+                  height: 88,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: imageUrl.isNotEmpty
+                      ? ClipOval(
+                          child: Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.campaign_rounded,
+                              size: 44,
+                              color: Color(0xFF00BFA5),
+                            ),
+                          ),
+                        )
+                      : const Icon(
+                          Icons.campaign_rounded,
+                          size: 44,
+                          color: Color(0xFF00BFA5),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } catch (_) {}
   }
 
   void _setupFCMHandlers() {
@@ -2249,12 +2464,19 @@ class _HomeScreenState extends State<HomeScreen> {
   static const int _jobsPageSize = 10;
   final ScrollController _scrollController = ScrollController();
 
+  // Job notifications
+  int _unreadNotifCount = 0;
+  bool _userIsPaid = false;
+  final Set<String> _shownNotifIds = {};
+  bool _notifInitialLoadDone = false;
+
   @override
   void initState() {
     super.initState();
     _loadRecommendedJobs();
     _fetchJobsForYou();
     _scrollController.addListener(_onScroll);
+    _listenNotifications();
   }
 
   @override
@@ -2262,6 +2484,71 @@ class _HomeScreenState extends State<HomeScreen> {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _listenNotifications() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Check paid status once
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (doc.exists && mounted) {
+        _userIsPaid = doc.data()?['isPaid'] == true;
+      }
+    } catch (_) {}
+
+    FirebaseFirestore.instance
+        .collection('job_notifications')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .listen((snap) {
+      if (!mounted) return;
+      final uid = user.uid;
+      int unread = 0;
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final audience = (data['audience'] ?? 'all') as String;
+        if (audience == 'paid' && !_userIsPaid) continue;
+        final readBy = (data['readBy'] as List?) ?? [];
+        final notifId = doc.id;
+        if (!readBy.contains(uid)) {
+          unread++;
+          // Fire a system notification only for notifications that appeared
+          // after the initial load (avoids blasting all old unread on startup).
+          if (_notifInitialLoadDone && !_shownNotifIds.contains(notifId)) {
+            _shownNotifIds.add(notifId);
+            final title = (data['title'] ?? 'New Job Alert') as String;
+            final body = (data['body'] ?? '') as String;
+            _localNotif.show(
+              notifId.hashCode,
+              title,
+              body.isNotEmpty ? body : 'Tap to view the latest job openings.',
+              const NotificationDetails(
+                android: AndroidNotificationDetails(
+                  'jobs_channel',
+                  'Job Notifications',
+                  channelDescription:
+                      'Notifications for new job postings and alerts',
+                  icon: '@mipmap/ic_launcher',
+                  color: Color(0xFF2563EB),
+                  importance: Importance.high,
+                  priority: Priority.high,
+                ),
+              ),
+              payload: 'jobs:$notifId',
+            );
+          } else {
+            _shownNotifIds.add(notifId);
+          }
+        }
+      }
+      _notifInitialLoadDone = true;
+      setState(() => _unreadNotifCount = unread);
+    });
   }
 
   void _onScroll() {
@@ -2387,26 +2674,48 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 8),
               // Notification Icon
               Stack(
+                clipBehavior: Clip.none,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationsScreen(),
+                        ),
+                      ).then((_) {
+                        // Refresh unread count after returning
+                        if (mounted) setState(() {});
+                      });
+                    },
                     color: Colors.black,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
+                  if (_unreadNotifCount > 0)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        width: 17,
+                        height: 17,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            _unreadNotifCount > 9 ? '9+' : '$_unreadNotifCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ],
@@ -3229,7 +3538,7 @@ class _JobListItemState extends State<JobListItem> {
                             const Icon(Icons.star, size: 14, color: Colors.orange),
                             const SizedBox(width: 2),
                             Text(
-                              '${widget.rating} Review',
+                              widget.rating,
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: Color(0xFF6B7280),
@@ -10097,76 +10406,57 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        // Badge chips
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: widget.badges
-                              .map((badge) => Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 7,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF1F5F9),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: const Color(0xFFE2E8F0),
-                                        width: 1,
+                        // Badge chips — skip empty strings
+                        Builder(builder: (_) {
+                          final validBadges = widget.badges
+                              .where((b) => b.trim().isNotEmpty)
+                              .toList();
+                          if (validBadges.isEmpty) return const SizedBox.shrink();
+                          return Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: validBadges
+                                .map((badge) => Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 7,
                                       ),
-                                    ),
-                                    child: Text(
-                                      badge,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xFF374151),
-                                        fontWeight: FontWeight.w500,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFEEF2F7),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                    ),
-                                  ))
-                              .toList(),
-                        ),
+                                      child: Text(
+                                        badge,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Color(0xFF4B5563),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ))
+                                .toList(),
+                          );
+                        }),
                         const SizedBox(height: 14),
-                        // Salary + time ago
+                        // Salary + location + time ago
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            const Icon(Icons.currency_rupee,
+                                size: 16, color: Color(0xFF2563EB)),
+                            const SizedBox(width: 2),
                             Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 26,
-                                    height: 26,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFFF59E0B),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      widget.currency,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 7),
-                                  Expanded(
-                                    child: Text(
-                                      widget.salary.isNotEmpty ? widget.salary : 'Not specified',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF1F2937),
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                widget.salary.isNotEmpty
+                                    ? widget.salary
+                                    : 'Not specified',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF2563EB),
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const SizedBox(width: 8),
                             Text(
                               widget.posted_days_ago,
                               style: const TextStyle(
@@ -10176,6 +10466,21 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                             ),
                           ],
                         ),
+                        if (widget.location.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on_outlined,
+                                  size: 15, color: Color(0xFF6B7280)),
+                              const SizedBox(width: 4),
+                              Text(
+                                widget.location,
+                                style: const TextStyle(
+                                    fontSize: 13, color: Color(0xFF6B7280)),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -11302,8 +11607,7 @@ class _JobAppliedScreenState extends State<JobAppliedScreen> {
                   StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('jobs')
-                        .where('status', isEqualTo: 'active')
-                        .limit(5)
+                        .limit(10)
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState ==
@@ -11315,11 +11619,12 @@ class _JobAppliedScreenState extends State<JobAppliedScreen> {
                         ));
                       }
                       final docs = snapshot.data?.docs ?? [];
-                      // Exclude current job
-                      final similar = docs
-                          .where((d) => d.id != widget.jobId)
-                          .take(4)
-                          .toList();
+                      // Exclude current job and unapproved jobs
+                      final similar = docs.where((d) {
+                        if (d.id == widget.jobId) return false;
+                        final st = ((d.data() as Map<String, dynamic>)['status'] ?? 'approved').toString();
+                        return st == 'approved' || st == 'active';
+                      }).take(4).toList();
 
                       if (similar.isEmpty) {
                         return const Padding(
@@ -11618,13 +11923,15 @@ class _SimilarJobCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          const Icon(Icons.star,
-                              size: 12, color: Colors.amber),
+                          const Icon(Icons.currency_rupee,
+                              size: 12, color: Color(0xFF2563EB)),
                           const SizedBox(width: 2),
-                          const Text(
-                            '4.5 Review',
-                            style: TextStyle(
-                                fontSize: 11, color: Color(0xFF6B7280)),
+                          Text(
+                            salary.isNotEmpty ? salary : '—',
+                            style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF2563EB),
+                                fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
@@ -11825,7 +12132,9 @@ class _CategoryJobsScreen extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('jobs').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('jobs')
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: Color(0xFF2563EB)));
@@ -12158,7 +12467,9 @@ class _SkillJobsScreen extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('jobs').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('jobs')
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: Color(0xFF2563EB)));

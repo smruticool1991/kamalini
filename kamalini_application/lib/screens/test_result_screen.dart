@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'test_taking_screen.dart';
 
 class TestResultScreen extends StatefulWidget {
   final String testId;
   final String userId;
+  // Test doc (for retake settings)
+  final Map<String, dynamic>? test;
   // Supplied directly after test submission
   final int? score;
   final int? total;
@@ -16,6 +19,7 @@ class TestResultScreen extends StatefulWidget {
     super.key,
     required this.testId,
     required this.userId,
+    this.test,
     this.score,
     this.total,
     this.percentage,
@@ -30,6 +34,7 @@ class TestResultScreen extends StatefulWidget {
 
 class _TestResultScreenState extends State<TestResultScreen> {
   Map<String, dynamic>? _savedResult;
+  List<Map<String, dynamic>> _allResults = [];
   bool _loading = true;
 
   bool get _hasDirectData => widget.score != null;
@@ -39,6 +44,7 @@ class _TestResultScreenState extends State<TestResultScreen> {
     super.initState();
     if (_hasDirectData) {
       _loading = false;
+      _fetchAllResults(); // still fetch to compute retake eligibility
     } else {
       _fetchResult();
     }
@@ -52,7 +58,6 @@ class _TestResultScreenState extends State<TestResultScreen> {
           .where('userId', isEqualTo: widget.userId)
           .get();
       if (snap.docs.isNotEmpty && mounted) {
-        // take latest by completedAt if multiple
         final docs = snap.docs.toList();
         docs.sort((a, b) {
           final at = a.data()['completedAt'] as Timestamp?;
@@ -64,6 +69,7 @@ class _TestResultScreenState extends State<TestResultScreen> {
         });
         setState(() {
           _savedResult = docs.first.data();
+          _allResults = docs.map((d) => d.data()).toList();
           _loading = false;
         });
       } else {
@@ -72,6 +78,98 @@ class _TestResultScreenState extends State<TestResultScreen> {
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _fetchAllResults() async {
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('testResults')
+          .where('testId', isEqualTo: widget.testId)
+          .where('userId', isEqualTo: widget.userId)
+          .get();
+      if (!mounted) return;
+      final docs = snap.docs.toList();
+      docs.sort((a, b) {
+        final at = a.data()['completedAt'] as Timestamp?;
+        final bt = b.data()['completedAt'] as Timestamp?;
+        if (at == null && bt == null) return 0;
+        if (at == null) return 1;
+        if (bt == null) return -1;
+        return bt.compareTo(at);
+      });
+      setState(() => _allResults = docs.map((d) => d.data()).toList());
+    } catch (_) {}
+  }
+
+  // Returns (canRetake, blockReason, countdown)
+  ({bool canRetake, String blockReason, Duration? countdown}) get _retakeStatus {
+    final test = widget.test;
+    if (test == null || test['retakeAllowed'] != true) {
+      return (canRetake: false, blockReason: '', countdown: null);
+    }
+
+    final maxRetakes = (test['maxRetakes'] ?? 0) as int;
+    final cooldownHours = (test['retakeCooldownHours'] ?? 0) as int;
+    final attemptCount = _allResults.length;
+
+    if (maxRetakes > 0 && attemptCount >= maxRetakes) {
+      return (
+        canRetake: false,
+        blockReason: 'Max attempts reached ($attemptCount/$maxRetakes)',
+        countdown: null,
+      );
+    }
+
+    if (cooldownHours > 0 && _allResults.isNotEmpty) {
+      final completedAt = _allResults.first['completedAt'] as Timestamp?;
+      if (completedAt != null) {
+        final canRetakeAt =
+            completedAt.toDate().add(Duration(hours: cooldownHours));
+        final now = DateTime.now();
+        if (now.isBefore(canRetakeAt)) {
+          return (
+            canRetake: false,
+            blockReason: '',
+            countdown: canRetakeAt.difference(now),
+          );
+        }
+      }
+    }
+
+    // Criteria check: who is eligible to retake
+    final criteria = (test['retakeCriteria'] ?? 'all') as String;
+    if (criteria != 'all' && _allResults.isNotEmpty) {
+      final latest = _allResults.first; // sorted newest-first
+      if (criteria == 'failed_only') {
+        final latestPassed = latest['passed'] as bool? ?? false;
+        if (latestPassed) {
+          return (
+            canRetake: false,
+            blockReason: 'Only failed users can retake',
+            countdown: null,
+          );
+        }
+      } else if (criteria == 'below_percentage') {
+        final threshold = (test['retakeBelowPercentage'] ?? 50) as int;
+        final pct = (latest['percentage'] ?? 0) as int;
+        if (pct >= threshold) {
+          return (
+            canRetake: false,
+            blockReason: 'Score $pct% meets the $threshold% threshold',
+            countdown: null,
+          );
+        }
+      }
+    }
+
+    return (canRetake: true, blockReason: '', countdown: null);
+  }
+
+  String _formatDuration(Duration d) {
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    if (h > 0) return '${h}h ${m}m';
+    return '${m}m';
   }
 
   @override
@@ -285,15 +383,21 @@ class _TestResultScreenState extends State<TestResultScreen> {
             ],
 
             const SizedBox(height: 20),
+
+            // ── Retake button ──
+            if (widget.test != null && widget.test!['retakeAllowed'] == true)
+              _buildRetakeSection(),
+
+            const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: OutlinedButton(
                 onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C3AED),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF7C3AED),
+                  side: const BorderSide(color: Color(0xFF7C3AED)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: const Text('Back to Tests',
@@ -307,17 +411,124 @@ class _TestResultScreenState extends State<TestResultScreen> {
     );
   }
 
+  Widget _buildRetakeSection() {
+    final info = _retakeStatus;
+
+    if (info.canRetake) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TestTakingScreen(test: widget.test!),
+                ),
+              );
+            },
+            icon: const Icon(Icons.replay, size: 18),
+            label: const Text('Retake Test',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF7C3AED),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (info.countdown != null) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.timer_outlined,
+                  size: 16, color: Color(0xFF94A3B8)),
+              const SizedBox(width: 8),
+              Text(
+                'Retake available in ${_formatDuration(info.countdown!)}',
+                style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF94A3B8),
+                    fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (info.blockReason.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFEF2F2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFFECACA)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.block_rounded,
+                  size: 16, color: Color(0xFFDC2626)),
+              const SizedBox(width: 8),
+              Text(
+                info.blockReason,
+                style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFFDC2626),
+                    fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
   Widget _statItem(String value, String label) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+        Text(value,
+            style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white)),
         const SizedBox(height: 2),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.75))),
+        Text(label,
+            style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withValues(alpha: 0.75))),
       ],
     );
   }
 
   Widget _divider() {
-    return Container(width: 1, height: 36, color: Colors.white.withOpacity(0.25));
+    return Container(
+        width: 1,
+        height: 36,
+        color: Colors.white.withValues(alpha: 0.25));
   }
 }

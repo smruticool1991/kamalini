@@ -1,7 +1,7 @@
 name: 'KAJobs'
 description: "KA Jobs - Find the best job opportunities and build your career with ease."
 publish_to: 'none'
-version: 0.1.11
+version: 0.1.12
 
 environment:
   sdk: ^3.10.8

@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../main.dart' show JobDetailsScreen;
+import '../main.dart' show JobDetailsScreen, JobListItem;
 import '../services/recommendation_service.dart';
 
 class SearchJobScreen extends StatefulWidget {
-  const SearchJobScreen({super.key});
+  final String? initialKeyword;
+  const SearchJobScreen({super.key, this.initialKeyword});
   @override
   State<SearchJobScreen> createState() => _SearchJobScreenState();
 }
@@ -50,6 +51,10 @@ class _SearchJobScreenState extends State<SearchJobScreen> {
     _loadRecommendedJobs();
     _keywordController.addListener(_onKeywordChanged);
     _locationController.addListener(_onLocationChanged);
+    if (widget.initialKeyword != null && widget.initialKeyword!.isNotEmpty) {
+      _keywordController.text = widget.initialKeyword!;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _search());
+    }
     _keywordFocus.addListener(() {
       if (!_keywordFocus.hasFocus) _removeKeywordOverlay();
     });
@@ -74,18 +79,65 @@ class _SearchJobScreenState extends State<SearchJobScreen> {
   Future<void> _loadCache() async {
     try {
       final snap = await FirebaseFirestore.instance.collection('jobs').get();
-      _allJobs = snap.docs.map((d) {
+      _allJobs = snap.docs.where((d) {
+        final status = (d.data()['status'] ?? 'approved').toString();
+        return status == 'approved' || status == 'active';
+      }).map((d) {
         final data = d.data();
+
+        // Compute time-ago string from createdAt
+        String timeAgo = (data['posted'] ?? '').toString();
+        final createdAtRaw = data['createdAt'];
+        if (createdAtRaw != null) {
+          try {
+            DateTime dt;
+            if (createdAtRaw is Timestamp) {
+              dt = createdAtRaw.toDate();
+            } else {
+              dt = DateTime.parse(createdAtRaw.toString());
+            }
+            final diff = DateTime.now().difference(dt);
+            if (diff.inDays > 0) {
+              timeAgo = '${diff.inDays} Day${diff.inDays > 1 ? 's' : ''} ago';
+            } else if (diff.inHours > 0) {
+              timeAgo = '${diff.inHours} Hour${diff.inHours > 1 ? 's' : ''} ago';
+            } else {
+              timeAgo = 'Just now';
+            }
+          } catch (_) {}
+        }
+
+        // Derive job-type badges
+        final rawBadges = List<String>.from(data['badges'] ?? []);
+        List<String> badges;
+        if (rawBadges.isNotEmpty && rawBadges.any((b) => b.isNotEmpty)) {
+          badges = rawBadges;
+        } else {
+          final exp = (data['experience'] ?? '').toString().toLowerCase();
+          badges = [];
+          if (exp.contains('senior') || exp.contains('lead')) {
+            badges.add('Executive');
+          } else if (exp.contains('entry')) {
+            badges.add('Entry Level');
+          }
+          badges.add('Full-Time');
+          badges.add('Remote');
+        }
+
         return {
           'id': d.id,
+          'companyId': data['companyId'] ?? '',
           'title': data['title'] ?? '',
           'company': data['company'] ?? '',
           'category': data['category'] ?? '',
           'salary': data['salary'] ?? '',
           'location': data['location'] ?? '',
-          'posted': data['posted'] ?? '',
+          'posted': timeAgo,
           'rating': (data['rating'] ?? '4.5').toString(),
-          'badges': List<String>.from(data['badges'] ?? [data['type'] ?? '']),
+          'badges': badges,
+          'description': data['description'] ?? '',
+          'experience': data['experience'] ?? '',
+          'currency': data['currency'] ?? '₹',
         };
       }).toList();
       if (mounted) setState(() => _cacheLoaded = true);
@@ -215,7 +267,7 @@ class _SearchJobScreenState extends State<SearchJobScreen> {
           description: job['description']?.toString() ?? '',
           experience: job['experience']?.toString() ?? '',
           category: job['category']?.toString() ?? '',
-          currency: job['currency']?.toString() ?? 'Rs',
+          currency: job['currency']?.toString() ?? '₹',
         ),
       ),
     );
@@ -527,10 +579,24 @@ class _SearchJobScreenState extends State<SearchJobScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       itemCount: _results.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, i) => _SearchResultCard(
-        job: _results[i],
-        onTap: () => _openDetail(_results[i]),
-      ),
+      itemBuilder: (_, i) {
+        final job = _results[i];
+        return JobListItem(
+          jobId: job['id'] ?? '',
+          companyId: job['companyId'] ?? '',
+          title: job['title'] ?? '',
+          company: job['company'] ?? '',
+          location: job['location'] ?? '',
+          rating: job['rating']?.toString() ?? '4.5',
+          badges: List<String>.from(job['badges'] ?? []),
+          posted_days_ago: job['posted'] ?? '',
+          salary_range: job['salary'] ?? '',
+          description: job['description'] ?? '',
+          experience: job['experience'] ?? '',
+          category: job['category'] ?? '',
+          currency: job['currency'] ?? '₹',
+        );
+      },
     );
   }
 
@@ -971,143 +1037,3 @@ class _HorizontalJobCard extends StatelessWidget {
   }
 }
 
-class _SearchResultCard extends StatelessWidget {
-  final Map<String, dynamic> job;
-  final VoidCallback? onTap;
-
-  const _SearchResultCard({required this.job, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final badges = List<String>.from(job['badges'] ?? []);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.work_outline,
-                    size: 20, color: Color(0xFF2563EB)),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      job['title'] ?? '',
-                      style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1F2937)),
-                    ),
-                    Text(
-                      job['company'] ?? '',
-                      style: const TextStyle(
-                          fontSize: 12, color: Color(0xFF2563EB)),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star,
-                          size: 13, color: Color(0xFFF59E0B)),
-                      const SizedBox(width: 2),
-                      Text(
-                        job['rating']?.toString() ?? '4.5',
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF374151)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  const Icon(Icons.bookmark_border,
-                      size: 18, color: Color(0xFF9CA3AF)),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              const Icon(Icons.currency_rupee, size: 13, color: Color(0xFF2563EB)),
-              const SizedBox(width: 2),
-              Text(
-                job['salary'] ?? '',
-                style: const TextStyle(
-                    fontSize: 12, color: Color(0xFF374151)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 4,
-            children: badges
-                .map((b) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF3F4F6),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(b,
-                          style: const TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF374151))),
-                    ))
-                .toList(),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.location_on_outlined,
-                  size: 13, color: Color(0xFF9CA3AF)),
-              const SizedBox(width: 2),
-              Expanded(
-                child: Text(
-                  job['location'] ?? '',
-                  style: const TextStyle(
-                      fontSize: 12, color: Color(0xFF9CA3AF)),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Text(
-                job['posted'] ?? '',
-                style: const TextStyle(
-                    fontSize: 11, color: Color(0xFF9CA3AF)),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-  }
-}
