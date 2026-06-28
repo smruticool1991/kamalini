@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { onAuthStateChanged, signOut, signInWithPopup } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, googleProvider, db } from "@/lib/firebase";
 // Direct import — pre-bundled so no chunk-load delay on mobile after sign-in
 import ProfileCompleteModal from "@/components/profileComplete/ProfileCompleteModal";
@@ -91,7 +91,23 @@ function Header({ clname = "" }) {
   }, []);
 
   const handleSignOut = async () => { await signOut(auth); setDropOpen(false); };
-  const handleGoogleLogin = async () => { try { await signInWithPopup(auth, googleProvider); } catch(e) { console.error(e); } };
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const u = result.user;
+      const userRef = doc(db, 'users', u.uid);
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) {
+        await setDoc(userRef, {
+          name: u.displayName ?? '',
+          email: u.email ?? '',
+          signInMethod: 'google',
+          profileComplete: false,
+          createdAt: serverTimestamp(),
+        });
+      }
+    } catch(e) { console.error(e); }
+  };
   const getInitial = (name) => (name || "U")[0].toUpperCase();
 
   useEffect(() => {

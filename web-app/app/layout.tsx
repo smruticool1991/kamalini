@@ -8,11 +8,11 @@ export const metadata: Metadata = {
     apple: '/app_icon.png',
   },
   title: {
-    default: 'KA Jobs – Find Jobs, Hire Talent & Build Your Career in India',
-    template: '%s | KA Jobs',
+    default: 'KA JOBS – Official Digital Platforms',
+    template: '%s | KA JOBS',
   },
-  description: 'KA Jobs is India\'s fastest growing job portal. Search thousands of job openings, apply instantly, and connect with top employers across IT, sales, marketing, engineering, healthcare and more.',
-  keywords: 'jobs India, job search India, job portal India, find jobs, hire candidates, job openings, fresher jobs, experienced jobs, IT jobs India, sales jobs, marketing jobs, engineering jobs, KA Jobs',
+  description: 'One Platform Connecting Employers, Students, and Training Institutions Across India.',
+  keywords: 'jobs India, job search India, job portal India, find jobs, hire candidates, job openings, fresher jobs, experienced jobs, IT jobs India, sales jobs, marketing jobs, engineering jobs, training India, KA Jobs',
   authors: [{ name: 'KA Jobs' }],
   creator: 'KA Jobs',
   publisher: 'KA Jobs',
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_IN',
     url: 'https://kajobs.in',
-    siteName: 'KA Jobs',
-    title: 'KA Jobs – Find Jobs, Hire Talent & Build Your Career in India',
-    description: 'India\'s fastest growing job portal. Search thousands of job openings and connect with top employers.',
+    siteName: 'KA JOBS',
+    title: 'KA JOBS – Official Digital Platforms',
+    description: 'One Platform Connecting Employers, Students, and Training Institutions Across India.',
     images: [
       {
         url: '/og-image.png',
@@ -45,14 +45,30 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'KA Jobs – Find Jobs & Hire Talent in India',
-    description: 'India\'s fastest growing job portal. Search thousands of job openings and connect with top employers.',
+    title: 'KA JOBS – Official Digital Platforms',
+    description: 'One Platform Connecting Employers, Students, and Training Institutions Across India.',
     images: ['/og-image.png'],
   },
   alternates: {
     canonical: 'https://kajobs.in',
   },
 };
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'KA JOBS',
+  url: 'https://kajobs.in',
+  logo: 'https://kajobs.in/logo.png',
+  sameAs: [
+    'https://www.facebook.com/hr.kamalini',
+    'https://in.linkedin.com/company/kamalini-associates',
+    'https://x.com/XKAJOBS',
+    'https://www.instagram.com/hrkamalini/',
+    'https://www.youtube.com/@kamaliniassociates',
+    'https://wa.me/message/6XMKT3X6OCO4N1',
+  ],
+}
 
 export default function RootLayout({
   children,
@@ -69,6 +85,10 @@ export default function RootLayout({
         <link rel="stylesheet" href="/shortcodes.css" />
         <link rel="stylesheet" href="/style.css" />
         <link rel="stylesheet" href="/responsive.css" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
       </head>
       <body suppressHydrationWarning>{children}</body>
     </html>

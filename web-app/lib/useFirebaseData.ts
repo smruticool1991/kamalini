@@ -19,6 +19,7 @@ export interface FirebaseJob {
   id: string
   title: string
   company: string
+  companyId?: string
   location: string
   salary?: string
   currency?: string

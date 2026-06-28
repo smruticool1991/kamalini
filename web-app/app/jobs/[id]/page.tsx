@@ -16,7 +16,7 @@ import {
   signInWithPopup, signOut, onAuthStateChanged,
   type User,
 } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDoc, doc, setDoc } from 'firebase/firestore';
 import { extractId, generateJobUrl } from '@/lib/slug';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -40,7 +40,21 @@ function LoginModal({ onClose, onLogin }: { onClose: () => void; onLogin: () => 
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const u = result.user;
+      // Create a minimal users doc on first Google sign-in so candidateProfile
+      // has at least name/email when the user applies before completing profile
+      const userRef = doc(db, 'users', u.uid);
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) {
+        await setDoc(userRef, {
+          name: u.displayName ?? '',
+          email: u.email ?? '',
+          signInMethod: 'google',
+          profileComplete: false,
+          createdAt: serverTimestamp(),
+        });
+      }
       onLogin();
     } catch (err) {
       console.error('Login failed:', err);
@@ -138,7 +152,7 @@ function ApplicationModal({
   user, job, onClose,
 }: {
   user: User;
-  job: { id: string; title: string; company: string; location?: string; category?: string };
+  job: { id: string; title: string; company: string; companyId?: string; location?: string; category?: string };
   onClose: () => void;
 }) {
   const [step, setStep] = useState(1); // 1=Personal, 2=Professional, 3=Documents, 4=Success
@@ -165,24 +179,56 @@ function ApplicationModal({
     if (!form.agreeTerms) return;
     setSubmitting(true);
     try {
+      // Fetch candidate profile — user can always read their own doc
+      let candidateProfile: Record<string, any> = {};
+      try {
+        const profileSnap = await getDoc(doc(db, 'users', user.uid));
+        if (profileSnap.exists()) {
+          const p = profileSnap.data();
+          candidateProfile = {
+            dateOfBirth:       p.dateOfBirth       ?? '',
+            gender:            p.gender             ?? '',
+            currentCity:       p.currentCity || p.location || '',
+            workStatus:        p.workStatus         ?? '',
+            profileSummary:    p.profileSummary     ?? '',
+            keySkills:         p.keySkills          ?? '',
+            preferredJobRoles: p.preferredJobRoles  ?? [],
+            educationLevel:    p.educationLevel     ?? '',
+            collegeName:       p.collegeName        ?? '',
+            degree:            p.degree             ?? '',
+            specialization:    p.specialization     ?? '',
+            completionYear:    p.completionYear     ?? '',
+            englishLevel:      p.englishLevel       ?? '',
+            openToRelocation:  p.openToRelocation   ?? false,
+            preferredCities:   p.preferredCities    ?? [],
+            profileComplete:   p.profileComplete    ?? false,
+            signInMethod:      p.signInMethod       ?? 'google',
+            employmentHistory: p.employmentHistory  ?? [],
+            educationHistory:  p.educationHistory   ?? [],
+          };
+        }
+      } catch { /* profile not found or not yet created */ }
+
       await addDoc(collection(db, 'applications'), {
-        jobId: job.id,
-        jobTitle: job.title,
-        company: job.company,
-        applicantUid: user.uid,
-        applicantName: form.fullName,
+        jobId:          job.id,
+        jobTitle:       job.title,
+        company:        job.company,
+        companyId:      job.companyId ?? '',
+        applicantUid:   user.uid,
+        applicantName:  form.fullName,
         applicantEmail: form.email,
-        phone: form.phone,
-        currentRole: form.currentRole,
-        experience: form.experience,
-        currentSalary: form.currentSalary,
-        noticePeriod: form.noticePeriod,
-        linkedin: form.linkedin,
-        portfolio: form.portfolio,
-        resumeUrl: form.resumeUrl,
-        coverLetter: form.coverLetter,
-        status: 'pending',
-        appliedAt: serverTimestamp(),
+        phone:          form.phone,
+        currentRole:    form.currentRole,
+        experience:     form.experience,
+        currentSalary:  form.currentSalary,
+        noticePeriod:   form.noticePeriod,
+        linkedin:       form.linkedin,
+        portfolio:      form.portfolio,
+        resumeUrl:      form.resumeUrl,
+        coverLetter:    form.coverLetter,
+        status:         'Applied',
+        appliedAt:      serverTimestamp(),
+        candidateProfile,
       });
       setStep(4);
     } catch (err) {
@@ -523,7 +569,7 @@ export default function JobDetailPage() {
       {showAppModal && user && (
         <ApplicationModal
           user={user}
-          job={{ id: actualId, title: job.title, company: job.company, location: job.location, category: job.category }}
+          job={{ id: actualId, title: job.title, company: job.company, companyId: job.companyId, location: job.location, category: job.category }}
           onClose={() => setShowAppModal(false)}
         />
       )}
