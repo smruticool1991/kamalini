@@ -9,6 +9,7 @@ import Gotop from '@/components/gotop';
 import { collection, query, onSnapshot, addDoc, serverTimestamp, where, limit, getDocs, getDoc, doc as fbDoc } from 'firebase/firestore';
 import { db, auth, googleProvider } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithPopup, User } from 'firebase/auth';
+import { useCandidatePlan } from '@/lib/useCandidatePlan';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface EduEntry {
@@ -53,10 +54,12 @@ function EducationCard({
   entry,
   institutionImageMap,
   currentUser,
+  hasActivePlan,
 }: {
   entry: EduEntry;
   institutionImageMap: Record<string, string>;
   currentUser: User | null;
+  hasActivePlan: boolean;
 }) {
   const [hasApplied, setHasApplied] = useState(false);
   const [applying, setApplying]     = useState(false);
@@ -206,9 +209,15 @@ function EducationCard({
 
           {/* Buttons */}
           <div className="edu-btn-row">
-            <button className="edu-detail-btn" onClick={() => setShowDetail(true)}>
-              View Details
-            </button>
+            {hasActivePlan ? (
+              <button className="edu-detail-btn" onClick={() => setShowDetail(true)}>
+                View Details
+              </button>
+            ) : (
+              <Link href="/plans" className="edu-detail-btn" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, whiteSpace: 'nowrap' }}>
+                🔒 View Details
+              </Link>
+            )}
             {!showAuth && (
               hasApplied ? (
                 <div className="edu-applied">✓ Applied</div>
@@ -218,7 +227,7 @@ function EducationCard({
                 </button>
               )
             )}
-            {!hasApplied && !showAuth && (
+            {hasActivePlan && !hasApplied && !showAuth && (
               <button
                 className="edu-signin-toggle"
                 onClick={() => setShowAuth(s => !s)}
@@ -300,6 +309,7 @@ export default function EducationPage() {
   const [sortChip, setSortChip]             = useState<string | null>(null);
   const [showCourseMenu, setShowCourseMenu] = useState(false);
   const [currentUser, setCurrentUser]       = useState<User | null>(null);
+  const candidatePlanState = useCandidatePlan(currentUser?.uid);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, u => setCurrentUser(u));
@@ -499,6 +509,7 @@ export default function EducationPage() {
                   entry={e}
                   institutionImageMap={institutionImages}
                   currentUser={currentUser}
+                  hasActivePlan={candidatePlanState.hasActivePlan}
                 />
               ))}
             </div>

@@ -1,15 +1,17 @@
 ﻿import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
+import TickerBar from './TickerBar';
 
 
 Footer.propTypes = {
-    
+
 };
 
 function Footer(props) {
     return (
         <footer className="footer">
+                <TickerBar />
                 <div className="top-footer">
                 <div className="tf-container">
                     <div className="row">
@@ -25,6 +27,11 @@ function Footer(props) {
                             <li><Link href="https://www.facebook.com/hr.kamalini" target="_blank" rel="noopener noreferrer"><i className="icon-facebook"></i></Link></li>
                             <li><Link href="https://in.linkedin.com/company/kamalini-associates" target="_blank" rel="noopener noreferrer"><i className="icon-linkedin2"></i></Link></li>
                             <li><Link href="https://x.com/XKAJOBS" target="_blank" rel="noopener noreferrer"><i className="icon-twitter"></i></Link></li>
+                            <li><Link href="https://t.me/kajobsofficial" target="_blank" rel="noopener noreferrer">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{display:'block'}}>
+                                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.14-.259.259-.529.259l.19-2.688 4.883-4.413c.212-.19-.046-.297-.329-.108l-6.033 3.796-2.598-.812c-.566-.177-.577-.566.117-.837l10.15-3.914c.472-.177.885.108.73.837z"/>
+                                </svg>
+                            </Link></li>
                             <li><Link href="https://www.instagram.com/hrkamalini/" target="_blank" rel="noopener noreferrer"><i className="icon-instagram1"></i></Link></li>
                             <li><Link href="https://www.youtube.com/@kamaliniassociates?si=WJei-90SPECg6Y8U" target="_blank" rel="noopener noreferrer"><i className="icon-youtube"></i></Link></li>
                             <li><Link href="https://wa.me/message/6XMKT3X6OCO4N1" target="_blank" rel="noopener noreferrer">

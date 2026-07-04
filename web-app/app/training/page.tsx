@@ -10,6 +10,7 @@ import logo from '@/assets/images/logo.png';
 import { collection, query, onSnapshot, addDoc, serverTimestamp, where, limit, getDocs } from 'firebase/firestore';
 import { db, auth, googleProvider } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithPopup, User } from 'firebase/auth';
+import { useCandidatePlan } from '@/lib/useCandidatePlan';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Facility { name: string; value?: string; }
@@ -34,7 +35,7 @@ const TESTIMONIALS = [
 ];
 
 // ─── Training Card ─────────────────────────────────────────────────────────────
-function TrainingCard({ training, currentUser }: { training: Training; currentUser: User | null }) {
+function TrainingCard({ training, currentUser, hasActivePlan }: { training: Training; currentUser: User | null; hasActivePlan: boolean }) {
   const [hasApplied, setHasApplied] = useState(false);
   const [applying, setApplying]     = useState(false);
   const [showAuth, setShowAuth]     = useState(false);
@@ -129,25 +130,39 @@ function TrainingCard({ training, currentUser }: { training: Training; currentUs
           </>
         )}
 
-        {/* POC */}
+        {/* POC — contact details are a premium-plan perk */}
         {(training.pocName || training.pocPhone) && (
-          <div className="tc-poc">
-            <div className="tc-poc-icon">
-              <i className="icon-user-1"></i>
-            </div>
-            <div style={{ flex: 1 }}>
-              <p className="tc-poc-label">Point of Contact</p>
-              {training.pocName  && <p className="tc-poc-name">{training.pocName}</p>}
+          hasActivePlan ? (
+            <div className="tc-poc">
+              <div className="tc-poc-icon">
+                <i className="icon-user-1"></i>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p className="tc-poc-label">Point of Contact</p>
+                {training.pocName  && <p className="tc-poc-name">{training.pocName}</p>}
+                {training.pocPhone && (
+                  <a href={`tel:${training.pocPhone}`} className="tc-poc-phone">{training.pocPhone}</a>
+                )}
+              </div>
               {training.pocPhone && (
-                <a href={`tel:${training.pocPhone}`} className="tc-poc-phone">{training.pocPhone}</a>
+                <a href={`tel:${training.pocPhone}`} className="tc-call-btn">
+                  <i className="icon-call-calling"></i>
+                </a>
               )}
             </div>
-            {training.pocPhone && (
-              <a href={`tel:${training.pocPhone}`} className="tc-call-btn">
-                <i className="icon-call-calling"></i>
-              </a>
-            )}
-          </div>
+          ) : (
+            <Link href="/plans" className="tc-poc" style={{ textDecoration: 'none' }}>
+              <div className="tc-poc-icon">
+                <i className="icon-lock1"></i>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p className="tc-poc-label">Point of Contact</p>
+                <p className="tc-poc-name" style={{ color: '#14a077', fontWeight: 700 }}>
+                  🔒 Upgrade to view contact details
+                </p>
+              </div>
+            </Link>
+          )
         )}
 
         {/* Auth gate */}
@@ -187,6 +202,7 @@ export default function TrainingPage() {
   const [mode, setMode]               = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [slideIndex, setSlideIndex]   = useState(0);
+  const candidatePlanState = useCandidatePlan(currentUser?.uid);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, u => setCurrentUser(u));
@@ -300,7 +316,7 @@ export default function TrainingPage() {
           ) : (
             <div className="cards-grid">
               {filtered.map(t => (
-                <TrainingCard key={t.id} training={t} currentUser={currentUser} />
+                <TrainingCard key={t.id} training={t} currentUser={currentUser} hasActivePlan={candidatePlanState.hasActivePlan} />
               ))}
             </div>
           )}

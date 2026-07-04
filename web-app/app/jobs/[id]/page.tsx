@@ -16,8 +16,13 @@ import {
   signInWithPopup, signOut, onAuthStateChanged,
   type User,
 } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp, getDoc, doc, setDoc } from 'firebase/firestore';
+import {
+  collection, addDoc, serverTimestamp, getDoc, doc, setDoc,
+  updateDoc, increment, query, where, orderBy, limit, getDocs,
+} from 'firebase/firestore';
 import { extractId, generateJobUrl } from '@/lib/slug';
+import { useCandidatePlan } from '@/lib/useCandidatePlan';
+import { isValidPhone } from '@/lib/validation';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const getInitial = (name?: string) => (name || '?')[0]?.toUpperCase() ?? '?';
@@ -149,12 +154,17 @@ interface AppForm {
 }
 
 function ApplicationModal({
-  user, job, onClose,
+  user, job, onClose, applicationsLimit, applicationsUsed, featureFlags, lastApplication,
 }: {
   user: User;
   job: { id: string; title: string; company: string; companyId?: string; location?: string; category?: string };
   onClose: () => void;
+  applicationsLimit: number | null;
+  applicationsUsed: number;
+  featureFlags: Record<string, boolean>;
+  lastApplication?: Record<string, any> | null;
 }) {
+  const capped = applicationsLimit != null && applicationsUsed >= applicationsLimit;
   const [step, setStep] = useState(1); // 1=Personal, 2=Professional, 3=Documents, 4=Success
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<AppForm>({
@@ -172,11 +182,43 @@ function ApplicationModal({
     agreeTerms: false,
   });
 
+  // Pre-fill from the candidate's most recent application so they don't
+  // retype the same details every time. Only fills fields still blank —
+  // won't clobber anything the candidate has already edited in this form.
+  // lastApplication can arrive after mount (it's fetched by the parent page),
+  // so this re-runs once it's available rather than only at initial state.
+  useEffect(() => {
+    if (!lastApplication) return;
+    setForm(f => ({
+      ...f,
+      fullName: f.fullName || lastApplication.applicantName || '',
+      phone: f.phone || lastApplication.phone || '',
+      currentRole: f.currentRole || lastApplication.currentRole || '',
+      experience: f.experience || lastApplication.experience || '',
+      currentSalary: f.currentSalary || lastApplication.currentSalary || '',
+      noticePeriod: f.noticePeriod || lastApplication.noticePeriod || '',
+      linkedin: f.linkedin || lastApplication.linkedin || '',
+      portfolio: f.portfolio || lastApplication.portfolio || '',
+      resumeUrl: f.resumeUrl || lastApplication.resumeUrl || '',
+      coverLetter: f.coverLetter || lastApplication.coverLetter || '',
+    }));
+  }, [lastApplication]);
+
+  // Also fall back to the phone number saved on the candidate's profile
+  // (set during "Complete Your Profile") — covers first-time applicants who
+  // have no prior application to pre-fill from yet.
+  useEffect(() => {
+    getDoc(doc(db, 'users', user.uid)).then((snap) => {
+      const phone = snap.data()?.phone;
+      if (phone) setForm(f => ({ ...f, phone: f.phone || phone }));
+    }).catch(() => { /* best effort */ });
+  }, [user.uid]);
+
   const update = (field: keyof AppForm, value: string | boolean) =>
     setForm(f => ({ ...f, [field]: value }));
 
   const handleSubmit = async () => {
-    if (!form.agreeTerms) return;
+    if (!form.agreeTerms || capped) return;
     setSubmitting(true);
     try {
       // Fetch candidate profile — user can always read their own doc
@@ -229,7 +271,15 @@ function ApplicationModal({
         status:         'Applied',
         appliedAt:      serverTimestamp(),
         candidateProfile,
+        applicantFeatureFlags: {
+          priorityProfile:    featureFlags.priorityProfile === true,
+          featuredBadge:      featureFlags.featuredBadge === true,
+          highlightedProfile: featureFlags.highlightedProfile === true,
+        },
       });
+      if (applicationsLimit != null) {
+        await updateDoc(doc(db, 'users', user.uid), { planApplicationsUsed: increment(1) });
+      }
       setStep(4);
     } catch (err) {
       console.error('Application submit failed:', err);
@@ -274,7 +324,8 @@ function ApplicationModal({
           {step < 4 && (
             <button onClick={onClose} style={{
               position: 'absolute', top: 16, right: 20, background: 'rgba(255,255,255,0.2)',
-              border: 'none', borderRadius: '50%', width: 32, height: 32,
+              border: 'none', borderRadius: '50%', width: 32, height: 32, padding: 0,
+              boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer', color: '#fff', fontSize: 18, lineHeight: 1,
             }}>×</button>
           )}
@@ -326,7 +377,20 @@ function ApplicationModal({
               </div>
               <div>
                 <label style={labelStyle}>Phone Number *</label>
-                <input style={inputStyle} value={form.phone} onChange={e => update('phone', e.target.value)} placeholder="+91 98765 43210" type="tel" required />
+                <input
+                  style={{
+                    ...inputStyle,
+                    border: form.phone && !isValidPhone(form.phone) ? '1.5px solid #e53935' : inputStyle.border,
+                  }}
+                  value={form.phone}
+                  onChange={e => update('phone', e.target.value)}
+                  placeholder="+91 98765 43210"
+                  type="tel"
+                  required
+                />
+                {form.phone && !isValidPhone(form.phone) && (
+                  <p style={{ fontSize: 11, color: '#e53935', marginTop: 5 }}>Enter a valid 10-digit mobile number</p>
+                )}
               </div>
               <div>
                 <label style={labelStyle}>Current Job Title</label>
@@ -374,13 +438,20 @@ function ApplicationModal({
           {step === 3 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               <h4 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1a1a2e' }}>Documents & Cover Letter</h4>
+              {capped && (
+                <div style={{ background: '#fff8e1', border: '1.5px solid #f59e0b', borderRadius: 12, padding: '14px 16px' }}>
+                  <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#92400e', fontSize: 13 }}>
+                    You've reached your plan's monthly application limit ({applicationsUsed}/{applicationsLimit}).
+                  </p>
+                  <Link href="/plans" style={{ color: '#b45309', fontWeight: 700, fontSize: 13 }}>Upgrade your plan →</Link>
+                </div>
+              )}
               <div>
-                <label style={labelStyle}>Resume / CV Link *</label>
+                <label style={labelStyle}>Resume / CV Link</label>
                 <input
                   style={inputStyle} value={form.resumeUrl}
                   onChange={e => update('resumeUrl', e.target.value)}
                   placeholder="Paste Google Drive / Dropbox link to your resume"
-                  required
                 />
                 <p style={{ fontSize: 11, color: '#aaa', marginTop: 5 }}>
                   Upload your resume to Google Drive and share the link here (make sure it's publicly accessible)
@@ -457,6 +528,7 @@ function ApplicationModal({
                 <button
                   onClick={() => {
                     if (step === 1 && (!form.fullName || !form.phone)) { alert('Please fill in required fields.'); return; }
+                    if (step === 1 && !isValidPhone(form.phone)) { alert('Please enter a valid 10-digit phone number.'); return; }
                     if (step === 2 && (!form.experience || !form.noticePeriod)) { alert('Please select experience and notice period.'); return; }
                     setStep(s => s + 1);
                   }}
@@ -471,16 +543,16 @@ function ApplicationModal({
               ) : (
                 <button
                   onClick={handleSubmit}
-                  disabled={submitting || !form.agreeTerms || !form.resumeUrl || !form.coverLetter}
+                  disabled={submitting || capped || !form.agreeTerms || !form.coverLetter}
                   style={{
                     padding: '12px 28px', borderRadius: 10, border: 'none',
-                    background: submitting || !form.agreeTerms || !form.resumeUrl || !form.coverLetter
+                    background: submitting || capped || !form.agreeTerms || !form.coverLetter
                       ? '#ccc' : 'linear-gradient(135deg,#14a077,#0f7a5a)',
-                    color: '#fff', cursor: submitting ? 'wait' : 'pointer',
+                    color: '#fff', cursor: submitting ? 'wait' : capped ? 'not-allowed' : 'pointer',
                     fontWeight: 700, fontSize: 14,
                     boxShadow: '0 4px 16px rgba(20,160,119,0.35)',
                   }}>
-                  {submitting ? 'Submitting...' : '🚀 Submit Application'}
+                  {submitting ? 'Submitting...' : capped ? 'Limit Reached' : '🚀 Submit Application'}
                 </button>
               )}
             </div>
@@ -503,6 +575,9 @@ export default function JobDetailPage() {
   const [user, setUser] = useState<User | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAppModal, setShowAppModal] = useState(false);
+  const candidatePlanState = useCandidatePlan(user?.uid);
+  const [lastApplication, setLastApplication] = useState<Record<string, any> | null>(null);
+  const [quickApplyStep, setQuickApplyStep] = useState<'idle' | 'confirm' | 'submitting' | 'done'>('idle');
 
   const handleToggle = (key: string) =>
     setToggle(prev => prev.key === key ? { key: '', status: false } : { key, status: true });
@@ -519,6 +594,70 @@ export default function JobDetailPage() {
     window.wow = new WOW.WOW({ live: false });
     window.wow.init();
   }, []);
+
+  // Most recent application — used to pre-fill the apply form (everyone) and
+  // to power Quick Apply (oneClickApply plan feature only, gated separately below).
+  useEffect(() => {
+    if (!user) { setLastApplication(null); return; }
+    getDocs(query(
+      collection(db, 'applications'),
+      where('applicantUid', '==', user.uid),
+      orderBy('appliedAt', 'desc'),
+      limit(1)
+    )).then((snap) => {
+      setLastApplication(snap.empty ? null : snap.docs[0].data());
+    }).catch(() => setLastApplication(null));
+  }, [user]);
+
+  const applicationsCapped = candidatePlanState.applicationsLimit != null &&
+    candidatePlanState.applicationsUsed >= candidatePlanState.applicationsLimit;
+
+  const handleQuickApply = async () => {
+    if (!user || !lastApplication || applicationsCapped) return;
+    setQuickApplyStep('submitting');
+    try {
+      let candidateProfile: Record<string, any> = {};
+      try {
+        const profileSnap = await getDoc(doc(db, 'users', user.uid));
+        if (profileSnap.exists()) candidateProfile = profileSnap.data();
+      } catch { /* profile not found */ }
+
+      await addDoc(collection(db, 'applications'), {
+        jobId:          actualId,
+        jobTitle:       job?.title,
+        company:        job?.company,
+        companyId:      job?.companyId ?? '',
+        applicantUid:   user.uid,
+        applicantName:  lastApplication.applicantName ?? user.displayName ?? '',
+        applicantEmail: user.email ?? '',
+        phone:          lastApplication.phone ?? '',
+        currentRole:    lastApplication.currentRole ?? '',
+        experience:     lastApplication.experience ?? '',
+        currentSalary:  lastApplication.currentSalary ?? '',
+        noticePeriod:   lastApplication.noticePeriod ?? '',
+        linkedin:       lastApplication.linkedin ?? '',
+        portfolio:      lastApplication.portfolio ?? '',
+        resumeUrl:      lastApplication.resumeUrl ?? '',
+        coverLetter:    lastApplication.coverLetter ?? '',
+        status:         'Applied',
+        appliedAt:      serverTimestamp(),
+        candidateProfile,
+        applicantFeatureFlags: {
+          priorityProfile:    candidatePlanState.featureFlags.priorityProfile === true,
+          featuredBadge:      candidatePlanState.featureFlags.featuredBadge === true,
+          highlightedProfile: candidatePlanState.featureFlags.highlightedProfile === true,
+        },
+      });
+      if (candidatePlanState.applicationsLimit != null) {
+        await updateDoc(doc(db, 'users', user.uid), { planApplicationsUsed: increment(1) });
+      }
+      setQuickApplyStep('done');
+    } catch (err) {
+      console.error('Quick apply failed:', err);
+      alert('Quick Apply failed. Please try the regular apply flow.');
+      setQuickApplyStep('idle');
+    }
+  };
 
   const handleApplyClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -571,7 +710,48 @@ export default function JobDetailPage() {
           user={user}
           job={{ id: actualId, title: job.title, company: job.company, companyId: job.companyId, location: job.location, category: job.category }}
           onClose={() => setShowAppModal(false)}
+          applicationsLimit={candidatePlanState.applicationsLimit}
+          applicationsUsed={candidatePlanState.applicationsUsed}
+          featureFlags={candidatePlanState.featureFlags}
+          lastApplication={lastApplication}
         />
+      )}
+
+      {/* ── Quick Apply confirm/success overlay ── */}
+      {user && (quickApplyStep === 'confirm' || quickApplyStep === 'submitting' || quickApplyStep === 'done') && lastApplication && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', padding: 16,
+        }} onClick={quickApplyStep === 'confirm' ? () => setQuickApplyStep('idle') : undefined}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: '#fff', borderRadius: 20, width: '100%', maxWidth: 440,
+            padding: '32px', boxShadow: '0 32px 100px rgba(0,0,0,0.2)', textAlign: 'center',
+          }}>
+            {quickApplyStep === 'done' ? (
+              <>
+                <div style={{ width: 72, height: 72, borderRadius: '50%', margin: '0 auto 20px', background: 'linear-gradient(135deg,#14a077,#0f7a5a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>✓</div>
+                <h3 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800, color: '#1a1a2e' }}>Applied! 🎉</h3>
+                <p style={{ color: '#666', marginBottom: 24 }}>Your quick application for <strong>{job.title}</strong> has been sent.</p>
+                <button onClick={() => setQuickApplyStep('idle')} style={{ padding: '12px 28px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg,#14a077,#0f7a5a)', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>Close</button>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>⚡</div>
+                <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 800, color: '#1a1a2e' }}>Quick Apply</h3>
+                <p style={{ color: '#666', fontSize: 13, marginBottom: 20, lineHeight: 1.6 }}>
+                  Apply using your saved resume, cover letter and details from your last application?
+                </p>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                  <button onClick={() => setQuickApplyStep('idle')} disabled={quickApplyStep === 'submitting'} style={{ padding: '11px 22px', borderRadius: 10, border: '1.5px solid #e0e0e0', background: '#fff', cursor: 'pointer', fontWeight: 600, color: '#555' }}>Cancel</button>
+                  <button onClick={handleQuickApply} disabled={quickApplyStep === 'submitting'} style={{ padding: '11px 22px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg,#14a077,#0f7a5a)', color: '#fff', fontWeight: 700, cursor: quickApplyStep === 'submitting' ? 'wait' : 'pointer' }}>
+                    {quickApplyStep === 'submitting' ? 'Applying...' : 'Confirm & Apply'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       )}
 
       {/* ── Header ── */}
@@ -633,18 +813,33 @@ export default function JobDetailPage() {
                     </Link>
                     {/* ── Apply Now Button ── */}
                     {user ? (
-                      <button
-                        onClick={handleApplyClick}
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 6,
-                          padding: '10px 20px', borderRadius: 8, border: 'none',
-                          background: 'linear-gradient(135deg,#14a077,#0f7a5a)',
-                          color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 14,
-                          boxShadow: '0 4px 14px rgba(20,160,119,0.4)',
-                        }}
-                      >
-                        <i className="icon-send" /> Apply Now
-                      </button>
+                      <>
+                        {candidatePlanState.featureFlags.oneClickApply === true && lastApplication && !applicationsCapped && (
+                          <button
+                            onClick={() => setQuickApplyStep('confirm')}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 6,
+                              padding: '10px 16px', borderRadius: 8, border: '1.5px solid #14a077',
+                              background: '#fff', color: '#14a077', cursor: 'pointer', fontWeight: 700, fontSize: 14,
+                              marginRight: 8,
+                            }}
+                          >
+                            ⚡ Quick Apply
+                          </button>
+                        )}
+                        <button
+                          onClick={handleApplyClick}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            padding: '10px 20px', borderRadius: 8, border: 'none',
+                            background: 'linear-gradient(135deg,#14a077,#0f7a5a)',
+                            color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 14,
+                            boxShadow: '0 4px 14px rgba(20,160,119,0.4)',
+                          }}
+                        >
+                          <i className="icon-send" /> Apply Now
+                        </button>
+                      </>
                     ) : (
                       <button
                         onClick={handleApplyClick}

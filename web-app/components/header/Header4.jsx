@@ -2,8 +2,13 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { onAuthStateChanged, signOut, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, googleProvider, db } from "@/lib/firebase";
+import SubscribePlanModal from "@/components/subscribePlan/SubscribePlanModal";
+import ProfileCompleteModal from "@/components/profileComplete/ProfileCompleteModal";
+import { useCandidatePlan } from "@/lib/useCandidatePlan";
 
 /**
  * @param {{ clname?: string }} props
@@ -13,7 +18,32 @@ function Header4({ clname = "" }) {
   const [dropOpen, setDropOpen] = useState(false);
   const [scroll, setScroll] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileInitialData, setProfileInitialData] = useState(null);
   const dropRef = useRef(null);
+  const prevUserRef = useRef(undefined); // undefined = auth not yet checked (page load)
+  const pathname = usePathname();
+  const candidatePlanState = useCandidatePlan(user?.uid);
+
+  const dismissProfileModal = () => {
+    sessionStorage.setItem("profileModalDismissed", "1");
+    setShowProfileModal(false);
+  };
+
+  // Nudge signed-in candidates without an active plan to subscribe — once per
+  // browser session, and not while they're already on the plans page.
+  useEffect(() => {
+    if (!user || candidatePlanState.loading || candidatePlanState.hasActivePlan) return;
+    if (pathname?.startsWith('/plans')) return;
+    if (sessionStorage.getItem('subscribeModalDismissed')) return;
+    setShowSubscribeModal(true);
+  }, [user, candidatePlanState.loading, candidatePlanState.hasActivePlan, pathname]);
+
+  const dismissSubscribeModal = () => {
+    sessionStorage.setItem('subscribeModalDismissed', '1');
+    setShowSubscribeModal(false);
+  };
 
   const handleMobile = () => {
     setIsMobileOpen((prev) => {
@@ -25,7 +55,45 @@ function Header4({ clname = "" }) {
   };
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      const wasSignedOut = prevUserRef.current === null;
+      prevUserRef.current = u ?? null;
+      setUser(u);
+
+      if (!u) {
+        prevUserRef.current = null;
+        setShowProfileModal(false);
+        sessionStorage.removeItem("profileModalDismissed");
+        return;
+      }
+
+      const dismissed = sessionStorage.getItem("profileModalDismissed");
+      if (dismissed) return;
+
+      // pc2_ — bumped from pc_ when "complete" started requiring a phone
+      // number, so stale caches from before that change don't suppress it
+      const cachedComplete = localStorage.getItem(`pc2_${u.uid}`) === "1";
+      if (cachedComplete) return;
+
+      if (wasSignedOut) {
+        setShowProfileModal(true);
+      }
+
+      try {
+        const snap = await getDoc(doc(db, "users", u.uid));
+        const data = snap.data();
+        setProfileInitialData(data ?? null);
+        const profileComplete = !!data && data.profileComplete === true && !!data.phone;
+        if (profileComplete) {
+          localStorage.setItem(`pc2_${u.uid}`, "1");
+          setShowProfileModal(false);
+        } else if (!wasSignedOut) {
+          setShowProfileModal(true);
+        }
+      } catch (e) {
+        console.error("Error checking profile:", e);
+      }
+    });
     return () => unsub();
   }, []);
 
@@ -86,6 +154,7 @@ function Header4({ clname = "" }) {
                   { href: '/education', label: 'Education' },
                   { href: '/tests', label: 'Tests' },
                   { href: '/blog', label: 'Blog' },
+                  { href: '/plans', label: 'Upgrade' },
                 ].map(({ href, label }, i, arr) => (
                   <li key={href} className="menu-item" style={{ borderBottom: i < arr.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
                     <Link href={href} onClick={handleMobile}
@@ -114,6 +183,23 @@ function Header4({ clname = "" }) {
         </div>
       </div>
 
+      {/* Profile Completion Modal — shown after login when profile (incl. phone) is incomplete */}
+      {showProfileModal && user && (
+        <ProfileCompleteModal
+          userEmail={user.email || ""}
+          userName={user.displayName || ""}
+          initialData={profileInitialData ?? undefined}
+          onComplete={() => {
+            localStorage.setItem(`pc2_${user.uid}`, "1");
+            setShowProfileModal(false);
+          }}
+          onDismiss={dismissProfileModal}
+        />
+      )}
+
+      {/* Subscribe nudge — shown once per session to candidates with no active plan */}
+      {showSubscribeModal && <SubscribePlanModal onDismiss={dismissSubscribeModal} />}
+
       <header id="header" className="header header-default">
       <div className="tf-container ct2">
         <div className="row">
@@ -140,6 +226,7 @@ function Header4({ clname = "" }) {
                       <li className="menu-item sub5"><Link href="/education">Education</Link></li>
                       <li className="menu-item sub5"><Link href="/blog">Blog</Link></li>
                       <li className="menu-item sub6"><Link href="/tests">Tests</Link></li>
+                      <li className="menu-item sub7"><Link href="/plans">Upgrade</Link></li>
                     </ul>
                   </nav>
                 </div>
@@ -225,6 +312,7 @@ function Header4({ clname = "" }) {
                           { href: "/profile", icon: "icon-user", label: "My Profile" },
                           { href: "/profile#applications", icon: "icon-briefcase", label: "My Applications" },
                           { href: "/find-jobs", icon: "icon-search", label: "Browse Jobs" },
+                          { href: "/plans", icon: "icon-star-full", label: "Upgrade to Premium" },
                         ].map((item) => (
                           <Link
                             key={item.href}

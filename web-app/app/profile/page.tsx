@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, onSnapshot, orderBy } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
+import { useCandidatePlan } from '@/lib/useCandidatePlan';
 import Header4 from '@/components/header/Header4';
 import Footer from '@/components/footer';
 import Gotop from '@/components/gotop';
@@ -24,6 +25,7 @@ const ProfileCompleteModal = dynamic(
 // ─── User Profile type ────────────────────────────────────────────────────────
 interface UserProfile {
   name?: string;
+  phone?: string;
   educationLevel?: string;
   dateOfBirth?: string;
   gender?: string;
@@ -75,6 +77,172 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+// ─── Profile Views Tab ─────────────────────────────────────────────────────────
+interface ProfileView {
+  id: string;
+  companyId?: string;
+  jobTitle?: string;
+  viewedAt?: any;
+}
+
+function timeAgo(dt: Date) {
+  const diffMs = Date.now() - dt.getTime();
+  const days = Math.floor(diffMs / 86400000);
+  if (days > 0) return `${days}d ago`;
+  const hours = Math.floor(diffMs / 3600000);
+  if (hours > 0) return `${hours}h ago`;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins > 0) return `${mins}m ago`;
+  return 'Just now';
+}
+
+function ProfileViewsTab({ uid, entitled }: { uid: string; entitled: boolean }) {
+  const [views, setViews] = useState<ProfileView[]>([]);
+  const [companyNames, setCompanyNames] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      query(collection(db, 'users', uid, 'profileViews'), orderBy('viewedAt', 'desc')),
+      (snap) => {
+        setViews(snap.docs.map((d) => ({ id: d.id, ...d.data() } as ProfileView)));
+        setLoading(false);
+      }
+    );
+    return () => unsub();
+  }, [uid]);
+
+  useEffect(() => {
+    if (!entitled) return;
+    views.forEach((v) => {
+      if (v.companyId && !(v.companyId in companyNames)) {
+        getDoc(doc(db, 'companies', v.companyId)).then((snap) => {
+          setCompanyNames((prev) => ({ ...prev, [v.companyId as string]: snap.data()?.name ?? 'A company' }));
+        });
+      }
+    });
+  }, [views, entitled, companyNames]);
+
+  if (loading) return <div style={{ textAlign: 'center', padding: 60, color: '#999' }}>Loading...</div>;
+
+  if (!entitled) {
+    return (
+      <div style={{ textAlign: 'center', padding: '60px 40px', background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+        <div style={{ fontSize: 48, marginBottom: 12 }}>👁</div>
+        <h4 style={{ margin: '0 0 8px', color: '#1a1a2e' }}>
+          {views.length > 0
+            ? `${views.length} ${views.length === 1 ? 'company has' : 'companies have'} viewed your profile`
+            : 'No one has viewed your profile yet'}
+        </h4>
+        <p style={{ color: '#888', margin: '0 0 20px' }}>Upgrade to a premium plan to see exactly who viewed your profile.</p>
+        <Link href="/plans" style={{ padding: '12px 28px', borderRadius: 10, background: 'linear-gradient(135deg,#14a077,#0f7a5a)', color: '#fff', textDecoration: 'none', fontWeight: 600 }}>
+          View Plans
+        </Link>
+      </div>
+    );
+  }
+
+  if (views.length === 0) {
+    return <div style={{ textAlign: 'center', padding: 60, color: '#888', background: '#fff', borderRadius: 16 }}>No one has viewed your profile yet</div>;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {views.map((v) => {
+        const viewedAtDate = v.viewedAt?.toDate ? v.viewedAt.toDate() : null;
+        return (
+          <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', borderRadius: 12, padding: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 20, background: '#e8f5ef', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <i className="icon-briefcase" style={{ color: '#2D8C6B' }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, color: '#1a1a2e' }}>
+                {v.companyId ? companyNames[v.companyId] ?? 'A company' : 'A company'}
+              </div>
+              {v.jobTitle && <div style={{ fontSize: 12, color: '#6B7280' }}>Viewed via {v.jobTitle}</div>}
+            </div>
+            {viewedAtDate && <div style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>{timeAgo(viewedAtDate)}</div>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Analytics Tab ─────────────────────────────────────────────────────────────
+function AnalyticsSection({
+  entitled, applications, statCounts,
+}: {
+  entitled: boolean;
+  applications: Application[];
+  statCounts: { total: number; pending: number; shortlisted: number; hired: number };
+}) {
+  if (!entitled) {
+    return (
+      <div style={{ textAlign: 'center', padding: '60px 40px', background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+        <div style={{ fontSize: 48, marginBottom: 12 }}>📊</div>
+        <h4 style={{ margin: '0 0 8px', color: '#1a1a2e' }}>Unlock your application analytics</h4>
+        <p style={{ color: '#888', margin: '0 0 20px' }}>Upgrade to a premium plan to see status breakdowns and trends for your applications.</p>
+        <Link href="/plans" style={{ padding: '12px 28px', borderRadius: 10, background: 'linear-gradient(135deg,#14a077,#0f7a5a)', color: '#fff', textDecoration: 'none', fontWeight: 600 }}>
+          View Plans
+        </Link>
+      </div>
+    );
+  }
+
+  const rejected = applications.filter((a) => a.status === 'rejected').length;
+  const reviewed = applications.filter((a) => a.status === 'reviewed').length;
+  const rows = [
+    { label: 'Pending', value: statCounts.pending, color: '#f59e0b' },
+    { label: 'Reviewed', value: reviewed, color: '#2196f3' },
+    { label: 'Shortlisted', value: statCounts.shortlisted, color: '#14a077' },
+    { label: 'Hired', value: statCounts.hired, color: '#059669' },
+    { label: 'Rejected', value: rejected, color: '#e91e63' },
+  ];
+  const max = Math.max(1, ...rows.map((r) => r.value));
+
+  const now = new Date();
+  const months = Array.from({ length: 6 }).map((_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    return { key: `${d.getFullYear()}-${d.getMonth()}`, label: d.toLocaleDateString('en-IN', { month: 'short' }), count: 0 };
+  });
+  applications.forEach((a) => {
+    const dt = a.appliedAt?.toDate ? a.appliedAt.toDate() : new Date(a.appliedAt ?? 0);
+    const key = `${dt.getFullYear()}-${dt.getMonth()}`;
+    const m = months.find((mm) => mm.key === key);
+    if (m) m.count += 1;
+  });
+  const maxMonth = Math.max(1, ...months.map((m) => m.count));
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.07)', padding: 22 }}>
+        <h4 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, color: '#1a1a2e' }}>Applications by Status</h4>
+        {rows.map((r) => (
+          <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <div style={{ width: 90, fontSize: 12, color: '#6B7280' }}>{r.label}</div>
+            <div style={{ flex: 1, height: 8, background: '#f0f0f0', borderRadius: 4 }}>
+              <div style={{ width: `${(r.value / max) * 100}%`, height: '100%', background: r.color, borderRadius: 4 }} />
+            </div>
+            <div style={{ width: 24, fontSize: 12, fontWeight: 700, color: '#1a1a2e', textAlign: 'right' }}>{r.value}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.07)', padding: 22 }}>
+        <h4 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, color: '#1a1a2e' }}>Applications (Last 6 Months)</h4>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height: 120 }}>
+          {months.map((m) => (
+            <div key={m.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: '100%', maxWidth: 32, height: `${(m.count / maxMonth) * 90}px`, background: 'linear-gradient(135deg,#14a077,#0f7a5a)', borderRadius: 4 }} />
+              <div style={{ fontSize: 11, color: '#9CA3AF' }}>{m.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Profile Page ────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const router = useRouter();
@@ -87,6 +255,7 @@ export default function ProfilePage() {
   const [toggle, setToggle] = useState({ key: '', status: false });
   const [expandedApp, setExpandedApp] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const candidatePlanState = useCandidatePlan(user?.uid);
 
   const handleToggle = (key: string) =>
     setToggle(prev => prev.key === key ? { key: '', status: false } : { key, status: true });
@@ -176,7 +345,7 @@ export default function ProfilePage() {
     hired: applications.filter(a => a.status === 'hired').length,
   };
 
-  const isProfileComplete = userProfile?.profileComplete === true;
+  const isProfileComplete = userProfile?.profileComplete === true && !!userProfile?.phone;
 
   return (
     <>
@@ -189,7 +358,7 @@ export default function ProfilePage() {
           onComplete={async () => {
             setShowProfileModal(false);
             // Update localStorage cache
-            if (user) localStorage.setItem(`pc_${user.uid}`, '1');
+            if (user) localStorage.setItem(`pc2_${user.uid}`, '1');
             // Refresh profile data from Firestore
             const snap = await getDoc(doc(db, 'users', user.uid));
             if (snap.exists()) setUserProfile(snap.data() as UserProfile);
@@ -282,7 +451,7 @@ export default function ProfilePage() {
         <div className="tf-container">
           {/* Tab Buttons */}
           <div style={{ display: 'flex', gap: 10, marginBottom: 32, flexWrap: 'wrap' }}>
-            {['👤 Profile Details', '📋 My Applications'].map((label, i) => (
+            {['👤 Profile Details', '📋 My Applications', '👁 Profile Views', '📊 Analytics'].map((label, i) => (
               <button
                 key={label}
                 onClick={() => setActiveTab(i)}
@@ -363,7 +532,7 @@ export default function ProfilePage() {
                         <button
                           onClick={() => {
                             // Clear cache so re-save is recognized
-                            if (user) localStorage.removeItem(`pc_${user.uid}`);
+                            if (user) localStorage.removeItem(`pc2_${user.uid}`);
                             setShowProfileModal(true);
                           }}
                           style={{
@@ -383,6 +552,7 @@ export default function ProfilePage() {
                       <div style={{ padding: '22px' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                           {[
+                            { label: 'Phone Number', value: userProfile.phone, icon: '📱' },
                             { label: 'Date of Birth', value: userProfile.dateOfBirth, icon: '🎂' },
                             { label: 'Gender', value: userProfile.gender, icon: '👥' },
                             { label: 'Work Status', value: userProfile.workStatus, icon: '💼' },
@@ -532,7 +702,7 @@ export default function ProfilePage() {
                     <div style={{ color: '#047857', fontSize: 13, marginTop: 4, marginBottom: 16 }}>Your profile is fully set up. You're getting the best job matches.</div>
                     <button
                       onClick={() => {
-                        if (user) localStorage.removeItem(`pc_${user.uid}`);
+                        if (user) localStorage.removeItem(`pc2_${user.uid}`);
                         setShowProfileModal(true);
                       }}
                       style={{
@@ -691,6 +861,32 @@ export default function ProfilePage() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── Tab 2: Profile Views ── */}
+          {activeTab === 2 && (
+            <div className="profile-card">
+              <div style={{ marginBottom: 20 }}>
+                <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#1a1a2e' }}>Profile Views</h3>
+                <p style={{ margin: '4px 0 0', color: '#888', fontSize: 14 }}>See which companies have checked out your profile</p>
+              </div>
+              <ProfileViewsTab uid={user.uid} entitled={candidatePlanState.featureFlags.profileViewers === true} />
+            </div>
+          )}
+
+          {/* ── Tab 3: Analytics ── */}
+          {activeTab === 3 && (
+            <div className="profile-card">
+              <div style={{ marginBottom: 20 }}>
+                <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#1a1a2e' }}>Application Analytics</h3>
+                <p style={{ margin: '4px 0 0', color: '#888', fontSize: 14 }}>Track how your applications are performing</p>
+              </div>
+              <AnalyticsSection
+                entitled={candidatePlanState.featureFlags.analyticsDashboard === true}
+                applications={applications}
+                statCounts={statCounts}
+              />
             </div>
           )}
         </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
+import { isValidPhone } from '@/lib/validation';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 interface ProfileData {
@@ -11,6 +12,7 @@ interface ProfileData {
   dateOfBirth: string;
   gender: string;
   email: string;
+  phone: string;
   workStatus: string;
   currentlyPursuing: boolean;
   pursuingLevel: string;
@@ -172,6 +174,7 @@ export default function ProfileCompleteModal({ userEmail, userName, initialData,
     dateOfBirth:       initialData?.dateOfBirth       ?? '',
     gender:            initialData?.gender            ?? '',
     email:             initialData?.email             ?? userEmail   ?? '',
+    phone:             initialData?.phone             ?? '',
     workStatus:        initialData?.workStatus        ?? '',
     currentlyPursuing: initialData?.currentlyPursuing ?? false,
     pursuingLevel:     initialData?.pursuingLevel     ?? '',
@@ -205,6 +208,8 @@ export default function ProfileCompleteModal({ userEmail, userName, initialData,
       case 1:
         if (!data.dateOfBirth) return 'Please enter your date of birth';
         if (!data.gender) return 'Please select your gender';
+        if (!data.phone) return 'Please enter your phone number';
+        if (!isValidPhone(data.phone)) return 'Please enter a valid 10-digit phone number';
         return null;
       case 2:
         if (!data.workStatus) return 'Please select your work status';
@@ -260,6 +265,7 @@ export default function ProfileCompleteModal({ userEmail, userName, initialData,
         dateOfBirth: data.dateOfBirth,
         gender: data.gender,
         email: data.email,
+        phone: data.phone,
         workStatus: data.workStatus,
         currentlyPursuing: data.currentlyPursuing,
         pursuingLevel: data.pursuingLevel,
@@ -361,6 +367,19 @@ export default function ProfileCompleteModal({ userEmail, userName, initialData,
                   <Chip key={g} label={g} selected={data.gender === g} onClick={() => set('gender', g)} />
                 ))}
               </div>
+            </div>
+            <div style={{ marginBottom: 18 }}>
+              <FieldLabel required>Phone Number</FieldLabel>
+              <StyledInput
+                type="tel"
+                placeholder="+91 98765 43210"
+                value={data.phone}
+                onChange={e => set('phone', e.target.value)}
+                style={{ borderColor: data.phone && !isValidPhone(data.phone) ? '#e53935' : undefined }}
+              />
+              {data.phone && !isValidPhone(data.phone) && (
+                <p style={{ fontSize: 12, color: '#e53935', margin: '6px 0 0' }}>Enter a valid 10-digit mobile number</p>
+              )}
             </div>
             <div>
               <FieldLabel>Email Address</FieldLabel>

@@ -1,0 +1,94 @@
+/* Sticky footer ticker bar (site-wide, fixed to bottom of viewport) */
+.sticky-ticker-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 998;
+    height: 38px;
+    background: #14a077;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.15);
+}
+
+.sticky-ticker-bar .ticker-track {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    animation: ticker-scroll 28s linear infinite;
+    will-change: transform;
+}
+
+.sticky-ticker-bar:hover .ticker-track {
+    animation-play-state: paused;
+}
+
+.sticky-ticker-bar .ticker-group {
+    display: flex;
+    align-items: center;
+    padding-right: 48px;
+}
+
+.sticky-ticker-bar .ticker-item {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.sticky-ticker-bar .ticker-item strong {
+    font-weight: 700;
+    margin-right: 4px;
+    display: inline-block;
+    min-width: 7.5ch;
+    font-variant-numeric: tabular-nums;
+}
+
+.sticky-ticker-bar .ticker-sep {
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0 16px;
+}
+
+@keyframes ticker-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* keep the go-to-top button clear of the ticker bar */
+#scroll-top {
+    bottom: 61px !important;
+}
+
+/* extra breathing room so the ticker doesn't cover the footer copyright row */
+.footer .bottom {
+    padding-bottom: 49px;
+}
+
+@media (max-width: 575px) {
+    .sticky-ticker-bar {
+        height: 34px;
+    }
+
+    .sticky-ticker-bar .ticker-item {
+        font-size: 12px;
+    }
+
+    .sticky-ticker-bar .ticker-group {
+        padding-right: 32px;
+    }
+
+    #scroll-top {
+        bottom: 57px !important;
+    }
+
+    .footer .bottom {
+        padding-bottom: 45px;
+    }
+}

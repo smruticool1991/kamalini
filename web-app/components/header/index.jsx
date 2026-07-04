@@ -1,11 +1,14 @@
 ﻿'use client';
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { onAuthStateChanged, signOut, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, googleProvider, db } from "@/lib/firebase";
 // Direct import — pre-bundled so no chunk-load delay on mobile after sign-in
 import ProfileCompleteModal from "@/components/profileComplete/ProfileCompleteModal";
+import SubscribePlanModal from "@/components/subscribePlan/SubscribePlanModal";
+import { useCandidatePlan } from "@/lib/useCandidatePlan";
 
 
 Header.propTypes = {};
@@ -18,8 +21,26 @@ function Header({ clname = "" }) {
   const [user, setUser] = useState(null);
   const [dropOpen, setDropOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileInitialData, setProfileInitialData] = useState(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
   const dropRef = useRef(null);
+  const pathname = usePathname();
+  const candidatePlanState = useCandidatePlan(user?.uid);
+
+  // Nudge signed-in candidates without an active plan to subscribe — once per
+  // browser session, and not while they're already on the plans page.
+  useEffect(() => {
+    if (!user || candidatePlanState.loading || candidatePlanState.hasActivePlan) return;
+    if (pathname?.startsWith('/plans')) return;
+    if (sessionStorage.getItem('subscribeModalDismissed')) return;
+    setShowSubscribeModal(true);
+  }, [user, candidatePlanState.loading, candidatePlanState.hasActivePlan, pathname]);
+
+  const dismissSubscribeModal = () => {
+    sessionStorage.setItem('subscribeModalDismissed', '1');
+    setShowSubscribeModal(false);
+  };
 
   const handleMobile = () => {
     setIsMobileOpen((prev) => {
@@ -45,7 +66,9 @@ function Header({ clname = "" }) {
         if (dismissed) return;
 
         // ✅ Fast local cache — avoids flash for returning users who finished profile
-        const cachedComplete = localStorage.getItem(`pc_${u.uid}`) === '1';
+        // (pc2_ — bumped from pc_ when "complete" started requiring a phone number,
+        // so stale caches from before that change don't suppress the phone prompt)
+        const cachedComplete = localStorage.getItem(`pc2_${u.uid}`) === '1';
         if (cachedComplete) return;
 
         if (wasSignedOut) {
@@ -56,10 +79,12 @@ function Header({ clname = "" }) {
         // Firestore verification runs in background
         try {
           const snap = await getDoc(doc(db, "users", u.uid));
-          const profileComplete = snap.exists() && snap.data()?.profileComplete === true;
+          const data = snap.data();
+          setProfileInitialData(data ?? null);
+          const profileComplete = !!data && data.profileComplete === true && !!data.phone;
           if (profileComplete) {
             // Cache so future sign-ins skip the modal with zero flash
-            localStorage.setItem(`pc_${u.uid}`, '1');
+            localStorage.setItem(`pc2_${u.uid}`, '1');
             setShowProfileModal(false);
           } else if (!wasSignedOut) {
             // Page reload + profile incomplete — show modal now
@@ -144,6 +169,7 @@ function Header({ clname = "" }) {
                   { href: '/education', label: 'Education' },
                   { href: '/tests', label: 'Tests' },
                   { href: '/blog', label: 'Blog' },
+                  { href: '/plans', label: 'Upgrade' },
                 ].map(({ href, label }, i, arr) => (
                   <li key={href} className="menu-item" style={{ borderBottom: i < arr.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
                     <Link href={href} onClick={handleMobile}
@@ -177,9 +203,10 @@ function Header({ clname = "" }) {
         <ProfileCompleteModal
           userEmail={user.email || ""}
           userName={user.displayName || ""}
+          initialData={profileInitialData ?? undefined}
           onComplete={() => {
             // Cache completion permanently so future sign-ins never flash the modal
-            if (user) localStorage.setItem(`pc_${user.uid}`, '1');
+            if (user) localStorage.setItem(`pc2_${user.uid}`, '1');
             setShowProfileModal(false);
           }}
           onDismiss={() => {
@@ -189,6 +216,9 @@ function Header({ clname = "" }) {
           }}
         />
       )}
+
+      {/* Subscribe nudge — shown once per session to candidates with no active plan */}
+      {showSubscribeModal && <SubscribePlanModal onDismiss={dismissSubscribeModal} />}
 
       <header
         id="header"
@@ -237,6 +267,7 @@ function Header({ clname = "" }) {
                         <li className="menu-item sub5"><Link href="/education">Education</Link></li>
                         <li className="menu-item sub5"><Link href="/tests">Tests</Link></li>
                         <li className="menu-item sub5"><Link href="/blog">Blog</Link></li>
+                        <li className="menu-item sub5"><Link href="/plans">Upgrade</Link></li>
                       </ul>
                     </nav>
                   </div>
@@ -265,7 +296,7 @@ function Header({ clname = "" }) {
                               <div><div style={{ fontWeight: 700, fontSize: 14, color: "#1a1a2e" }}>{user.displayName}</div><div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>{user.email}</div></div>
                             </div>
                           </div>
-                          {[{ href: "/profile", icon: "icon-user", label: "My Profile" }, { href: "/profile#applications", icon: "icon-briefcase", label: "My Applications" }, { href: "/find-jobs", icon: "icon-search", label: "Browse Jobs" }].map(item => (
+                          {[{ href: "/profile", icon: "icon-user", label: "My Profile" }, { href: "/profile#applications", icon: "icon-briefcase", label: "My Applications" }, { href: "/find-jobs", icon: "icon-search", label: "Browse Jobs" }, { href: "/plans", icon: "icon-star-full", label: "Upgrade to Premium" }].map(item => (
                             <Link key={item.href} href={item.href} onClick={() => setDropOpen(false)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", color: "#333", textDecoration: "none", fontSize: 14 }} onMouseEnter={e => e.currentTarget.style.background="#f8f9fa"} onMouseLeave={e => e.currentTarget.style.background="transparent"}>
                               <i className={item.icon} style={{ color: "#14a077", width: 18 }} />{item.label}
                             </Link>
