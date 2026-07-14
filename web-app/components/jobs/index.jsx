@@ -80,7 +80,6 @@ function Jobs(props) {
                       <span className="icon-dolar1"></span>
                       <p>
                         {idx.price}
-                        <span className="year">/year</span>
                       </p>
                     </div>
                     <p className="days">{idx.apply}</p>

@@ -606,7 +606,7 @@ export default function EmployerDetailPage() {
                             <Stars rating={4} size={14} />
                           </div>
                           <div className="job-footer-right">
-                            {job.salary && <div className="price"><span className="icon-dolar1"></span><p>{job.currency || '₹'}{job.salary}<span className="year">/year</span></p></div>}
+                            {job.salary && <div className="price"><span className="icon-dolar1"></span><p>{job.currency || '₹'}{job.salary}</p></div>}
                             {job.deadline
                               ? <p className="days">{Math.max(0, Math.ceil((new Date(job.deadline).getTime() - Date.now()) / 86400000))} days left</p>
                               : <p className="days">Apply Now</p>

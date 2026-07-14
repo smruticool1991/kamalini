@@ -583,7 +583,7 @@ function FindJobsInner() {
                                 <span className="icon-dolar1"></span>
                                 <p>
                                   {job.salary
-                                    ? <>{job.currency || '₹'} {job.salary}<span className="year">/year</span></>
+                                    ? <>{job.currency || '₹'} {job.salary}</>
                                     : 'Salary not disclosed'}
                                 </p>
                               </div>
@@ -678,7 +678,7 @@ function FindJobsInner() {
                             <span className="icon-dolar1"></span>
                             <p>
                               {job.salary
-                                ? <>{job.currency || '₹'} {job.salary} <span className="year">/year</span></>
+                                ? <>{job.currency || '₹'} {job.salary}</>
                                 : 'Salary not disclosed'}
                             </p>
                           </div>

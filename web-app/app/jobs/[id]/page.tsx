@@ -874,7 +874,7 @@ export default function JobDetailPage() {
                     {job.salary && (
                       <div className="price">
                         <span className="icon-dollar" />
-                        <p>{job.currency || '₹'} {job.salary}<span className="year">/year</span></p>
+                        <p>{job.currency || '₹'} {job.salary}</p>
                       </div>
                     )}
                   </div>
@@ -1010,7 +1010,7 @@ export default function JobDetailPage() {
                                 </ul>
                               </div>
                               <div className="job-footer-right">
-                                {rj.salary && <div className="price"><span className="icon-dolar1"></span><p>{rj.currency || '₹'} {rj.salary}<span className="year">/year</span></p></div>}
+                                {rj.salary && <div className="price"><span className="icon-dolar1"></span><p>{rj.currency || '₹'} {rj.salary}</p></div>}
                                 <p className="days">Apply Now</p>
                               </div>
                             </div>
