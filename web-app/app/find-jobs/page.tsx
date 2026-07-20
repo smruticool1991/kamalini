@@ -391,9 +391,11 @@ function FindJobsInner() {
     setCurrentPage(1);
   };
 
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'az'>('newest');
+
   // Filter logic
   const filteredJobs = useMemo(() => {
-    return allJobs.filter((job) => {
+    const matched = allJobs.filter((job) => {
       const kw = appliedFilters.keyword.toLowerCase();
       const loc = appliedFilters.location.toLowerCase();
       const matchKeyword = !kw ||
@@ -407,7 +409,19 @@ function FindJobsInner() {
         job.category?.toLowerCase().includes(appliedFilters.category.toLowerCase());
       return matchKeyword && matchLocation && matchJobType && matchExperience && matchCategory;
     });
-  }, [allJobs, appliedFilters]);
+
+    const sorted = [...matched];
+    if (sortBy === 'az') {
+      sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+    } else {
+      sorted.sort((a, b) => {
+        const at = new Date(a.createdAt || 0).getTime();
+        const bt = new Date(b.createdAt || 0).getTime();
+        return sortBy === 'oldest' ? at - bt : bt - at;
+      });
+    }
+    return sorted;
+  }, [allJobs, appliedFilters, sortBy]);
 
   // Pagination
   const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
@@ -467,11 +481,13 @@ function FindJobsInner() {
                   {/* Sort */}
                   <div className="sort-by">
                     <select
+                      value={sortBy}
+                      onChange={(e) => { setSortBy(e.target.value as 'newest' | 'oldest' | 'az'); setCurrentPage(1); }}
                       style={{ border: '1px solid #e0e0e0', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer' }}
                     >
-                      <option>Newest First</option>
-                      <option>Oldest First</option>
-                      <option>A-Z</option>
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                      <option value="az">A-Z</option>
                     </select>
                   </div>
 

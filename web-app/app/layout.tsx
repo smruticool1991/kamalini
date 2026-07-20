@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -52,6 +53,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://kajobs.in',
   },
+  verification: {
+    google: 'HFwQkIJMizcirM_nT59vsGr6zu197liW46ZwbV5nrAA',
+  },
 };
 
 const organizationSchema = {
@@ -89,6 +93,19 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-Y9NBZBL5V1"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-Y9NBZBL5V1');
+          `}
+        </Script>
       </head>
       <body suppressHydrationWarning>{children}</body>
     </html>

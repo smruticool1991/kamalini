@@ -100,14 +100,28 @@ export function useFirebaseJobs(limitCount = 12) {
         const q = query(
           collection(db, 'jobs'),
           where('status', '==', 'approved'),
+          orderBy('createdAt', 'desc'),
           limit(limitCount)
         )
         const snap = await getDocs(q)
         const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as FirebaseJob))
         setJobs(data)
       } catch (err) {
-        console.error('Error fetching jobs:', err)
-        setError('Failed to load jobs')
+        // If the composite index isn't ready yet, fall back without orderBy
+        try {
+          const q2 = query(
+            collection(db, 'jobs'),
+            where('status', '==', 'approved'),
+            limit(limitCount)
+          )
+          const snap2 = await getDocs(q2)
+          const data = snap2.docs.map(d => ({ id: d.id, ...d.data() } as FirebaseJob))
+          data.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+          setJobs(data)
+        } catch (err2) {
+          console.error('Error fetching jobs:', err2)
+          setError('Failed to load jobs')
+        }
       } finally {
         setLoading(false)
       }
