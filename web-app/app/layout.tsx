@@ -9,10 +9,10 @@ export const metadata: Metadata = {
     apple: '/app_icon.png',
   },
   title: {
-    default: 'KA JOBS – Official Digital Platforms',
+    default: 'Jobs in Odisha 2026 – Bhubaneswar New Fresher’s, Private, Govt, Female, Jobs',
     template: '%s | KA JOBS',
   },
-  description: 'One Platform Connecting Employers, Students, and Training Institutions Across India.',
+  description: 'Daily updated jobs in Bhubaneswar Odisha 2026. Verified new Fresher’s, Private, Govt, Female Jobs in all sectors like IT, banking, BPO, Healthcare. Apply free on kajobs.in.',
   keywords: 'jobs India, job search India, job portal India, find jobs, hire candidates, job openings, fresher jobs, experienced jobs, IT jobs India, sales jobs, marketing jobs, engineering jobs, training India, KA Jobs',
   authors: [{ name: 'KA Jobs' }],
   creator: 'KA Jobs',
@@ -33,8 +33,8 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: 'https://kajobs.in',
     siteName: 'KA JOBS',
-    title: 'KA JOBS – Official Digital Platforms',
-    description: 'One Platform Connecting Employers, Students, and Training Institutions Across India.',
+    title: 'Jobs in Odisha 2026 – Bhubaneswar New Fresher’s, Private, Govt, Female, Jobs',
+    description: 'Daily updated jobs in Bhubaneswar Odisha 2026. Verified new Fresher’s, Private, Govt, Female Jobs in all sectors like IT, banking, BPO, Healthcare. Apply free on kajobs.in.',
     images: [
       {
         url: '/og-image.png',
@@ -46,8 +46,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'KA JOBS – Official Digital Platforms',
-    description: 'One Platform Connecting Employers, Students, and Training Institutions Across India.',
+    title: 'Jobs in Odisha 2026 – Bhubaneswar New Fresher’s, Private, Govt, Female, Jobs',
+    description: 'Daily updated jobs in Bhubaneswar Odisha 2026. Verified new Fresher’s, Private, Govt, Female Jobs in all sectors like IT, banking, BPO, Healthcare. Apply free on kajobs.in.',
     images: ['/og-image.png'],
   },
   alternates: {
