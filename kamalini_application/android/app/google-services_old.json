@@ -14,22 +14,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "543414932327-bf6nbuula8a24sm8bgsqcecrqmerhk69.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.kamaliniapp.india",
-            "certificate_hash": "adb49873a96c87f887c5e26bcd32449ec9030380"
-          }
-        },
-        {
-          "client_id": "543414932327-clu3tigumugh5srj7o8j8tcpcm0kjcn0.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.kamaliniapp.india",
-            "certificate_hash": "17e617694fdf737fd0252705a32cfe6025f0d39d"
-          }
-        },
-        {
           "client_id": "543414932327-o8d4c3qr6viuuj5vfpuie954tbjcntcm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

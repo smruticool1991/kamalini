@@ -38,8 +38,8 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion  // explicitly set to support Android 5.0+ (flutter.minSdkVersion is now 24 in Flutter 3.38.x)
         targetSdk = flutter.targetSdkVersion
-        versionCode = 12
-        versionName = "0.1.12"
+        versionCode = 14
+        versionName = "0.1.14"
     }
 
     signingConfigs {
@@ -72,4 +72,6 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // Required for FlutterFragmentActivity + the Theme.AppCompat styles it needs (razorpay_flutter checkout host).
+    implementation("androidx.appcompat:appcompat:1.7.0")
 }

@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'test_taking_screen.dart';
 import 'test_result_screen.dart';
+import '../services/plan_service.dart';
+import 'plans_screen.dart';
 
 class TestsScreen extends StatefulWidget {
   const TestsScreen({super.key});
@@ -18,11 +21,22 @@ class _TestsScreenState extends State<TestsScreen> {
   bool _loading = true;
   String? _error;
 
+  // Tests subscription (admin-app Settings → Tests Subscription). Access
+  // comes from a candidate plan with the 'testsAccess' feature.
+  bool? _subEnabled;
+  bool? _planHasTests;
+  StreamSubscription? _subSettingsListener;
+  StreamSubscription? _subAccessListener;
+
+  bool get _subLoaded => _subEnabled != null && _planHasTests != null;
+  bool get _hasTestsAccess => !_subEnabled! || _planHasTests!;
+
   @override
   void initState() {
     super.initState();
     _listenTests();
     _listenUserResults();
+    _listenTestsSubscription();
     Future.delayed(const Duration(seconds: 15), () {
       if (mounted && _loading) {
         setState(() {
@@ -31,6 +45,38 @@ class _TestsScreenState extends State<TestsScreen> {
         });
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _subSettingsListener?.cancel();
+    _subAccessListener?.cancel();
+    super.dispose();
+  }
+
+  void _listenTestsSubscription() {
+    // If either check fails, fail open rather than locking everyone out.
+    _subSettingsListener = PlanService.testsSubscriptionEnabled().listen(
+      (enabled) {
+        if (mounted) setState(() => _subEnabled = enabled);
+      },
+      onError: (_) {
+        if (mounted) setState(() => _subEnabled = false);
+      },
+    );
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      _planHasTests = false;
+      return;
+    }
+    _subAccessListener = PlanService.hasTestsAccess(user.uid).listen(
+      (has) {
+        if (mounted) setState(() => _planHasTests = has);
+      },
+      onError: (_) {
+        if (mounted) setState(() => _planHasTests = true);
+      },
+    );
   }
 
   void _listenTests() {
@@ -186,9 +232,11 @@ class _TestsScreenState extends State<TestsScreen> {
           child: Container(height: 1, color: const Color(0xFFE2E8F0)),
         ),
       ),
-      body: _loading
+      body: (_loading || !_subLoaded)
           ? const Center(
               child: CircularProgressIndicator(color: Color(0xFF7C3AED)))
+          : !_hasTestsAccess
+              ? _buildPaywall()
           : _error != null
               ? _buildError()
               : _tests.isEmpty
@@ -249,6 +297,61 @@ class _TestsScreenState extends State<TestsScreen> {
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaywall() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F3FF),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(Icons.lock_outline_rounded,
+                  size: 36, color: Color(0xFF7C3AED)),
+            ),
+            const SizedBox(height: 20),
+            const Text('Premium Feature',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A))),
+            const SizedBox(height: 8),
+            const Text(
+              'Skill tests require a plan that includes test access. Check the plan details and activate one to start taking tests.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Color(0xFF64748B), height: 1.5),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                // The access listener unlocks the list as soon as the plan
+                // is activated, so no reload is needed on return.
+                onPressed: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const PlansScreen())),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7C3AED),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text('View Plans',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               ),
             ),
           ],

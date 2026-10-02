@@ -14,6 +14,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
+import 'config/supabase_config.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -23,7 +25,10 @@ import 'screens/search_job_screen.dart';
 import 'screens/tests_screen.dart';
 import 'screens/notifications_screen.dart';
 import 'screens/notification_detail_screen.dart';
+import 'screens/plans_screen.dart';
+import 'screens/profile_views_screen.dart';
 import 'services/recommendation_service.dart';
+import 'services/plan_service.dart';
 import 'firebase_options.dart';
 
 // ── FCM: top-level plugin and notification channel ──────────────────────────
@@ -175,6 +180,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
 
   // Determine start screen based on saved session
   final bool isLoggedIn = FirebaseAuth.instance.currentUser != null;
@@ -1512,7 +1518,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                               recognizer: TapGestureRecognizer()
-                                ..onTap = () {},
+                                ..onTap = () => launchUrl(
+                                    Uri.parse('https://kajobs.in/terms-of-service'),
+                                    mode: LaunchMode.externalApplication),
                             ),
                           ],
                         ),
@@ -1811,7 +1819,10 @@ class _JobBoardHomeState extends State<JobBoardHome> {
     _calculateProfileCompletion();
     _listenPendingTests();
     _setupFCMHandlers();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkAdminPopup());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _checkAdminPopup();
+      await _checkPlansPopup();
+    });
     _notifPayloadSub = _notifPayloadStream.stream.listen((payload) async {
       if (!mounted || payload == null) return;
       if (payload.startsWith('jobs:')) {
@@ -1864,7 +1875,7 @@ class _JobBoardHomeState extends State<JobBoardHome> {
 
       if (title.isEmpty && message.isEmpty) return;
 
-      showDialog(
+      await showDialog(
         context: context,
         barrierDismissible: true,
         barrierColor: Colors.black54,
@@ -2002,6 +2013,100 @@ class _JobBoardHomeState extends State<JobBoardHome> {
                 ),
               ),
             ],
+          ),
+        ),
+      );
+    } catch (_) {}
+  }
+
+  Future<void> _checkPlansPopup() async {
+    try {
+      // Respect the admin kill-switch (Settings → Candidate Plans in admin-app).
+      final settingsSnap = await _firestore.collection('app_settings').doc('candidate_plans').get();
+      if (settingsSnap.data()?['enabled'] == false) return;
+
+      final user = _auth.currentUser;
+      if (user == null) return;
+
+      // Don't nag candidates who already have an active plan.
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      final expiresAt = userDoc.data()?['planExpiresAt']?.toString();
+      final expiry = expiresAt != null ? DateTime.tryParse(expiresAt) : null;
+      if (expiry != null && expiry.isAfter(DateTime.now())) return;
+
+      final plansSnap = await _firestore
+          .collection('candidatePlans')
+          .where('isActive', isEqualTo: true)
+          .get();
+      if (plansSnap.docs.isEmpty || !mounted) return;
+
+      final docs = [...plansSnap.docs]
+        ..sort((a, b) => ((a.data()['price'] as num?) ?? 0).compareTo((b.data()['price'] as num?) ?? 0));
+      final highlight = docs.firstWhere(
+        (d) => ((d.data()['price'] as num?) ?? 0) > 0,
+        orElse: () => docs.first,
+      ).data();
+      final planName = (highlight['name'] ?? 'Premium').toString();
+
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierColor: Colors.black54,
+        builder: (ctx) => Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          child: Container(
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(color: const Color(0xFFE8F5F0), borderRadius: BorderRadius.circular(32)),
+                  child: const Icon(Icons.workspace_premium, color: Color(0xFF2D8C6B), size: 32),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Go Premium',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Get a Featured badge, priority with recruiters, and see who viewed your profile with $planName.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 14, color: Color(0xFF888888), height: 1.5),
+                ),
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const PlansScreen()));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2D8C6B),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    ),
+                    child: const Text('View Plans', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: TextButton.styleFrom(foregroundColor: const Color(0xFF2D8C6B), padding: const EdgeInsets.symmetric(vertical: 8)),
+                  child: const Text('Not now', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -3271,12 +3376,16 @@ class JobCard extends StatelessWidget {
             children: [
               const Icon(Icons.currency_rupee, size: 14, color: Color(0xFF2563EB)),
               const SizedBox(width: 2),
-              Text(
-                salary_range,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF1F2937),
+              Expanded(
+                child: Text(
+                  salary_range,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF1F2937),
+                  ),
                 ),
               ),
             ],
@@ -3515,12 +3624,16 @@ class _JobListItemState extends State<JobListItem> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Text(
-                            widget.company,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF2563EB),
-                              fontWeight: FontWeight.w500,
+                          Flexible(
+                            child: Text(
+                              widget.company,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF2563EB),
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -4999,7 +5112,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
   String _searchQuery = '';
   List<Map<String, dynamic>> _trainings = [];
   bool _loading = true;
-  bool _showLanding = true;   // ← show promo first
 
   // 'Training' or 'Education'
   String _selectedType = 'Training';
@@ -5011,6 +5123,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
   String? _eduSortChip; // 'Top Choice' | 'NIRF Ranked' | 'Fee: Low to High'
   // institution name → imageUrl (background image)
   Map<String, String> _institutionImageMap = {};
+  bool _plansFeatureEnabled = true;
+  bool _hasTrainingAccess = false;
+  bool _checkingAccess = true;
 
   @override
   void initState() {
@@ -5018,9 +5133,84 @@ class _TrainingScreenState extends State<TrainingScreen> {
     _loadTrainings();
     _loadCourses();
     _loadInstitutions();
+    _loadPlansPromoState();
     _searchController.addListener(() {
       setState(() => _searchQuery = _searchController.text.toLowerCase());
     });
+  }
+
+  Future<void> _loadPlansPromoState() async {
+    try {
+      final settingsSnap = await FirebaseFirestore.instance.collection('app_settings').doc('candidate_plans').get();
+      final enabled = settingsSnap.data()?['enabled'] != false;
+
+      var hasTrainingAccess = false;
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        final data = userDoc.data();
+        final expiresAt = data?['planExpiresAt']?.toString();
+        final expiry = expiresAt != null ? DateTime.tryParse(expiresAt) : null;
+        final hasActivePlan = expiry != null && expiry.isAfter(DateTime.now());
+        final flags = data?['planFeatureFlags'];
+        hasTrainingAccess = hasActivePlan && flags is Map && flags['trainingAccess'] == true;
+      }
+
+      if (mounted) setState(() { _plansFeatureEnabled = enabled; _hasTrainingAccess = hasTrainingAccess; _checkingAccess = false; });
+    } catch (_) {
+      // If the check fails, fail open rather than locking everyone out.
+      if (mounted) setState(() => _checkingAccess = false);
+    }
+  }
+
+  Widget _buildLockedScreen() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 76, height: 76,
+                  decoration: BoxDecoration(color: const Color(0xFFE8F5F0), borderRadius: BorderRadius.circular(38)),
+                  child: const Icon(Icons.lock_outline, color: Color(0xFF2D8C6B), size: 36),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Premium Feature',
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Training & Education content requires a plan that includes this facility. Check the plan details and activate one to browse training centers and institutions.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: Color(0xFF6B7280), height: 1.5),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.push(context, MaterialPageRoute(builder: (_) => const PlansScreen()));
+                      _loadPlansPromoState();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2D8C6B),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('View Plans', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _loadCourses() {
@@ -5188,233 +5378,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
     );
   }
 
-  // ── Promotional landing screen ──────────────────────────────────────────
-  Widget _buildLandingScreen() {
-    const teal = Color(0xFF2D8C6B);
-    final testimonials = [
-      {'name': 'Amit Verma', 'role': 'Data Entry Operator', 'from': '₹14,000', 'to': '₹38,000', 'quote': 'Got placed within 2 months of completing my online course'},
-      {'name': 'Kavitha Nair', 'role': 'Sales Executive', 'from': '₹16,000', 'to': '₹45,000', 'quote': 'Flexible learning helped me upskill while working full time'},
-      {'name': 'Rohit Patil', 'role': 'Logistics Coordinator', 'from': '₹18,000', 'to': '₹52,000', 'quote': 'Best decision I made — my salary tripled in one year'},
-    ];
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // ── Background image / gradient ──
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF1A0A2E),
-                    Color(0xFF0D1B2A),
-                    Color(0xFF0A1628),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Subtle university building silhouette overlay
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.18,
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: RadialGradient(
-                    center: Alignment(0, -0.3),
-                    radius: 1.2,
-                    colors: [Color(0xFF4A3580), Colors.transparent],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Column(
-              children: [
-                // ── Top bar: logo + close ──
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      RichText(
-                        text: const TextSpan(
-                          children: [
-                            TextSpan(text: 'KA Jobs', style: TextStyle(color: Color(0xFFF5A623), fontSize: 22, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic)),
-                            TextSpan(text: 'Trai', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic)),
-                            TextSpan(text: 'n', style: TextStyle(color: Color(0xFFF5A623), fontSize: 22, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic)),
-                            TextSpan(text: 'ing', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic)),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => setState(() => _showLanding = false),
-                        child: Container(
-                          width: 36, height: 36,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: const Icon(Icons.close, color: Colors.white, size: 20),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 36),
-                // ── Hero text ──
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    children: [
-                      Text(
-                        'BUILD YOUR\nCAREER WITH',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.w900,
-                          height: 1.15,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      // Golden pill label
-                      const _OnlineDegreeTag(),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 36),
-                // ── Divider with learner count ──
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.white.withOpacity(0.3), thickness: 1)),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14),
-                      child: Text(
-                        'JOIN 50,000+ LEARNERS',
-                        style: TextStyle(color: Colors.white70, fontSize: 12, letterSpacing: 1.4, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: Colors.white.withOpacity(0.3), thickness: 1)),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                // ── Testimonial cards horizontal scroll ──
-                SizedBox(
-                  height: 180,
-                  child: PageView.builder(
-                    controller: PageController(viewportFraction: 0.78),
-                    itemCount: testimonials.length,
-                    itemBuilder: (_, i) {
-                      final t = testimonials[i];
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1A1A2E),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withOpacity(0.1)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // University logo placeholder
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Text('JGI JAIN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Color(0xFF1A1A2E))),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 16,
-                                  backgroundColor: teal,
-                                  child: Text(t['name']![0], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(t['name']!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text('"${t['quote']}"',
-                              style: const TextStyle(color: Colors.white70, fontSize: 11, fontStyle: FontStyle.italic),
-                              maxLines: 2, overflow: TextOverflow.ellipsis),
-                            const Spacer(),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(t['role']!, style: const TextStyle(color: Colors.white54, fontSize: 11),
-                                  overflow: TextOverflow.ellipsis),
-                                const SizedBox(height: 6),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.white38),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(t['from']!, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
-                                    ),
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 4),
-                                      child: Icon(Icons.arrow_forward, color: Colors.white54, size: 13),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: teal,
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(t['to']!, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const Spacer(),
-
-                // ── Get Started button ──
-                GestureDetector(
-                  onTap: () => setState(() => _showLanding = false),
-                  child: Container(
-                    width: double.infinity,
-                    color: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    child: const Text(
-                      'Get Started',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF9E9E9E),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   List<Map<String, dynamic>> get _filtered {
     var list = _trainings.where((t) {
       final type = (t['type'] ?? 'Training').toString();
@@ -5490,7 +5453,13 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_showLanding) return _buildLandingScreen();
+    if (_checkingAccess) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFF8FAFC),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF2D8C6B))),
+      );
+    }
+    if (_plansFeatureEnabled && !_hasTrainingAccess) return _buildLockedScreen();
     final filtered = _filtered;
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -5736,31 +5705,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
                         ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// Online Degree golden tag
-class _OnlineDegreeTag extends StatelessWidget {
-  const _OnlineDegreeTag();
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5A623),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [BoxShadow(color: const Color(0xFFF5A623).withOpacity(0.5), blurRadius: 14, spreadRadius: 2)],
-      ),
-      child: const Text(
-        'online degree',
-        style: TextStyle(
-          color: Color(0xFF3A1A6B),
-          fontSize: 22,
-          fontWeight: FontWeight.w900,
-          fontStyle: FontStyle.italic,
         ),
       ),
     );
@@ -6781,6 +6725,9 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
   String _dob = '';
   String _gender = '';
   String _phone = '';
+  bool _phoneVerified = false;
+  String _whatsapp = '';
+  bool _whatsappSameAsPhone = true;
   String _email = FirebaseAuth.instance.currentUser?.email ?? '';
   String _educationLevel = '';
   String _currentCity = '';
@@ -6805,6 +6752,7 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
       text: FirebaseAuth.instance.currentUser?.displayName ?? '');
   final _dobCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
+  final _whatsappCtrl = TextEditingController();
   final _profileSummaryCtrl = TextEditingController();
   final _companyNameCtrl = TextEditingController();
   final _jobTitleCtrl = TextEditingController();
@@ -6840,6 +6788,7 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
     _nameCtrl.dispose();
     _dobCtrl.dispose();
     _phoneCtrl.dispose();
+    _whatsappCtrl.dispose();
     _profileSummaryCtrl.dispose();
     _companyNameCtrl.dispose();
     _jobTitleCtrl.dispose();
@@ -6859,6 +6808,15 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
         if (_dob.isEmpty) return 'Please select your date of birth';
         if (_gender.isEmpty) return 'Please select your gender';
         if (_phone.trim().isEmpty) return 'Please enter your phone number';
+        if (!RegExp(r'^[6-9]\d{9}$').hasMatch(_phone.trim())) {
+          return 'Please enter a valid 10-digit mobile number';
+        }
+        if (!_whatsappSameAsPhone) {
+          if (_whatsapp.trim().isEmpty) return 'Please enter your WhatsApp number';
+          if (!RegExp(r'^[6-9]\d{9}$').hasMatch(_whatsapp.trim())) {
+            return 'Please enter a valid 10-digit WhatsApp number';
+          }
+        }
         return null;
       case 2: // Profile Summary — optional
         return null;
@@ -6938,6 +6896,8 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
       'dateOfBirth': _dob,
       'gender': _gender,
       'phone': _phone,
+      'phoneVerified': _phoneVerified,
+      'whatsappNumber': _whatsappSameAsPhone ? _phone : _whatsapp.trim(),
       'email': _email,
       'educationLevel': _educationLevel,
       'currentCity': _currentCity,
@@ -7010,7 +6970,18 @@ class _ProfileOnboardingFlowState extends State<ProfileOnboardingFlow> {
                 // Step 0 – Name + Education Level
                 _StepBasicName(name: _name, onChanged: (v) => setState(() => _name = v), ctrl: _nameCtrl, educationLevel: _educationLevel, onEduChanged: (v) => setState(() => _educationLevel = v)),
                 // Step 1 – DOB, Gender, Phone
-                _StepBasicDetails(name: _name, dob: _dob, gender: _gender, email: _email, phone: _phone, phoneCtrl: _phoneCtrl, onNameChanged: (v) => setState(() => _name = v), onDobChanged: (v) => setState(() => _dob = v), onGenderChanged: (v) => setState(() => _gender = v), onPhoneChanged: (v) => setState(() => _phone = v)),
+                _StepBasicDetails(
+                  name: _name, dob: _dob, gender: _gender, email: _email,
+                  phone: _phone, phoneCtrl: _phoneCtrl, phoneVerified: _phoneVerified,
+                  whatsapp: _whatsapp, whatsappCtrl: _whatsappCtrl, whatsappSameAsPhone: _whatsappSameAsPhone,
+                  onNameChanged: (v) => setState(() => _name = v),
+                  onDobChanged: (v) => setState(() => _dob = v),
+                  onGenderChanged: (v) => setState(() => _gender = v),
+                  onPhoneChanged: (v) => setState(() { _phone = v; _phoneVerified = false; }),
+                  onPhoneVerifiedChanged: (v) => setState(() => _phoneVerified = v),
+                  onWhatsappChanged: (v) => setState(() => _whatsapp = v),
+                  onWhatsappSameAsPhoneChanged: (v) => setState(() => _whatsappSameAsPhone = v),
+                ),
                 // Step 2 – Profile Summary (new)
                 _StepProfileSummary(ctrl: _profileSummaryCtrl, onChanged: (v) => setState(() => _profileSummary = v)),
                 // Step 3 – Work Status
@@ -7234,13 +7205,27 @@ class _StepBasicName extends StatelessWidget {
   }
 }
 
-// Step 1 – Name, DOB, Gender, Email
-class _StepBasicDetails extends StatelessWidget {
-  final String name, dob, gender, email, phone;
-  final TextEditingController phoneCtrl;
-  final ValueChanged<String> onNameChanged, onDobChanged, onGenderChanged, onPhoneChanged;
-  const _StepBasicDetails({required this.name, required this.dob, required this.gender, required this.email, required this.phone, required this.phoneCtrl, required this.onNameChanged, required this.onDobChanged, required this.onGenderChanged, required this.onPhoneChanged});
+// Step 1 – Name, DOB, Gender, Email, Phone (OTP-verified), WhatsApp
+class _StepBasicDetails extends StatefulWidget {
+  final String name, dob, gender, email, phone, whatsapp;
+  final bool phoneVerified, whatsappSameAsPhone;
+  final TextEditingController phoneCtrl, whatsappCtrl;
+  final ValueChanged<String> onNameChanged, onDobChanged, onGenderChanged, onPhoneChanged, onWhatsappChanged;
+  final ValueChanged<bool> onPhoneVerifiedChanged, onWhatsappSameAsPhoneChanged;
+  const _StepBasicDetails({
+    required this.name, required this.dob, required this.gender, required this.email,
+    required this.phone, required this.phoneCtrl, required this.phoneVerified,
+    required this.whatsapp, required this.whatsappCtrl, required this.whatsappSameAsPhone,
+    required this.onNameChanged, required this.onDobChanged, required this.onGenderChanged,
+    required this.onPhoneChanged, required this.onPhoneVerifiedChanged,
+    required this.onWhatsappChanged, required this.onWhatsappSameAsPhoneChanged,
+  });
 
+  @override
+  State<_StepBasicDetails> createState() => _StepBasicDetailsState();
+}
+
+class _StepBasicDetailsState extends State<_StepBasicDetails> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -7250,14 +7235,14 @@ class _StepBasicDetails extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _field('Name', child: TextField(
-              controller: TextEditingController(text: name)..selection = TextSelection.collapsed(offset: name.length),
-              onChanged: onNameChanged,
+              controller: TextEditingController(text: widget.name)..selection = TextSelection.collapsed(offset: widget.name.length),
+              onChanged: widget.onNameChanged,
               decoration: _inputDec(''),
             )),
             const SizedBox(height: 16),
             _fieldWithRequired('Date of Birth (DOB)', child: TextField(
               readOnly: true,
-              controller: TextEditingController(text: dob),
+              controller: TextEditingController(text: widget.dob),
               decoration: _inputDec('Choose date').copyWith(
                 suffixIcon: const Icon(Icons.calendar_today_outlined, size: 20),
               ),
@@ -7269,7 +7254,7 @@ class _StepBasicDetails extends StatelessWidget {
                   lastDate: DateTime.now(),
                 );
                 if (picked != null) {
-                  onDobChanged('${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}');
+                  widget.onDobChanged('${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}');
                 }
               },
             )),
@@ -7277,21 +7262,59 @@ class _StepBasicDetails extends StatelessWidget {
             _fieldWithRequired('Gender', child: Row(
               children: ['Male', 'Female'].map((g) => Padding(
                 padding: const EdgeInsets.only(right: 10),
-                child: _onboardChip(g, gender == g, onTap: () => onGenderChanged(g)),
+                child: _onboardChip(g, widget.gender == g, onTap: () => widget.onGenderChanged(g)),
               )).toList(),
             )),
             const SizedBox(height: 16),
             _field('Email Address', child: TextField(
               enabled: false,
-              controller: TextEditingController(text: email),
+              controller: TextEditingController(text: widget.email),
               decoration: _inputDec(''),
             )),
             const SizedBox(height: 16),
             _fieldWithRequired('Phone Number', child: TextField(
-              controller: phoneCtrl,
-              onChanged: onPhoneChanged,
+              controller: widget.phoneCtrl,
+              onChanged: (v) {
+                widget.onPhoneChanged(v);
+                widget.onPhoneVerifiedChanged(true);
+              },
               keyboardType: TextInputType.phone,
-              decoration: _inputDec('Enter your mobile number'),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              maxLength: 10,
+              decoration: _inputDec('Enter your mobile number').copyWith(
+                counterText: '',
+                prefixText: '+91 ',
+              ),
+            )),
+            const SizedBox(height: 16),
+            _fieldWithRequired('WhatsApp Number', child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () => widget.onWhatsappSameAsPhoneChanged(!widget.whatsappSameAsPhone),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: widget.whatsappSameAsPhone,
+                        activeColor: _kTeal,
+                        onChanged: (v) => widget.onWhatsappSameAsPhoneChanged(v ?? true),
+                      ),
+                      const Text('Same as phone number', style: TextStyle(fontSize: 13, color: Colors.black87)),
+                    ],
+                  ),
+                ),
+                if (!widget.whatsappSameAsPhone) ...[
+                  const SizedBox(height: 4),
+                  TextField(
+                    controller: widget.whatsappCtrl,
+                    onChanged: widget.onWhatsappChanged,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    maxLength: 10,
+                    decoration: _inputDec('Enter your WhatsApp number').copyWith(counterText: '', prefixText: '+91 '),
+                  ),
+                ],
+              ],
             )),
           ],
         ),
@@ -9638,11 +9661,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _firestoreEducation = '';
   String _firestoreWorkStatus = '';
   String _photoUrl = '';
+  Map<String, bool> _featureFlags = {};
+  bool _plansFeatureEnabled = true;
 
   @override
   void initState() {
     super.initState();
     _loadProfileData();
+    _loadFeatureFlags();
+    _loadPlansFeatureFlag();
+  }
+
+  Future<void> _loadFeatureFlags() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    final flags = await PlanService.currentFeatureFlags(user.uid);
+    if (mounted) setState(() => _featureFlags = flags);
+  }
+
+  Future<void> _loadPlansFeatureFlag() async {
+    try {
+      final snap = await _firestore.collection('app_settings').doc('candidate_plans').get();
+      final data = snap.data();
+      // Missing doc = feature ships enabled by default; only an explicit false hides it.
+      if (mounted && data != null) setState(() => _plansFeatureEnabled = data['enabled'] != false);
+    } catch (_) {}
   }
 
   Future<void> _pickAndUploadImage() async {
@@ -9957,7 +10000,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(displayName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1F2937))),
+                              Row(
+                                children: [
+                                  Flexible(child: Text(displayName, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)))),
+                                  if (_featureFlags['featuredBadge'] == true) ...[
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(20)),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: const [
+                                          Icon(Icons.star, size: 11, color: Color(0xFFB45309)),
+                                          SizedBox(width: 3),
+                                          Text('Featured', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFFB45309))),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                               if (_firestoreWorkStatus.isNotEmpty) ...[const SizedBox(height: 2),
                                 Text(_firestoreWorkStatus == 'fresher' ? 'Fresher / Student' : 'Working Professional',
                                     style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)))],
@@ -10045,6 +10107,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
+              if (_plansFeatureEnabled) ...[
+                const SizedBox(height: 20),
+                // Section label
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text('Premium', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF6B7280))),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                  child: Column(
+                    children: [
+                      _buildSectionTile(Icons.workspace_premium_outlined, 'Upgrade to Premium', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlansScreen())), isFirst: true),
+                      _buildSectionTile(Icons.visibility_outlined, 'Profile Views', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileViewsScreen())), isLast: true),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
               // Logout button
               Padding(
@@ -10158,7 +10239,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     try {
       final snap = await FirebaseFirestore.instance
           .collection('applications')
-          .where('userId', isEqualTo: user.uid)
+          .where('applicantUid', isEqualTo: user.uid)
           .where('jobId', isEqualTo: widget.jobId)
           .limit(1)
           .get();
@@ -10219,34 +10300,146 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     }
   }
 
+  /// Returns true if the candidate may apply. If they have no active plan,
+  /// or have used up their plan's monthly application limit, shows an
+  /// upgrade prompt and returns false instead of applying.
+  Future<bool> _requireActivePlan() async {
+    String dialogTitle = 'Activate a Plan to Apply';
+    String dialogMessage = 'You need an active plan to apply for jobs. Activate the Free Plan or upgrade to Premium to continue.';
+
+    try {
+      final settingsSnap = await FirebaseFirestore.instance.collection('app_settings').doc('candidate_plans').get();
+      if (settingsSnap.data()?['enabled'] == false) return true; // admin kill-switch off → don't restrict
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return false;
+
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final data = userDoc.data();
+      final expiresAt = data?['planExpiresAt']?.toString();
+      final expiry = expiresAt != null ? DateTime.tryParse(expiresAt) : null;
+      if (expiry != null && expiry.isAfter(DateTime.now())) {
+        final limit = data?['planApplicationsLimit'] as int?;
+        final used = (data?['planApplicationsUsed'] as num?)?.toInt() ?? 0;
+        if (limit == null || used < limit) return true;
+        dialogTitle = 'Application Limit Reached';
+        dialogMessage = 'You\'ve used all $limit job applications on your current plan this month. Upgrade to apply for more jobs.';
+      }
+    } catch (_) {
+      return true; // fail open on error rather than blocking applications
+    }
+
+    if (!mounted) return false;
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(dialogTitle),
+        content: Text(dialogMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const PlansScreen()));
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2D8C6B)),
+            child: const Text('View Plans', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    return false;
+  }
+
   Future<void> _applyForJob() async {
+    final canApply = await _requireActivePlan();
+    if (!canApply) return;
     setState(() => _isApplying = true);
     try {
       final user = FirebaseAuth.instance.currentUser;
-      // 1. Public doc — no sensitive fields (safe to appear in Network tab)
+      if (user == null) return;
+
+      // Fetch candidate profile — user can always read their own doc
+      Map<String, dynamic> candidateProfile = {};
+      try {
+        final profileDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (profileDoc.exists) {
+          final p = profileDoc.data() ?? {};
+          candidateProfile = {
+            'dateOfBirth':       p['dateOfBirth']       ?? '',
+            'gender':            p['gender']             ?? '',
+            'currentCity':       p['currentCity'] ?? p['location'] ?? '',
+            'workStatus':        p['workStatus']         ?? '',
+            'profileSummary':    p['profileSummary']     ?? '',
+            'keySkills':         p['keySkills']          ?? '',
+            'preferredJobRoles': p['preferredJobRoles']  ?? [],
+            'educationLevel':    p['educationLevel']     ?? '',
+            'collegeName':       p['collegeName']        ?? '',
+            'degree':            p['degree']             ?? '',
+            'specialization':    p['specialization']     ?? '',
+            'completionYear':    p['completionYear']     ?? '',
+            'englishLevel':      p['englishLevel']       ?? '',
+            'openToRelocation':  p['openToRelocation']   ?? false,
+            'preferredCities':   p['preferredCities']    ?? [],
+            'profileComplete':   p['profileComplete']    ?? false,
+            'signInMethod':      p['signInMethod']       ?? 'phone',
+            'employmentHistory': p['employmentHistory']  ?? [],
+            'educationHistory':  p['educationHistory']   ?? [],
+          };
+        }
+      } catch (_) {}
+
+      // Snapshot the candidate's current plan feature flags so employer-app
+      // can show a badge / prioritize this application without an extra read.
+      Map<String, bool> planFlags = {};
+      try {
+        planFlags = await PlanService.currentFeatureFlags(user.uid);
+      } catch (_) {}
+
       final appRef = await FirebaseFirestore.instance.collection('applications').add({
-        'jobId': widget.jobId,
-        'companyId': widget.companyId,
-        'jobTitle': widget.title,
-        'company': widget.company,
-        'location': widget.location,
-        'salary': widget.salary,
-        'currency': widget.currency,
-        'badges': widget.badges,
-        'userId': user?.uid ?? 'anonymous',
-        'applicantName': user?.displayName ?? user?.email?.split('@').first ?? 'Applicant',
-        'status': 'Applied',
-        'appliedAt': DateTime.now().toIso8601String(),
+        'jobId':            widget.jobId,
+        'companyId':        widget.companyId,
+        'jobTitle':         widget.title,
+        'company':          widget.company,
+        'location':         widget.location,
+        'salary':           widget.salary,
+        'currency':         widget.currency,
+        'badges':           widget.badges,
+        'applicantUid':     user.uid,
+        'applicantName':    user.displayName ?? user.email?.split('@').first ?? 'Applicant',
+        'applicantEmail':   user.email ?? '',
+        'status':           'Applied',
+        'appliedAt':        DateTime.now().toIso8601String(),
+        'candidateProfile': candidateProfile,
+        'applicantFeatureFlags': {
+          'priorityProfile':    planFlags['priorityProfile'] ?? false,
+          'featuredBadge':      planFlags['featuredBadge'] ?? false,
+          'highlightedProfile': planFlags['highlightedProfile'] ?? false,
+        },
       });
-      // 2. Sensitive doc — same ID, separate collection (only fetched after payment)
+      // Count this application against the candidate's plan limit, if any.
+      try {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'planApplicationsUsed': FieldValue.increment(1),
+        });
+      } catch (_) {}
+      // Keep applicationContacts doc for backward compat
       await FirebaseFirestore.instance.collection('applicationContacts').doc(appRef.id).set({
-        'applicationId': appRef.id,
-        'jobId': widget.jobId,
-        'companyId': widget.companyId,
-        'applicantEmail': user?.email ?? '',
+        'applicationId':  appRef.id,
+        'jobId':          widget.jobId,
+        'companyId':      widget.companyId,
+        'applicantEmail': user.email ?? '',
         'applicantPhone': '',
-        'resume': '',
-        'coverLetter': '',
+        'resume':         '',
+        'coverLetter':    '',
       });
       if (mounted) {
         setState(() {

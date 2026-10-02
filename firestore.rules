@@ -34,6 +34,32 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── Plans: public read (employers browse), admin manages ──
+    match /plans/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Candidate Plans: public read (candidates browse), admin manages ──
+    match /candidatePlans/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── App Settings: public read (mobile app reads feature flags/popup config), admin manages ──
+    match /app_settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Coupons: public read (mobile app validates codes), any signed-in user can bump usedCount on redeem, admin manages ──
+    match /coupons/{couponId} {
+      allow read: if true;
+      allow update: if request.auth != null &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount']);
+      allow write: if isAdmin();
+    }
+
     // ── Public read for categories, skills (mobile app needs this) ──
     match /jobCategories/{docId} {
       allow read: if true;
@@ -55,9 +81,17 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── Employers: authenticated users who have a companies doc ──
+    function isEmployer() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/companies/$(request.auth.uid));
+    }
+
     // ── Users can read/write their own data + subcollections (bookmarks, etc.) ──
+    // Employers can read applicant profiles (needed to show full details in employer-app)
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isEmployer();
       allow read, write: if isAdmin();
     }
     match /users/{userId}/{document=**} {
@@ -65,12 +99,32 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // ── Profile views: candidate reads own, employer logs a view, admin full ──
+    match /users/{userId}/profileViews/{viewId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAdmin();
+      allow create: if isEmployer();
+    }
+
     // ── Applications: user creates/reads own, employer reads+updates for their jobs, admin full ──
     match /applications/{appId} {
       allow read: if request.auth != null &&
         (resource.data.userId == request.auth.uid ||
+         resource.data.applicantUid == request.auth.uid ||
          resource.data.companyId == request.auth.uid || isAdmin());
-      allow create: if request.auth != null;
+      // Candidate can only create their own application, and only while under
+      // their plan's monthly cap (planApplicationsLimit null/absent = unlimited).
+      // Note: planExpiresAt is stored as an ISO string, which rules can't parse,
+      // so this trusts the stored limit as-is; expired-plan cleanup happens
+      // client-side (see web-app's useCandidatePlan hook).
+      allow create: if request.auth != null &&
+        request.resource.data.applicantUid == request.auth.uid &&
+        (
+          !exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('planApplicationsLimit', null) == null ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('planApplicationsUsed', 0) <
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('planApplicationsLimit', null)
+        );
       // Employer can update status of applications for their own jobs
       allow update: if request.auth != null &&
         resource.data.companyId == request.auth.uid;
@@ -118,13 +172,28 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // ── Payments: user reads own, employer creates own, admin full ──
+    // ── Payments: user reads own, employer creates own + updates view tracking, admin full ──
     match /payments/{paymentId} {
       allow read: if request.auth != null &&
         (resource.data.userId == request.auth.uid ||
          resource.data.companyId == request.auth.uid || isAdmin());
       allow create: if request.auth != null &&
         request.resource.data.companyId == request.auth.uid;
+      // Employer can update only view-tracking fields on their own payment doc
+      allow update: if request.auth != null &&
+        resource.data.companyId == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['viewsUsed', 'viewedApplicationIds']);
+      allow update, delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Candidate Payments: candidate reads/creates own, admin full ──
+    match /candidatePayments/{paymentId} {
+      allow read: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();
       allow write: if isAdmin();
     }
