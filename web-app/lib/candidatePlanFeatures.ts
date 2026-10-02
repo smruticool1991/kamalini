@@ -13,4 +13,5 @@ export const candidatePlanFeatureDefs: { key: string; label: string }[] = [
   { key: 'applicationTracking', label: 'Track application status' },
   { key: 'analyticsDashboard', label: 'Application analytics dashboard' },
   { key: 'trainingAccess', label: 'Access to Training & Education' },
+  { key: 'testsAccess', label: 'Access to Skill Tests' },
 ];

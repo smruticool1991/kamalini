@@ -4,12 +4,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
   collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp,
+  doc, onSnapshot,
 } from 'firebase/firestore';
 import { onAuthStateChanged, signInWithPopup, type User } from 'firebase/auth';
 import { db, auth, googleProvider } from '@/lib/firebase';
 import Header4 from '@/components/header/Header4';
 import Footer from '@/components/footer';
 import Gotop from '@/components/gotop';
+import { useCandidatePlan } from '@/lib/useCandidatePlan';
 
 // ─── Firestore types ─────────────────────────────────────────────────────────
 
@@ -133,6 +135,35 @@ function LoginModal({ onClose }: { onClose: () => void }) {
         <button onClick={onClose} style={{ marginTop: 14, background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: 13 }}>Cancel</button>
       </div>
     </div>
+  );
+}
+
+// ─── Locked View (tests subscription) ────────────────────────────────────────
+
+function TestsLockedView({ user, showLoginModal }: { user: User | null; showLoginModal: () => void }) {
+  return (
+    <section style={{ padding: '80px 0', minHeight: '60vh', background: '#f8fafc' }}>
+      <div className="container">
+        <div style={{ maxWidth: 440, margin: '0 auto', background: '#fff', borderRadius: 20, padding: '40px 32px', boxShadow: '0 4px 24px rgba(0,0,0,0.07)', textAlign: 'center' }}>
+          <div style={{ width: 72, height: 72, borderRadius: 20, background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="#7c3aed" strokeWidth="1.8"/><path d="M8 11V7a4 4 0 018 0v4" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round"/></svg>
+          </div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', marginBottom: 8 }}>Premium Feature</h2>
+          <p style={{ color: '#64748b', fontSize: 15, lineHeight: 1.6, marginBottom: 28 }}>
+            Skill tests require a plan that includes test access. Check the plan details and activate one to start taking tests.
+          </p>
+          {user ? (
+            <Link href="/plans" style={{ display: 'block', width: '100%', padding: '13px 0', borderRadius: 10, background: '#7c3aed', color: '#fff', fontWeight: 700, fontSize: 15, textDecoration: 'none' }}>
+              View Plans
+            </Link>
+          ) : (
+            <button onClick={showLoginModal} style={{ width: '100%', padding: '13px 0', borderRadius: 10, border: 'none', background: '#7c3aed', color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
+              Sign in to continue
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -590,9 +621,23 @@ export default function TestsPage() {
   const [resultData, setResultData] = useState<{ score: number; total: number; pct: number; passed: boolean; answers: number[]; results: TestResult[] } | null>(null);
   const [showLogin, setShowLogin] = useState(false);
 
+  // Tests subscription (admin-app Settings → Tests Subscription). When on,
+  // access comes from a candidate plan with the 'testsAccess' feature.
+  // null = still loading; on read error, fail open (tests stay free).
+  const [subEnabled, setSubEnabled] = useState<boolean | null>(null);
+  const candidatePlanState = useCandidatePlan(user?.uid);
 
   // Auth
   useEffect(() => onAuthStateChanged(auth, u => { setUser(u); setAuthLoading(false); }), []);
+
+  useEffect(() => onSnapshot(
+    doc(db, 'app_settings', 'tests_subscription'),
+    snap => setSubEnabled(snap.data()?.enabled === true),
+    () => setSubEnabled(false),
+  ), []);
+
+  const subLoading = subEnabled === null || (!!user && candidatePlanState.loading);
+  const testsLocked = !!subEnabled && !(user && candidatePlanState.featureFlags.testsAccess === true);
 
   // Fetch published tests
   useEffect(() => {
@@ -659,6 +704,7 @@ export default function TestsPage() {
 
   const handleStart = (test: Test) => {
     if (!user) { setShowLogin(true); return; }
+    if (testsLocked) return;
     setActiveTest(test);
     setView('taking');
     window.scrollTo(0, 0);
@@ -719,7 +765,7 @@ export default function TestsPage() {
   };
 
   // Taking / Result views are full-screen (no site header/footer)
-  if (view === 'taking' && activeTest && user) {
+  if (view === 'taking' && activeTest && user && !testsLocked) {
     return (
       <>
         {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
@@ -733,7 +779,7 @@ export default function TestsPage() {
     );
   }
 
-  if (view === 'result' && activeTest && resultData) {
+  if (view === 'result' && activeTest && resultData && !testsLocked) {
     return (
       <TestResultView
         test={activeTest}
@@ -767,7 +813,7 @@ export default function TestsPage() {
         </div>
       </div>
 
-      {testsLoading || authLoading ? (
+      {testsLoading || authLoading || subLoading ? (
         <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ width: 44, height: 44, border: '4px solid #f1f5f9', borderTop: '4px solid #7c3aed', borderRadius: '50%', animation: 'spin 0.9s linear infinite', margin: '0 auto 16px' }} />
@@ -775,6 +821,8 @@ export default function TestsPage() {
           </div>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
+      ) : testsLocked ? (
+        <TestsLockedView user={user} showLoginModal={() => setShowLogin(true)} />
       ) : (
         <TestListView
           tests={tests}
